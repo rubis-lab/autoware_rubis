@@ -132,38 +132,50 @@ void Lanelet2GlobalPlannerNode::request_osm_binary_map()
 void Lanelet2GlobalPlannerNode::goal_pose_cb(
   const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
+  RCLCPP_ERROR(this->get_logger(), "RUBIS: starting Lanelet2GlobalPlannerNode::goal_pose_cb");
   if (!start_pose_init) {
     RCLCPP_ERROR(this->get_logger(), "Current pose has not been set!");
     return;
   }
+  RCLCPP_ERROR(this->get_logger(), "RUBIS: check1 Lanelet2GlobalPlannerNode::goal_pose_cb");
   // transform and set the starting and goal point in the map frame
   goal_pose.header = msg->header;
+  RCLCPP_ERROR(this->get_logger(), "RUBIS: check2 Lanelet2GlobalPlannerNode::goal_pose_cb");
   goal_pose.pose = msg->pose;
+  RCLCPP_ERROR(this->get_logger(), "RUBIS: check3 Lanelet2GlobalPlannerNode::goal_pose_cb");
   geometry_msgs::msg::PoseStamped goal_pose_map = goal_pose;
+  RCLCPP_ERROR(this->get_logger(), "RUBIS: check4 Lanelet2GlobalPlannerNode::goal_pose_cb");
 
   if (goal_pose.header.frame_id != "map") {
     if (!transform_pose_to_map(goal_pose, goal_pose_map)) {
       // return: nothing happen
+      RCLCPP_ERROR(this->get_logger(), "RUBIS: ending(error) Lanelet2GlobalPlannerNode::goal_pose_cb");
       return;
     } else {
       goal_pose = goal_pose_map;
     }
   }
-
+  RCLCPP_ERROR(this->get_logger(), "RUBIS: check5 Lanelet2GlobalPlannerNode::goal_pose_cb");
   auto start = convertToTrajectoryPoint(start_pose.pose);
   auto end = convertToTrajectoryPoint(goal_pose.pose);
-
+  RCLCPP_ERROR(this->get_logger(), "RUBIS: check6 Lanelet2GlobalPlannerNode::goal_pose_cb");
   // get routes
   std::vector<lanelet::Id> route;
   if (lanelet2_global_planner->plan_route(start, end, route)) {
+      RCLCPP_ERROR(this->get_logger(), "RUBIS: check6b Lanelet2GlobalPlannerNode::goal_pose_cb");
     // send out the global path
     std_msgs::msg::Header msg_header;
+    RCLCPP_ERROR(this->get_logger(), "RUBIS: check6c Lanelet2GlobalPlannerNode::goal_pose_cb");
     msg_header.stamp = rclcpp::Clock().now();
+    RCLCPP_ERROR(this->get_logger(), "RUBIS: check6d Lanelet2GlobalPlannerNode::goal_pose_cb");
     msg_header.frame_id = "map";
+    RCLCPP_ERROR(this->get_logger(), "RUBIS: check7 Lanelet2GlobalPlannerNode::goal_pose_cb");
     this->send_global_path(route, start, end, msg_header);
+    RCLCPP_ERROR(this->get_logger(), "RUBIS: check8 Lanelet2GlobalPlannerNode::goal_pose_cb");
   } else {
     RCLCPP_ERROR(this->get_logger(), "Global route has not been found!");
   }
+  RCLCPP_ERROR(this->get_logger(), "RUBIS: ending Lanelet2GlobalPlannerNode::goal_pose_cb");
 }
 
 void Lanelet2GlobalPlannerNode::current_pose_cb(

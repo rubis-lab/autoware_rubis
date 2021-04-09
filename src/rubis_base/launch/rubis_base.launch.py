@@ -185,11 +185,13 @@ def generate_launch_description():
         package='lanelet2_map_provider',
         executable='lanelet2_map_provider_exe',
         namespace='had_maps',
+        name='lanelet2_map_provider_node',
         parameters=[LaunchConfiguration('lanelet2_map_provider_param_file')]
     )
     lanelet2_map_visualizer = Node(
         package='lanelet2_map_provider',
         executable='lanelet2_map_visualizer_exe',
+        name='lanelet2_map_visualizer_node',
         namespace='had_maps'
     )
 
@@ -337,47 +339,47 @@ def generate_launch_description():
     )
 
     # mpc
-    # mpc_param_file = os.path.join(
-    #     get_package_share_directory('rubis_base'),
-    #     'param/mpc.param.yaml')
-    # mpc_param = DeclareLaunchArgument(
-    #     'mpc_param_file',
-    #     default_value=mpc_param_file,
-    #     description='Path to config file for MPC'
-    # )
-    # mpc = Node(
-    #     package='mpc_controller_nodes',
-    #     executable='mpc_controller_node_exe',
-    #     name='mpc_controller',
-    #     namespace='control',
-    #     parameters=[LaunchConfiguration('mpc_param_file')],
-    #     # remappings=[
-
-    #     # ]
-    # )
-
-    pure_pursuit_param_file = os.path.join(
+    mpc_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
-        'param/pure_pursuit.param.yaml')
-    pure_pursuit_param = DeclareLaunchArgument(
-        'pure_pursuit_param_file',
-        default_value=pure_pursuit_param_file,
-        description='Path to config file to Pure Pursuit Controller'
+        'param/mpc.param.yaml')
+    mpc_param = DeclareLaunchArgument(
+        'mpc_param_file',
+        default_value=mpc_param_file,
+        description='Path to config file for MPC'
     )
-    pure_pursuit = Node(
-        package="pure_pursuit_nodes",
-        executable="pure_pursuit_node_exe",
-        # namespace="control",
-        name="pure_pursuit_node",
-        output="screen",
-        parameters=[LaunchConfiguration("pure_pursuit_param_file"), {}],
-        remappings=[
-            ("current_pose", "/vehicle/vehicle_kinematic_state"),
-            ("trajectory", "/planning/trajectory"),
-            ("ctrl_cmd", "/vehicle/control_command"),
-            ("ctrl_diag", "/control/control_diagnostic"),
-        ],
+    mpc = Node(
+        package='mpc_controller_nodes',
+        executable='mpc_controller_node_exe',
+        name='mpc_controller',
+        namespace='control',
+        parameters=[LaunchConfiguration('mpc_param_file')],
+        # remappings=[
+
+        # ]
     )
+
+    # pure_pursuit_param_file = os.path.join(
+    #     get_package_share_directory('rubis_base'),
+    #     'param/pure_pursuit.param.yaml')
+    # pure_pursuit_param = DeclareLaunchArgument(
+    #     'pure_pursuit_param_file',
+    #     default_value=pure_pursuit_param_file,
+    #     description='Path to config file to Pure Pursuit Controller'
+    # )
+    # pure_pursuit = Node(
+    #     package="pure_pursuit_nodes",
+    #     executable="pure_pursuit_node_exe",
+    #     # namespace="control",
+    #     name="pure_pursuit_node",
+    #     output="screen",
+    #     parameters=[LaunchConfiguration("pure_pursuit_param_file"), {}],
+    #     remappings=[
+    #         ("current_pose", "/vehicle/vehicle_kinematic_state"),
+    #         ("trajectory", "/planning/trajectory"),
+    #         ("ctrl_cmd", "/vehicle/control_command"),
+    #         ("ctrl_diag", "/control/control_diagnostic"),
+    #     ],
+    # )
 
     ######## lgsvl
     lgsvl_param_file = os.path.join(
@@ -440,67 +442,67 @@ def generate_launch_description():
         map_publisher,
         # map_downsampler_node_runner,
 
-        # point_cloud_transform (lidar)
-        pc_filter_transform_param,
-        filter_transform_vlp16_front,
-        filter_transform_vlp16_rear,
+        # # point_cloud_transform (lidar)
+        # pc_filter_transform_param,
+        # filter_transform_vlp16_front,
+        # filter_transform_vlp16_rear,
 
-        # point_cloud_fusion (lidar)
-        point_cloud_fusion_node,
+        # # point_cloud_fusion (lidar)
+        # point_cloud_fusion_node,
 
-        # downsample (lidar)
-        scan_downsampler_param,
-        scan_downsampler,
+        # # downsample (lidar)
+        # scan_downsampler_param,
+        # scan_downsampler,
 
-        # ray ground classifier
-        ray_ground_classifier_param,
-        ray_ground_classifier,
+        # # ray ground classifier
+        # ray_ground_classifier_param,
+        # ray_ground_classifier,
 
-        # euclidean cluster
-        euclidean_cluster_param,
-        euclidean_clustering,
+        # # euclidean cluster
+        # euclidean_cluster_param,
+        # euclidean_clustering,
 
-        # object detection
-        object_collision_estimator_param,
-        object_collision_estimator,
+        # # object detection
+        # object_collision_estimator_param,
+        # object_collision_estimator,
 
         # lanelet
         lanelet2_map_provider_param,
         lanelet2_map_provider,
         lanelet2_map_visualizer,
 
-        # ndt_localizer
-        ndt_localizer_param,
-        ndt_localizer,
+        # # ndt_localizer
+        # ndt_localizer_param,
+        # ndt_localizer,
 
-        # odom hack
-        odom_bl_publisher,
+        # # odom hack
+        # odom_bl_publisher,
 
-        # planners
-        # recordreplay_planner_param,
-        # recordreplay_planner,
+        # # planners
+        # # recordreplay_planner_param,
+        # # recordreplay_planner,
 
-        global_planner,
+        # global_planner,
 
-        lane_planner_param,
-        lane_planner,
+        # lane_planner_param,
+        # lane_planner,
 
-        behavior_planner_param,
-        behavior_planner,
+        # behavior_planner_param,
+        # behavior_planner,
 
-        parking_planner_param,
-        parking_planner,
+        # parking_planner_param,
+        # parking_planner,
 
-        # mpc
+        # # mpc
         # mpc_param,
         # mpc,
 
-        pure_pursuit_param,
-        pure_pursuit,
+        # # pure_pursuit_param,
+        # # pure_pursuit,
 
-        # lgsvl
-        lgsvl_interface_param,
-        lgsvl_interface,
+        # # lgsvl
+        # lgsvl_interface_param,
+        # lgsvl_interface,
 
         rviz2,
 
