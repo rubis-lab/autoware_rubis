@@ -91,21 +91,6 @@ def generate_launch_description():
         remappings=[("points_in", "points_raw")]
     )
 
-    return LaunchDescription([
-        # robot_state_publisher(urdf)
-        urdf_publisher,
-
-        # map_publisher
-        map_publisher_param,
-        map_publisher,
-        # map_downsampler_node_runner,
-
-        # point_cloud_transform (lidar)
-        pc_filter_transform_param,
-        filter_transform_vlp16_front,
-        filter_transform_vlp16_rear,
-    ])
-
     # point cloud fusion
     point_cloud_fusion_node_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
@@ -120,7 +105,6 @@ def generate_launch_description():
     point_cloud_fusion_node = Node(
         package='point_cloud_fusion_nodes',
         executable='pointcloud_fusion_node_exe',
-        name='point_cloud_fusion_node',
         namespace='lidars',
         parameters=[point_cloud_fusion_node_param_file],
         remappings=[
@@ -151,6 +135,28 @@ def generate_launch_description():
             ("points_downsampled", "points_fused_downsampled")
         ]
     )
+
+    return LaunchDescription([
+        # robot_state_publisher(urdf)
+        urdf_publisher,
+
+        # map_publisher
+        map_publisher_param,
+        map_publisher,
+        # map_downsampler_node_runner,
+
+        # point_cloud_transform (lidar)
+        pc_filter_transform_param,
+        filter_transform_vlp16_front,
+        filter_transform_vlp16_rear,
+
+        # point_cloud_fusion (lidar)
+        point_cloud_fusion_node,
+
+        # downsample (lidar)
+        scan_downsampler_param,
+        scan_downsampler,
+    ])
 
     # euclidean_cluster
     euclidean_cluster_param_file = os.path.join(
