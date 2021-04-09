@@ -321,6 +321,28 @@ def generate_launch_description():
         ]
     )
 
+    off_map_obstacles_filter_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/off_map_obstacles_filter.param.yaml')
+    off_map_obstacles_filter_param = DeclareLaunchArgument(
+        'off_map_obstacles_filter_param_file',
+        default_value=off_map_obstacles_filter_param_file,
+        description='Path to parameter file for off-map obstacle filter'
+    )
+    off_map_obstacles_filter = Node(
+        package='off_map_obstacles_filter_nodes',
+        name='off_map_obstacles_filter_node',
+        namespace='perception',
+        executable='off_map_obstacles_filter_nodes_exe',
+        parameters=[LaunchConfiguration('off_map_obstacles_filter_param_file')],
+        output='screen',
+        remappings=[
+            ('bounding_boxes_in', 'lidar_bounding_boxes'),
+            ('bounding_boxes_out', 'lidar_bounding_boxes_filtered'),
+            ('HAD_Map_Service', '/had_maps/HAD_Map_Service'),
+        ]
+    )
+
     parking_planner_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
         'param/parking_planner.param.yaml')
@@ -358,28 +380,28 @@ def generate_launch_description():
         # ]
     )
 
-    # pure_pursuit_param_file = os.path.join(
-    #     get_package_share_directory('rubis_base'),
-    #     'param/pure_pursuit.param.yaml')
-    # pure_pursuit_param = DeclareLaunchArgument(
-    #     'pure_pursuit_param_file',
-    #     default_value=pure_pursuit_param_file,
-    #     description='Path to config file to Pure Pursuit Controller'
-    # )
-    # pure_pursuit = Node(
-    #     package="pure_pursuit_nodes",
-    #     executable="pure_pursuit_node_exe",
-    #     # namespace="control",
-    #     name="pure_pursuit_node",
-    #     output="screen",
-    #     parameters=[LaunchConfiguration("pure_pursuit_param_file"), {}],
-    #     remappings=[
-    #         ("current_pose", "/vehicle/vehicle_kinematic_state"),
-    #         ("trajectory", "/planning/trajectory"),
-    #         ("ctrl_cmd", "/vehicle/control_command"),
-    #         ("ctrl_diag", "/control/control_diagnostic"),
-    #     ],
-    # )
+    pure_pursuit_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/pure_pursuit.param.yaml')
+    pure_pursuit_param = DeclareLaunchArgument(
+        'pure_pursuit_param_file',
+        default_value=pure_pursuit_param_file,
+        description='Path to config file to Pure Pursuit Controller'
+    )
+    pure_pursuit = Node(
+        package="pure_pursuit_nodes",
+        executable="pure_pursuit_node_exe",
+        # namespace="control",
+        name="pure_pursuit_node",
+        output="screen",
+        parameters=[LaunchConfiguration("pure_pursuit_param_file"), {}],
+        remappings=[
+            ("current_pose", "/vehicle/vehicle_kinematic_state"),
+            ("trajectory", "/planning/trajectory"),
+            ("ctrl_cmd", "/vehicle/vehicle_command"),
+            ("ctrl_diag", "/control/control_diagnostic"),
+        ],
+    )
 
     ######## lgsvl
     lgsvl_param_file = os.path.join(
@@ -490,15 +512,18 @@ def generate_launch_description():
         behavior_planner_param,
         behavior_planner,
 
+        off_map_obstacles_filter_param,
+        off_map_obstacles_filter,
+
         parking_planner_param,
         parking_planner,
 
         # mpc
-        mpc_param,
-        mpc,
+        # mpc_param,
+        # mpc,
 
-        # pure_pursuit_param,
-        # pure_pursuit,
+        pure_pursuit_param,
+        pure_pursuit,
 
         # lgsvl
         lgsvl_interface_param,

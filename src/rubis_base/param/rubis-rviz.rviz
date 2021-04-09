@@ -134,8 +134,7 @@ Visualization Manager:
       Enabled: true
       Name: Trajectory
       Namespaces:
-        trajectory_arrow: true
-        trajectory_velocity: true
+        {}
       Scale: 10
       Text Alpha: 1
       Text Scale: 1
@@ -189,16 +188,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 0.06952133774757385
+      Distance: 159.15414428710938
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -50.163360595703125
-        Y: -21.36469841003418
-        Z: 44.32951354980469
+        X: -44.31911087036133
+        Y: 60.103336334228516
+        Z: -0.5324009656906128
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
