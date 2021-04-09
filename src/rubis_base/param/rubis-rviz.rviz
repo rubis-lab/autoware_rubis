@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /Trajectory1
       Splitter Ratio: 0.5
     Tree Height: 617
   - Class: rviz_common/Selection
@@ -90,7 +91,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 255
+      Max Intensity: 213.00003051757812
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: PointCloud2
@@ -115,11 +116,10 @@ Visualization Manager:
         center_lane_line: true
         lanelet_triangles: true
         left_lane_bound: true
-        parking_access_areas: true
-        parking_access_triangles: true
-        parking_spots: true
-        parking_triangles: true
-        pickup_dropoff_triangles: true
+        parking_access_area_bounds: true
+        parking_access_area_triangles: true
+        parking_area_bounds: true
+        parking_area_triangles: true
         right_lane_bound: true
       Topic:
         Depth: 5
@@ -127,6 +127,24 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /had_maps/viz_had_map
+      Value: true
+    - Alpha: 1
+      Class: autoware_rviz_plugins/Trajectory
+      Color: 0; 255; 0
+      Enabled: true
+      Name: Trajectory
+      Namespaces:
+        trajectory_arrow: true
+        trajectory_velocity: true
+      Scale: 10
+      Text Alpha: 1
+      Text Scale: 1
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /planning/trajectory
       Value: true
   Enabled: true
   Global Options:
@@ -171,16 +189,16 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 141.06967163085938
+      Distance: 0.06952133774757385
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -45.39488983154297
-        Y: 40.35907745361328
-        Z: 9.905529975891113
+        X: -50.163360595703125
+        Y: -21.36469841003418
+        Z: 44.32951354980469
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false

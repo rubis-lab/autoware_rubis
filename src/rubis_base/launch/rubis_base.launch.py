@@ -442,67 +442,67 @@ def generate_launch_description():
         map_publisher,
         # map_downsampler_node_runner,
 
-        # # point_cloud_transform (lidar)
-        # pc_filter_transform_param,
-        # filter_transform_vlp16_front,
-        # filter_transform_vlp16_rear,
+        # point_cloud_transform (lidar)
+        pc_filter_transform_param,
+        filter_transform_vlp16_front,
+        filter_transform_vlp16_rear,
 
-        # # point_cloud_fusion (lidar)
-        # point_cloud_fusion_node,
+        # point_cloud_fusion (lidar)
+        point_cloud_fusion_node,
 
-        # # downsample (lidar)
-        # scan_downsampler_param,
-        # scan_downsampler,
+        # downsample (lidar)
+        scan_downsampler_param,
+        scan_downsampler,
 
-        # # ray ground classifier
-        # ray_ground_classifier_param,
-        # ray_ground_classifier,
+        # ray ground classifier
+        ray_ground_classifier_param,
+        ray_ground_classifier,
 
-        # # euclidean cluster
-        # euclidean_cluster_param,
-        # euclidean_clustering,
+        # euclidean cluster
+        euclidean_cluster_param,
+        euclidean_clustering,
 
-        # # object detection
-        # object_collision_estimator_param,
-        # object_collision_estimator,
+        # object detection
+        object_collision_estimator_param,
+        object_collision_estimator,
 
         # lanelet
         lanelet2_map_provider_param,
         lanelet2_map_provider,
         lanelet2_map_visualizer,
 
-        # # ndt_localizer
-        # ndt_localizer_param,
-        # ndt_localizer,
+        # ndt_localizer
+        ndt_localizer_param,
+        ndt_localizer,
 
-        # # odom hack
-        # odom_bl_publisher,
+        # odom hack
+        odom_bl_publisher,
 
-        # # planners
-        # # recordreplay_planner_param,
-        # # recordreplay_planner,
+        # planners
+        # recordreplay_planner_param,
+        # recordreplay_planner,
 
-        # global_planner,
+        global_planner,
 
-        # lane_planner_param,
-        # lane_planner,
+        lane_planner_param,
+        lane_planner,
 
-        # behavior_planner_param,
-        # behavior_planner,
+        behavior_planner_param,
+        behavior_planner,
 
-        # parking_planner_param,
-        # parking_planner,
+        parking_planner_param,
+        parking_planner,
 
-        # # mpc
-        # mpc_param,
-        # mpc,
+        # mpc
+        mpc_param,
+        mpc,
 
-        # # pure_pursuit_param,
-        # # pure_pursuit,
+        # pure_pursuit_param,
+        # pure_pursuit,
 
-        # # lgsvl
-        # lgsvl_interface_param,
-        # lgsvl_interface,
+        # lgsvl
+        lgsvl_interface_param,
+        lgsvl_interface,
 
         rviz2,
 
