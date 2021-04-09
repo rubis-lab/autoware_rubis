@@ -8,7 +8,7 @@
       history_depth: 10
     # Config of the maps point cloud subscription
     map_sub:
-      history_depth: 1
+      history_depth: 1.00002
     # Config of the maps point clouds to register
     pose_pub:
       history_depth: 10
@@ -26,10 +26,10 @@
         y: -41.0
         z: -2.01
       quaternion:
-        x: 0.0
-        y: 0.0
-        z: 0.0
-        w: 1.0
+        x: 0.00001
+        y: 0.00001
+        z: 0.00001
+        w: 1.00001
       enabled: false
     # localizer specific configuration
     localizer:

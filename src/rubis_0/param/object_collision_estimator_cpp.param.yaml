@@ -22,7 +22,7 @@
       mass_kg: 1500.0
       yaw_inertia_kgm2: 12.0
       width_m: 1.83
-      front_overhang_m: 1.0
+      front_overhang_m: 1.00001
       rear_overhang_m: 1.03
     safety_factor: 2.0
     stop_margin: 20.0  # distance between control point (e.g. CoG/base_link) and obstacle

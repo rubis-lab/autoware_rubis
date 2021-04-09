@@ -64,7 +64,7 @@ function(autoware_set_compile_options target)
   if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(${target} PRIVATE
       -Wall
-      -Werror
+      #   -Werror
       -Wextra
       #-Wshadow             # causes issues with ROS 2 headers
       #-Wnon-virtual-dtor   # causes issues with ROS 2 headers

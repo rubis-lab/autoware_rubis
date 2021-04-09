@@ -1,7 +1,13 @@
 ## Clean build
 
+> `tools/autoware_auto_cmake/autoware_auto_cmake.cmake`
+```cmake
+# suppress warnings as errors
+# -Werror
+```
+
 ```bash
-colcon build --packages-skip rubis_0 --cmake-args -DBUILD_TESTING=OFF -DCMAKE_CXX_FLAGS="-Wno-error=old-style-cast " -Dtf2_INCLUDE_DIRS="/home/rubis/ros2_foxy/install/tf2_sensor_msgs/include/;/opt/ros/foxy/include/"
+colcon build --packages-skip rubis_0 rubis_1 --cmake-args -DBUILD_TESTING=OFF -Dtf2_INCLUDE_DIRS="/home/rubis/ros2_foxy/install/tf2_sensor_msgs/include/;/opt/ros/foxy/include/"
 ```
 
 ### Error handling
