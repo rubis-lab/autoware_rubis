@@ -214,10 +214,147 @@ def generate_launch_description():
         ]
     )
 
+    object_collision_estimator_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/object_collision_estimator.param.yaml')
+    object_collision_estimator_param = DeclareLaunchArgument(
+        'object_collision_estimator_param_file',
+        default_value=object_collision_estimator_param_file,
+        description='Path to paramter file for object collision estimator'
+    )
+    object_collision_estimator = Node(
+        package='object_collision_estimator_nodes',
+        name='object_collision_estimator_node',
+        namespace='planning',
+        executable='object_collision_estimator_node_exe',
+        parameters=[LaunchConfiguration('object_collision_estimator_param_file')],
+        remappings=[
+            ('obstacle_topic', '/perception/lidar_bounding_boxes'),
+        ]
+    )
 
+    # off_map_obstacles_filter = Node(
+    #     package='off_map_obstacles_filter_nodes',
+    #     name='off_map_obstacles_filter_node',
+    #     namespace='perception',
+    #     executable='off_map_obstacles_filter_nodes_exe',
+    #     parameters=[LaunchConfiguration('off_map_obstacles_filter_param_file')],
+    #     output='screen',
+    #     remappings=[
+    #         ('bounding_boxes_in', 'lidar_bounding_boxes'),
+    #         ('bounding_boxes_out', 'lidar_bounding_boxes_filtered'),
+    #         ('HAD_Map_Service', '/had_maps/HAD_Map_Service'),
+    #     ]
+    # )
 
+    # planners
+    # recordreplay_planner_param_file = os.path.join(
+    #     get_package_share_directory('rubis_base'),
+    #     'param/recordreplay_planner.param.yaml')
+    # recordreplay_planner_param = DeclareLaunchArgument(
+    #     'recordreplay_planner_param_file',
+    #     default_value=recordreplay_planner_param_file,
+    #     description='Path to config file for record/replay planner'
+    # )
+    # recordreplay_planner = Node(
+    #     package='recordreplay_planner_nodes',
+    #     executable='recordreplay_planner_node_exe',
+    #     name='recordreplay_planner',
+    #     namespace='planning',
+    #     parameters=[LaunchConfiguration('recordreplay_planner_param_file')],
+    #     remappings=[
+    #         ('vehicle_state', '/vehicle/vehicle_kinematic_state'),
+    #         ('planned_trajectory', '/planning/trajectory'),
+    #         ('obstacle_bounding_boxes', '/perception/lidar_bounding_boxes'),
+    #     ]
+    # )
 
+    global_planner = Node(
+        package='lanelet2_global_planner_nodes',
+        name='lanelet2_global_planner_node',
+        namespace='planning',
+        executable='lanelet2_global_planner_node_exe',
+        remappings=[('HAD_Map_Client', '/had_maps/HAD_Map_Service'),
+                    ('vehicle_kinematic_state', '/vehicle/vehicle_kinematic_state')]
+    )
 
+    lane_planner_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/lane_planner.param.yaml')
+    lane_planner_param = DeclareLaunchArgument(
+        'lane_planner_param_file',
+        default_value=lane_planner_param_file,
+        description='Path to parameter file for lane planner'
+    )
+    lane_planner = Node(
+        package='lane_planner_nodes',
+        name='lane_planner_node',
+        namespace='planning',
+        executable='lane_planner_node_exe',
+        parameters=[LaunchConfiguration('lane_planner_param_file')],
+        remappings=[('HAD_Map_Service', '/had_maps/HAD_Map_Service')]
+    )
+
+    behavior_planner_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/behavior_planner.param.yaml')
+    behavior_planner_param = DeclareLaunchArgument(
+        'behavior_planner_param_file',
+        default_value=behavior_planner_param_file,
+        description='Path to paramter file for behavior planner'
+    )
+    behavior_planner = Node(
+        package='behavior_planner_nodes',
+        name='behavior_planner_node',
+        namespace='planning',
+        executable='behavior_planner_node_exe',
+        parameters=[LaunchConfiguration('behavior_planner_param_file')],
+        output='screen',
+        remappings=[
+            ('HAD_Map_Service', '/had_maps/HAD_Map_Service'),
+            ('vehicle_state', '/vehicle/vehicle_kinematic_state'),
+            ('route', 'global_path'),
+            ('vehicle_state_report', '/vehicle/state_report'),
+            ('vehicle_state_command', '/vehicle/state_command')
+        ]
+    )
+
+    parking_planner_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/parking_planner.param.yaml')
+    parking_planner_param = DeclareLaunchArgument(
+        'parking_planner_param_file',
+        default_value=parking_planner_param_file,
+        description='Path to paramter file for parking planner'
+    )
+    parking_planner = Node(
+        package='parking_planner_nodes',
+        name='parking_planner_node',
+        namespace='planning',
+        executable='parking_planner_node_exe',
+        parameters=[LaunchConfiguration('parking_planner_param_file')],
+        remappings=[('HAD_Map_Service', '/had_maps/HAD_Map_Service')]
+    )
+
+    # mpc
+    mpc_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/mpc.param.yaml')
+    mpc_param = DeclareLaunchArgument(
+        'mpc_param_file',
+        default_value=mpc_param_file,
+        description='Path to config file for MPC'
+    )
+    mpc = Node(
+        package='mpc_controller_nodes',
+        executable='mpc_controller_node_exe',
+        name='mpc_controller',
+        namespace='control',
+        parameters=[LaunchConfiguration('mpc_param_file')],
+        # remappings=[
+
+        # ]
+    )
 
     ######## lgsvl
     lgsvl_param_file = os.path.join(
@@ -300,6 +437,10 @@ def generate_launch_description():
         euclidean_cluster_param,
         euclidean_clustering,
 
+        # object detection
+        object_collision_estimator_param,
+        object_collision_estimator,
+
         # lanelet
         lanelet2_map_provider_param,
         lanelet2_map_provider,
@@ -311,230 +452,6 @@ def generate_launch_description():
 
         # odom hack
         odom_bl_publisher,
-
-        # lgsvl
-        lgsvl_interface_param,
-        lgsvl_interface,
-
-        rviz2,
-
-    ])
-
-    
-
-
-
-
-
-
-    # planners
-    # recordreplay_planner_param_file = os.path.join(
-    #     get_package_share_directory('rubis_base'),
-    #     'param/recordreplay_planner.param.yaml')
-    # recordreplay_planner_param = DeclareLaunchArgument(
-    #     'recordreplay_planner_param_file',
-    #     default_value=recordreplay_planner_param_file,
-    #     description='Path to config file for record/replay planner'
-    # )
-    # recordreplay_planner = Node(
-    #     package='recordreplay_planner_nodes',
-    #     executable='recordreplay_planner_node_exe',
-    #     name='recordreplay_planner',
-    #     namespace='planning',
-    #     parameters=[LaunchConfiguration('recordreplay_planner_param_file')],
-    #     remappings=[
-    #         ('vehicle_state', '/vehicle/vehicle_kinematic_state'),
-    #         ('planned_trajectory', '/planning/trajectory'),
-    #         ('obstacle_bounding_boxes', '/perception/lidar_bounding_boxes'),
-    #     ]
-    # )
-
-    global_planner = Node(
-        package='lanelet2_global_planner_nodes',
-        name='lanelet2_global_planner_node',
-        namespace='planning',
-        executable='lanelet2_global_planner_node_exe',
-        remappings=[('HAD_Map_Client', '/had_maps/HAD_Map_Service'),
-                    ('vehicle_kinematic_state', '/vehicle/vehicle_kinematic_state')]
-    )
-
-    lane_planner_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/lane_planner.param.yaml')
-    lane_planner_param = DeclareLaunchArgument(
-        'lane_planner_param_file',
-        default_value=lane_planner_param_file,
-        description='Path to parameter file for lane planner'
-    )
-    lane_planner = Node(
-        package='lane_planner_nodes',
-        name='lane_planner_node',
-        namespace='planning',
-        executable='lane_planner_node_exe',
-        parameters=[LaunchConfiguration('lane_planner_param_file')],
-        remappings=[('HAD_Map_Service', '/had_maps/HAD_Map_Service')]
-    )
-
-    parking_planner_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/parking_planner.param.yaml')
-    parking_planner_param = DeclareLaunchArgument(
-        'parking_planner_param_file',
-        default_value=parking_planner_param_file,
-        description='Path to paramter file for parking planner'
-    )
-    parking_planner = Node(
-        package='parking_planner_nodes',
-        name='parking_planner_node',
-        namespace='planning',
-        executable='parking_planner_node_exe',
-        parameters=[LaunchConfiguration('parking_planner_param_file')],
-        remappings=[('HAD_Map_Service', '/had_maps/HAD_Map_Service')]
-    )
-
-    object_collision_estimator_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/object_collision_estimator.param.yaml')
-    object_collision_estimator_param = DeclareLaunchArgument(
-        'object_collision_estimator_param_file',
-        default_value=object_collision_estimator_param_file,
-        description='Path to paramter file for object collision estimator'
-    )
-    object_collision_estimator = Node(
-        package='object_collision_estimator_nodes',
-        name='object_collision_estimator_node',
-        namespace='planning',
-        executable='object_collision_estimator_node_exe',
-        parameters=[LaunchConfiguration('object_collision_estimator_param_file')],
-        remappings=[
-            ('obstacle_topic', '/perception/lidar_bounding_boxes'),
-        ]
-    )
-
-    behavior_planner_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/behavior_planner.param.yaml')
-    behavior_planner_param = DeclareLaunchArgument(
-        'behavior_planner_param_file',
-        default_value=behavior_planner_param_file,
-        description='Path to paramter file for behavior planner'
-    )
-    behavior_planner = Node(
-        package='behavior_planner_nodes',
-        name='behavior_planner_node',
-        namespace='planning',
-        executable='behavior_planner_node_exe',
-        parameters=[LaunchConfiguration('behavior_planner_param_file')],
-        output='screen',
-        remappings=[
-            ('HAD_Map_Service', '/had_maps/HAD_Map_Service'),
-            ('vehicle_state', '/vehicle/vehicle_kinematic_state'),
-            ('route', 'global_path'),
-            ('vehicle_state_report', '/vehicle/state_report'),
-            ('vehicle_state_command', '/vehicle/state_command')
-        ]
-    )
-
-    # mpc
-    mpc_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/mpc.param.yaml')
-    mpc_param = DeclareLaunchArgument(
-        'mpc_param_file',
-        default_value=mpc_param_file,
-        description='Path to config file for MPC'
-    )
-    mpc = Node(
-        package='mpc_controller_nodes',
-        executable='mpc_controller_node_exe',
-        name='mpc_controller',
-        namespace='control',
-        parameters=[LaunchConfiguration('mpc_param_file')],
-        # remappings=[
-
-        # ]
-    )
-
-    ######## lgsvl
-    lgsvl_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/lgsvl_interface.param.yaml')
-    lgsvl_interface_param = DeclareLaunchArgument(
-        'lgsvl_interface_param_file',
-        default_value=lgsvl_param_file,
-        description='Path to config file for LGSVL Interface'
-    )
-    lgsvl_interface = Node(
-        package='lgsvl_interface',
-        executable='lgsvl_interface_exe',
-        namespace='vehicle',
-        output='screen',
-        parameters=[
-          LaunchConfiguration('lgsvl_interface_param_file'),
-          {"lgsvl.publish_tf": "true"}
-        ],
-        remappings=[
-            ("vehicle_control_cmd", "/lgsvl/vehicle_control_cmd"),
-            ("vehicle_state_cmd", "/lgsvl/vehicle_state_cmd"),
-            ("state_report", "/lgsvl/state_report"),
-            ("state_report_out", "/vehicle/state_report"),
-            ("gnss_odom", "/lgsvl/gnss_odom"),
-            ("vehicle_odom", "/lgsvl/vehicle_odom")
-        ]
-    )
-
-    ######## rviz2
-    rviz_cfg_path = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/rubis-rviz.rviz')
-    rviz2 = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', str(rviz_cfg_path)],
-        # condition=IfCondition(LaunchConfiguration('with_rviz')),
-        remappings=[("initialpose", "/localization/initialpose"),
-            ("goal_pose", "/planning/goal_pose")],
-    )
-
-
-    return LaunchDescription([
-        # robot_state_publisher(urdf)
-        urdf_publisher,
-
-        # map_publisher
-        map_publisher_param,
-        map_publisher,
-        # map_downsampler_node_runner,
-
-        # point_cloud_transform (lidar)
-        pc_filter_transform_param,
-        filter_transform_vlp16_front,
-        filter_transform_vlp16_rear,
-
-        # point_cloud_fusion (lidar)
-        point_cloud_fusion_node,
-
-        # downsample (lidar)
-        scan_downsampler_param,
-        scan_downsampler,
-
-        # euclidean cluster
-        euclidean_cluster_param,
-        euclidean_clustering,
-
-        # ray ground classifier
-        ray_ground_classifier_param,
-        ray_ground_classifier,
-
-        # lanelet
-        lanelet2_map_provider_param,
-        lanelet2_map_provider,
-        lanelet2_map_visualizer,
-
-        # ndt_localizer
-        ndt_localizer_param,
-        ndt_localizer,
 
         # planners
         # recordreplay_planner_param,
@@ -545,25 +462,20 @@ def generate_launch_description():
         lane_planner_param,
         lane_planner,
 
-        parking_planner_param,
-        parking_planner,
-
-        object_collision_estimator_param,
-        object_collision_estimator,
-
         behavior_planner_param,
         behavior_planner,
+
+        parking_planner_param,
+        parking_planner,
 
         # mpc
         mpc_param,
         mpc,
-
-        # odom hack
-        odom_bl_publisher,
 
         # lgsvl
         lgsvl_interface_param,
         lgsvl_interface,
 
         rviz2,
+
     ])
