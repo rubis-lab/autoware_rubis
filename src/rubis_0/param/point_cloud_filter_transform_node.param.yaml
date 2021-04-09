@@ -5,8 +5,8 @@
     input_frame_id:  "lidar_front"
     output_frame_id: "base_link"
     init_timeout_ms:  5000
-    expected_num_subscribers: 1.00002
-    expected_num_publishers:  1.00002
+    expected_num_subscribers: 1
+    expected_num_publishers:  1
     start_angle:            3.22886       # radius
     end_angle:              3.05433
     min_radius:             1.5           # meters
