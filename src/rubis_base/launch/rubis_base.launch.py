@@ -27,10 +27,6 @@ def generate_launch_description():
         name='robot_state_publisher',
         parameters=[{'robot_description': urdf_file}],
     )
-    return LaunchDescription([
-        # robot_state_publisher(urdf)
-        urdf_publisher,
-    ])
 
     ######## map_publisher
     map_publisher_param_file = os.path.join(
@@ -70,7 +66,7 @@ def generate_launch_description():
     ######## point_cloud_transform (lidar)
     pc_filter_transform_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
-        'param/vlp16_sim_lexus_filter_transform.param.yaml')
+        'param/pc_filter_transform.param.yaml')
 
     pc_filter_transform_param = DeclareLaunchArgument(
         'pc_filter_transform_param_file',
@@ -94,6 +90,21 @@ def generate_launch_description():
         parameters=[LaunchConfiguration('pc_filter_transform_param_file')],
         remappings=[("points_in", "points_raw")]
     )
+
+    return LaunchDescription([
+        # robot_state_publisher(urdf)
+        urdf_publisher,
+
+        # map_publisher
+        map_publisher_param,
+        map_publisher,
+        # map_downsampler_node_runner,
+
+        # point_cloud_transform (lidar)
+        pc_filter_transform_param,
+        filter_transform_vlp16_front,
+        filter_transform_vlp16_rear,
+    ])
 
     # point cloud fusion
     point_cloud_fusion_node_param_file = os.path.join(
