@@ -337,23 +337,46 @@ def generate_launch_description():
     )
 
     # mpc
-    mpc_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/mpc.param.yaml')
-    mpc_param = DeclareLaunchArgument(
-        'mpc_param_file',
-        default_value=mpc_param_file,
-        description='Path to config file for MPC'
-    )
-    mpc = Node(
-        package='mpc_controller_nodes',
-        executable='mpc_controller_node_exe',
-        name='mpc_controller',
-        namespace='control',
-        parameters=[LaunchConfiguration('mpc_param_file')],
-        # remappings=[
+    # mpc_param_file = os.path.join(
+    #     get_package_share_directory('rubis_base'),
+    #     'param/mpc.param.yaml')
+    # mpc_param = DeclareLaunchArgument(
+    #     'mpc_param_file',
+    #     default_value=mpc_param_file,
+    #     description='Path to config file for MPC'
+    # )
+    # mpc = Node(
+    #     package='mpc_controller_nodes',
+    #     executable='mpc_controller_node_exe',
+    #     name='mpc_controller',
+    #     namespace='control',
+    #     parameters=[LaunchConfiguration('mpc_param_file')],
+    #     # remappings=[
 
-        # ]
+    #     # ]
+    # )
+
+    pure_pursuit_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/pure_pursuit.param.yaml')
+    pure_pursuit_param = DeclareLaunchArgument(
+        'pure_pursuit_param_file',
+        default_value=pure_pursuit_param_file,
+        description='Path to config file to Pure Pursuit Controller'
+    )
+    pure_pursuit = Node(
+        package="pure_pursuit_nodes",
+        executable="pure_pursuit_node_exe",
+        # namespace="control",
+        name="pure_pursuit_node",
+        output="screen",
+        parameters=[LaunchConfiguration("pure_pursuit_param_file"), {}],
+        remappings=[
+            ("current_pose", "/vehicle/vehicle_kinematic_state"),
+            ("trajectory", "/planning/trajectory"),
+            ("ctrl_cmd", "/vehicle/control_command"),
+            ("ctrl_diag", "/control/control_diagnostic"),
+        ],
     )
 
     ######## lgsvl
@@ -469,8 +492,11 @@ def generate_launch_description():
         parking_planner,
 
         # mpc
-        mpc_param,
-        mpc,
+        # mpc_param,
+        # mpc,
+
+        pure_pursuit_param,
+        pure_pursuit,
 
         # lgsvl
         lgsvl_interface_param,
