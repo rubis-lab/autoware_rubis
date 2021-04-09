@@ -7,7 +7,7 @@
 ```
 
 ```bash
-colcon build --packages-skip rubis_0 rubis_1 --cmake-args -DBUILD_TESTING=OFF -Dtf2_INCLUDE_DIRS="/home/rubis/ros2_foxy/install/tf2_sensor_msgs/include/;/opt/ros/foxy/include/"
+colcon build --packages-skip rubis* --cmake-args -DBUILD_TESTING=OFF -Dtf2_INCLUDE_DIRS="/home/rubis/ros2_foxy/install/tf2_sensor_msgs/include/;/opt/ros/foxy/include/"
 ```
 
 ### Error handling
@@ -33,5 +33,5 @@ In file included from /home/rubis/AutowareAuto2/src/perception/filters/off_map_o
 
 ```bash
 source ./install/setup.bash
-colcon build --packages-select rubis_0
+colcon build --packages-select rubis_base
 ```
