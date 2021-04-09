@@ -193,6 +193,84 @@ def generate_launch_description():
         namespace='had_maps'
     )
 
+    # ndt_localizer
+    ndt_localizer_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/ndt_localizer.param.yaml')
+    ndt_localizer_param = DeclareLaunchArgument(
+        'ndt_localizer_param_file',
+        default_value=ndt_localizer_param_file,
+        description='Path to config file for ndt localizer'
+    )
+    ndt_localizer = Node(
+        package='ndt_nodes',
+        executable='p2d_ndt_localizer_exe',
+        namespace='localization',
+        name='p2d_ndt_localizer_node',
+        parameters=[LaunchConfiguration('ndt_localizer_param_file')],
+        remappings=[
+            ("points_in", "/lidars/points_fused_downsampled"),
+            ("observation_republish", "/lidars/points_fused_viz"),
+        ]
+    )
+
+
+
+
+
+
+    ######## lgsvl
+    lgsvl_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/lgsvl_interface.param.yaml')
+    lgsvl_interface_param = DeclareLaunchArgument(
+        'lgsvl_interface_param_file',
+        default_value=lgsvl_param_file,
+        description='Path to config file for LGSVL Interface'
+    )
+    lgsvl_interface = Node(
+        package='lgsvl_interface',
+        executable='lgsvl_interface_exe',
+        namespace='vehicle',
+        output='screen',
+        parameters=[
+          LaunchConfiguration('lgsvl_interface_param_file'),
+          {"lgsvl.publish_tf": "true"}
+        ],
+        remappings=[
+            ("vehicle_control_cmd", "/lgsvl/vehicle_control_cmd"),
+            ("vehicle_state_cmd", "/lgsvl/vehicle_state_cmd"),
+            ("state_report", "/lgsvl/state_report"),
+            ("state_report_out", "/vehicle/state_report"),
+            ("gnss_odom", "/lgsvl/gnss_odom"),
+            ("vehicle_odom", "/lgsvl/vehicle_odom")
+        ]
+    )
+
+    ######## rviz2
+    rviz_cfg_path = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/rubis-rviz.rviz')
+    rviz2 = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        arguments=['-d', str(rviz_cfg_path)],
+        # condition=IfCondition(LaunchConfiguration('with_rviz')),
+        remappings=[("initialpose", "/localization/initialpose"),
+            ("goal_pose", "/planning/goal_pose")],
+    )
+
+    ######## odom
+    # This is a hack to make the mapper purely rely on the ndt localizer without using any
+    # odometry source.
+    # TODO(yunus.caliskan): Revisit after #476
+    odom_bl_publisher = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        arguments=["0", "0", "0", "0", "0", "0", "odom", "base_link"]
+    )
+
     return LaunchDescription([
         # robot_state_publisher(urdf)
         urdf_publisher,
@@ -226,40 +304,26 @@ def generate_launch_description():
         lanelet2_map_provider_param,
         lanelet2_map_provider,
         lanelet2_map_visualizer,
+
+        # ndt_localizer
+        ndt_localizer_param,
+        ndt_localizer,
+
+        # odom hack
+        odom_bl_publisher,
+
+        # lgsvl
+        lgsvl_interface_param,
+        lgsvl_interface,
+
+        rviz2,
+
     ])
 
     
 
-    ######## odom
-    # This is a hack to make the mapper purely rely on the ndt localizer without using any
-    # odometry source.
-    # TODO(yunus.caliskan): Revisit after #476
-    odom_bl_publisher = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        arguments=["0", "0", "0", "0", "0", "0", "odom", "base_link"]
-    )
 
-    # ndt_localizer
-    ndt_localizer_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/ndt_localizer.param.yaml')
-    ndt_localizer_param = DeclareLaunchArgument(
-        'ndt_localizer_param_file',
-        default_value=ndt_localizer_param_file,
-        description='Path to config file for ndt localizer'
-    )
-    ndt_localizer = Node(
-        package='ndt_nodes',
-        executable='p2d_ndt_localizer_exe',
-        namespace='localization',
-        name='p2d_ndt_localizer_node',
-        parameters=[LaunchConfiguration('ndt_localizer_param_file')],
-        remappings=[
-            ("points_in", "/lidars/points_fused_downsampled"),
-            ("observation_republish", "/lidars/points_fused_viz"),
-        ]
-    )
+
 
 
 
