@@ -86,60 +86,60 @@ ament_auto_package(INSTALL_TO_SHARE
 ##### rubis
 
 find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(ndt_nodes REQUIRED)
-find_package(point_cloud_fusion_nodes REQUIRED)
-find_package(mpc_controller_nodes REQUIRED)
-# find_package(lanelet2_core REQURED)
-find_package(lanelet2_map_provider REQUIRED)
-find_package(voxel_grid_nodes REQUIRED)
-# find_package(casadi_vendor REQUIRED)
-find_package(parking_planner_nodes REQUIRED)
-find_package(point_cloud_filter_transform_nodes REQUIRED)
-find_package(object_collision_estimator_nodes REQUIRED)
-find_package(lanelet2_global_planner_nodes REQUIRED)
-find_package(lane_planner_nodes REQUIRED)
-find_package(behavior_planner_nodes REQUIRED)
-find_package(ray_ground_classifier_nodes REQUIRED)
-find_package(euclidean_cluster_nodes REQUIRED)
+# find_package(rclcpp_components REQUIRED)
+# find_package(std_msgs REQUIRED)
+# find_package(ndt_nodes REQUIRED)
+# find_package(point_cloud_fusion_nodes REQUIRED)
+# find_package(mpc_controller_nodes REQUIRED)
+# # find_package(lanelet2_core REQURED)
+# find_package(lanelet2_map_provider REQUIRED)
+# find_package(voxel_grid_nodes REQUIRED)
+# # find_package(casadi_vendor REQUIRED)
+# find_package(parking_planner_nodes REQUIRED)
+# find_package(point_cloud_filter_transform_nodes REQUIRED)
+# find_package(object_collision_estimator_nodes REQUIRED)
+# find_package(lanelet2_global_planner_nodes REQUIRED)
+# find_package(lane_planner_nodes REQUIRED)
+# find_package(behavior_planner_nodes REQUIRED)
+# find_package(ray_ground_classifier_nodes REQUIRED)
+# find_package(euclidean_cluster_nodes REQUIRED)
 
 ament_auto_find_build_dependencies()
 
-add_executable(
-  rubis_0_runner
-  src/rubis_0_runner.cpp
-  src/rubis_0.cpp
-  src/rubis_0_node.cpp
-  /home/rubis/AutowareAuto/src/rt/include/rubis_sched.hpp
-)
+# add_executable(
+#   rubis_0_runner
+#   src/rubis_0_runner.cpp
+#   src/rubis_0.cpp
+#   src/rubis_0_node.cpp
+#   /home/rubis/AutowareAuto/src/rt/include/rubis_sched.hpp
+# )
 
-target_include_directories(rubis_0_runner PUBLIC include /home/rubis/AutowareAuto/src/rt/include/)
-ament_target_dependencies(
-  rubis_0_runner
-  rclcpp
-  rclcpp_components
-  std_msgs
-  ndt_nodes
-  mpc_controller_nodes
-  lanelet2_map_provider
-  voxel_grid_nodes
-  parking_planner_nodes
-  point_cloud_filter_transform_nodes
-  object_collision_estimator_nodes
-  lanelet2_global_planner_nodes
-  lane_planner_nodes
-  behavior_planner_nodes
-  ray_ground_classifier_nodes
-  euclidean_cluster_nodes
-  point_cloud_fusion_nodes
-)
+# target_include_directories(rubis_0_runner PUBLIC include /home/rubis/AutowareAuto/src/rt/include/)
+# ament_target_dependencies(
+#   rubis_0_runner
+#   rclcpp
+#   rclcpp_components
+#   std_msgs
+#   ndt_nodes
+#   mpc_controller_nodes
+#   lanelet2_map_provider
+#   voxel_grid_nodes
+#   parking_planner_nodes
+#   point_cloud_filter_transform_nodes
+#   object_collision_estimator_nodes
+#   lanelet2_global_planner_nodes
+#   lane_planner_nodes
+#   behavior_planner_nodes
+#   ray_ground_classifier_nodes
+#   euclidean_cluster_nodes
+#   point_cloud_fusion_nodes
+# )
 
 
-install(
-  TARGETS rubis_0_runner
-  DESTINATION lib/${PROJECT_NAME}
-)
+# install(
+#   TARGETS rubis_0_runner
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
 install(
   DIRECTORY include/

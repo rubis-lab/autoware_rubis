@@ -32,5 +32,6 @@ In file included from /home/rubis/AutowareAuto2/src/perception/filters/off_map_o
 ## Build
 
 ```bash
+source ./install/setup.bash
 colcon build --packages-select rubis_0
 ```
