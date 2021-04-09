@@ -136,27 +136,22 @@ def generate_launch_description():
         ]
     )
 
-    return LaunchDescription([
-        # robot_state_publisher(urdf)
-        urdf_publisher,
-
-        # map_publisher
-        map_publisher_param,
-        map_publisher,
-        # map_downsampler_node_runner,
-
-        # point_cloud_transform (lidar)
-        pc_filter_transform_param,
-        filter_transform_vlp16_front,
-        filter_transform_vlp16_rear,
-
-        # point_cloud_fusion (lidar)
-        point_cloud_fusion_node,
-
-        # downsample (lidar)
-        scan_downsampler_param,
-        scan_downsampler,
-    ])
+    # ray ground classifier
+    ray_ground_classifier_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/ray_ground_classifier.param.yaml')
+    ray_ground_classifier_param = DeclareLaunchArgument(
+        'ray_ground_classifier_param_file',
+        default_value=ray_ground_classifier_param_file,
+        description='Path to config file for Ray Ground Classifier'
+    )
+    ray_ground_classifier = Node(
+        package='ray_ground_classifier_nodes',
+        executable='ray_ground_classifier_cloud_node_exe',
+        namespace='perception',
+        parameters=[LaunchConfiguration('ray_ground_classifier_param_file')],
+        remappings=[("points_in", "/lidars/points_fused")]
+    )
 
     # euclidean_cluster
     euclidean_cluster_param_file = os.path.join(
@@ -177,22 +172,63 @@ def generate_launch_description():
         ]
     )
 
-    # ray ground classifier
-    ray_ground_classifier_param_file = os.path.join(
+    # lanelet
+    lanelet2_map_provider_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
-        'param/ray_ground_classifier.param.yaml')
-    ray_ground_classifier_param = DeclareLaunchArgument(
-        'ray_ground_classifier_param_file',
-        default_value=ray_ground_classifier_param_file,
-        description='Path to config file for Ray Ground Classifier'
+        'param/lanelet2_map_provider.param.yaml')
+    lanelet2_map_provider_param = DeclareLaunchArgument(
+        'lanelet2_map_provider_param_file',
+        default_value=lanelet2_map_provider_param_file,
+        description='Path to parameter file for Lanelet2 Map Provider'
     )
-    ray_ground_classifier = Node(
-        package='ray_ground_classifier_nodes',
-        executable='ray_ground_classifier_cloud_node_exe',
-        namespace='perception',
-        parameters=[LaunchConfiguration('ray_ground_classifier_param_file')],
-        remappings=[("points_in", "/lidars/points_fused")]
+    lanelet2_map_provider = Node(
+        package='lanelet2_map_provider',
+        executable='lanelet2_map_provider_exe',
+        namespace='had_maps',
+        parameters=[LaunchConfiguration('lanelet2_map_provider_param_file')]
     )
+    lanelet2_map_visualizer = Node(
+        package='lanelet2_map_provider',
+        executable='lanelet2_map_visualizer_exe',
+        namespace='had_maps'
+    )
+
+    return LaunchDescription([
+        # robot_state_publisher(urdf)
+        urdf_publisher,
+
+        # map_publisher
+        map_publisher_param,
+        map_publisher,
+        # map_downsampler_node_runner,
+
+        # point_cloud_transform (lidar)
+        pc_filter_transform_param,
+        filter_transform_vlp16_front,
+        filter_transform_vlp16_rear,
+
+        # point_cloud_fusion (lidar)
+        point_cloud_fusion_node,
+
+        # downsample (lidar)
+        scan_downsampler_param,
+        scan_downsampler,
+
+        # ray ground classifier
+        ray_ground_classifier_param,
+        ray_ground_classifier,
+
+        # euclidean cluster
+        euclidean_cluster_param,
+        euclidean_clustering,
+
+        # lanelet
+        lanelet2_map_provider_param,
+        lanelet2_map_provider,
+        lanelet2_map_visualizer,
+    ])
+
+    
 
     ######## odom
     # This is a hack to make the mapper purely rely on the ndt localizer without using any
@@ -225,26 +261,7 @@ def generate_launch_description():
         ]
     )
 
-    # lanelet
-    lanelet2_map_provider_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/lanelet2_map_provider.param.yaml')
-    lanelet2_map_provider_param = DeclareLaunchArgument(
-        'lanelet2_map_provider_param_file',
-        default_value=lanelet2_map_provider_param_file,
-        description='Path to parameter file for Lanelet2 Map Provider'
-    )
-    lanelet2_map_provider = Node(
-        package='lanelet2_map_provider',
-        executable='lanelet2_map_provider_exe',
-        namespace='had_maps',
-        parameters=[LaunchConfiguration('lanelet2_map_provider_param_file')]
-    )
-    lanelet2_map_visualizer = Node(
-        package='lanelet2_map_provider',
-        executable='lanelet2_map_visualizer_exe',
-        namespace='had_maps'
-    )
+
 
     # planners
     # recordreplay_planner_param_file = os.path.join(
