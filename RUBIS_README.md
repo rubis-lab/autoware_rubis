@@ -1,4 +1,4 @@
-## Building
+## Clean build
 
 ```bash
 colcon build --packages-skip rubis_0 --cmake-args -DBUILD_TESTING=OFF -DCMAKE_CXX_FLAGS="-Wno-error=old-style-cast " -Dtf2_INCLUDE_DIRS="/home/rubis/ros2_foxy/install/tf2_sensor_msgs/include/;/opt/ros/foxy/include/"
@@ -23,3 +23,8 @@ In file included from /home/rubis/AutowareAuto2/src/perception/filters/off_map_o
 ...
 ```
 
+## Build
+
+```bash
+colcon build --packages-select rubis_0
+```
