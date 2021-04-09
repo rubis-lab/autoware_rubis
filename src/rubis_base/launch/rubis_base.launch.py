@@ -18,13 +18,19 @@ def generate_launch_description():
     urdf_path = os.path.join(
         get_package_share_directory('rubis_base'),
         'data/lexus_rx_450h.urdf')
+    with open(urdf_path, 'r') as infp:
+        urdf_file = infp.read()
     # use urdf/lexus_rx_450h_pcap for pcap file.
     urdf_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
         name='robot_state_publisher',
-        arguments=[str(urdf_path)]
+        parameters=[{'robot_description': urdf_file}],
     )
+    return LaunchDescription([
+        # robot_state_publisher(urdf)
+        urdf_publisher,
+    ])
 
     ######## map_publisher
     map_publisher_param_file = os.path.join(
