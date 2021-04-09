@@ -1,0 +1,5 @@
+/**:
+  ros__parameters:
+    heading_weight: 0.1
+    min_record_distance: 0.5
+    enable_object_collision_estimator: False

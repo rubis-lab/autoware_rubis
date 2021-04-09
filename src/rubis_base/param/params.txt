@@ -1,0 +1,365 @@
+/home/rubis/AutowareAuto/src/rubis_0/param/convert_yaml_to_cpp.py
+---------------------------------------------------------
+skipping
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/vlp16_sim_lexus_pc_fusion.param.yaml
+---------------------------------------------------------
+params.emplace_back("number_of_sources", 2);
+params.emplace_back("output_frame_id", "base_link");
+params.emplace_back("cloud_size", 55000);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/lane_planner.param.yaml
+---------------------------------------------------------
+params.emplace_back("heading_weight", 0.1);
+params.emplace_back("lane_planner.trajectory_resolution", 0.5);
+params.emplace_back("vehicle.cg_to_front_m", 1.228);
+params.emplace_back("vehicle.cg_to_rear_m", 1.5618);
+params.emplace_back("vehicle.front_corner_stiffness", 0.1);
+params.emplace_back("vehicle.rear_corner_stiffness", 0.1);
+params.emplace_back("vehicle.mass_kg", 1500.0);
+params.emplace_back("vehicle.yaw_inertia_kgm2", 12.0);
+params.emplace_back("vehicle.width_m", 2.0);
+params.emplace_back("vehicle.front_overhang_m", 1.05);
+params.emplace_back("vehicle.rear_overhang_m", 0.92);
+params.emplace_back("gaussian_smoother.standard_deviation", 5.0);
+params.emplace_back("gaussian_smoother.kernel_size", 3);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/rubis-rviz.rviz
+---------------------------------------------------------
+skipping
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/recordreplay_planner.param.yaml
+---------------------------------------------------------
+params.emplace_back("heading_weight", 0.1);
+params.emplace_back("min_record_distance", 0.5);
+params.emplace_back("enable_object_collision_estimator", false);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/params.txt
+---------------------------------------------------------
+skipping
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/voxel_grid.param.yaml
+---------------------------------------------------------
+params.emplace_back("is_approximate", false);
+params.emplace_back("config.capacity", 55000);
+params.emplace_back("config.min_point.x", -130.0);
+params.emplace_back("config.min_point.y", -130.0);
+params.emplace_back("config.min_point.z", -3.0);
+params.emplace_back("config.max_point.x", 130.0);
+params.emplace_back("config.max_point.y", 130.0);
+params.emplace_back("config.max_point.z", 3.0);
+params.emplace_back("config.voxel_size.x", 2.0);
+params.emplace_back("config.voxel_size.y", 2.0);
+params.emplace_back("config.voxel_size.z", 2.0);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/parking_planner.param.yaml
+---------------------------------------------------------
+params.emplace_back("vehicle.cg_to_front_m", 2.74);
+params.emplace_back("vehicle.cg_to_rear_m", 0.1);
+params.emplace_back("vehicle.front_corner_stiffness", 0.1);
+params.emplace_back("vehicle.rear_corner_stiffness", 0.1);
+params.emplace_back("vehicle.mass_kg", 1500.0);
+params.emplace_back("vehicle.yaw_inertia_kgm2", 12.0);
+params.emplace_back("vehicle.width_m", 1.83);
+params.emplace_back("vehicle.front_overhang_m", 1.0);
+params.emplace_back("vehicle.rear_overhang_m", 1.03);
+params.emplace_back("optimization_weights.steering", 1.0);
+params.emplace_back("optimization_weights.throttle", 1.0);
+params.emplace_back("optimization_weights.goal", 0.5);
+params.emplace_back("state_bounds.lower.x_m", -300.0);
+params.emplace_back("state_bounds.lower.y_m", -300.0);
+params.emplace_back("state_bounds.lower.velocity_mps", -3.0);
+params.emplace_back("state_bounds.lower.heading_rad", -6.2832);
+params.emplace_back("state_bounds.lower.steering_rad", -0.53);
+params.emplace_back("state_bounds.upper.x_m", 300.0);
+params.emplace_back("state_bounds.upper.y_m", 300.0);
+params.emplace_back("state_bounds.upper.velocity_mps", 3.0);
+params.emplace_back("state_bounds.upper.heading_rad", 6.2832);
+params.emplace_back("state_bounds.upper.steering_rad", 0.53);
+params.emplace_back("command_bounds.lower.steering_rate_rps", -5.0);
+params.emplace_back("command_bounds.lower.throttle_mps2", -5.0);
+params.emplace_back("command_bounds.upper.steering_rate_rps", 5.0);
+params.emplace_back("command_bounds.upper.throttle_mps2", 5.0);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/euclidean_cluster.param.yaml
+---------------------------------------------------------
+params.emplace_back("use_cluster", true);
+params.emplace_back("use_box", true);
+params.emplace_back("max_cloud_size", 55000);
+params.emplace_back("downsample", false);
+params.emplace_back("use_lfit", true);
+params.emplace_back("use_z", true);
+params.emplace_back("cluster.frame_id", "base_link");
+params.emplace_back("cluster.min_cluster_size", 10);
+params.emplace_back("cluster.max_num_clusters", 256);
+params.emplace_back("hash.min_x", -130.0);
+params.emplace_back("hash.max_x", 130.0);
+params.emplace_back("hash.min_y", -130.0);
+params.emplace_back("hash.max_y", 130.0);
+params.emplace_back("hash.side_length", 0.7);
+params.emplace_back("voxel.min_point.x", -130.0);
+params.emplace_back("voxel.min_point.y", -130.0);
+params.emplace_back("voxel.min_point.z", -130.0);
+params.emplace_back("voxel.max_point.x", 130.0);
+params.emplace_back("voxel.max_point.y", 130.0);
+params.emplace_back("voxel.max_point.z", 130.0);
+params.emplace_back("voxel.voxel_size.x", 0.2);
+params.emplace_back("voxel.voxel_size.y", 0.2);
+params.emplace_back("voxel.voxel_size.z", 0.2);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/mpc.param.yaml
+---------------------------------------------------------
+params.emplace_back("command_topic", "/vehicle/vehicle_command");
+params.emplace_back("state_topic", "/vehicle/vehicle_kinematic_state");
+params.emplace_back("trajectory_topic", "/planning/trajectory");
+params.emplace_back("tf_topic", "/tf");
+params.emplace_back("static_tf_topic", "/tf_static");
+params.emplace_back("diagnostic_topic", "control_diagnostic");
+params.emplace_back("debug_trajectory_publish_period_ms", 100);
+params.emplace_back("controller.interpolation", true);
+params.emplace_back("controller.sample_tolerance_ms", 20);
+params.emplace_back("controller.control_lookahead_ms", 100);
+params.emplace_back("controller.limits.min_longitudinal_velocity_mps", -5.0);
+params.emplace_back("controller.limits.max_longitudinal_velocity_mps", 35.0);
+params.emplace_back("controller.limits.min_lateral_velocity_mps", -3.0);
+params.emplace_back("controller.limits.max_lateral_velocity_mps", 3.0);
+params.emplace_back("controller.limits.min_acceleration_mps2", -3.0);
+params.emplace_back("controller.limits.max_acceleration_mps2", 3.0);
+params.emplace_back("controller.limits.min_yaw_rate_rps", -3.0);
+params.emplace_back("controller.limits.max_yaw_rate_rps", 3.0);
+params.emplace_back("controller.limits.min_jerk_mps3", -10.0);
+params.emplace_back("controller.limits.max_jerk_mps3", 10.0);
+params.emplace_back("controller.limits.min_steer_angle_rad", -0.6);
+params.emplace_back("controller.limits.max_steer_angle_rad", 0.6);
+params.emplace_back("controller.limits.min_steer_angle_rate_rps", -0.6);
+params.emplace_back("controller.limits.max_steer_angle_rate_rps", 0.6);
+params.emplace_back("controller.vehicle.cg_to_front_m", 1.228);
+params.emplace_back("controller.vehicle.cg_to_rear_m", 1.5618);
+params.emplace_back("controller.vehicle.front_corner_stiffness", 17000.0);
+params.emplace_back("controller.vehicle.rear_corner_stiffness", 20000.0);
+params.emplace_back("controller.vehicle.mass_kg", 1460.0);
+params.emplace_back("controller.vehicle.yaw_inertia_kgm2", 2170.0);
+params.emplace_back("controller.vehicle.width_m", 2.0);
+params.emplace_back("controller.vehicle.front_overhang_m", 0.5);
+params.emplace_back("controller.vehicle.rear_overhang_m", 0.5);
+params.emplace_back("controller.behavior.stop_rate_mps2", 3.0);
+params.emplace_back("controller.behavior.time_step_ms", 100);
+params.emplace_back("controller.behavior.is_temporal_reference", true);
+params.emplace_back("controller.weights.nominal.pose", 10.0);
+params.emplace_back("controller.weights.nominal.heading", 10.0);
+params.emplace_back("controller.weights.nominal.longitudinal_velocity", 10.0);
+params.emplace_back("controller.weights.nominal.lateral_velocity", 10.0);
+params.emplace_back("controller.weights.nominal.yaw_rate", 10.0);
+params.emplace_back("controller.weights.nominal.acceleration", 10.0);
+params.emplace_back("controller.weights.nominal.jerk", 10.0);
+params.emplace_back("controller.weights.nominal.steer_angle", 10.0);
+params.emplace_back("controller.weights.nominal.steer_angle_rate", 10.0);
+params.emplace_back("controller.weights.terminal.pose", 10000.0);
+params.emplace_back("controller.weights.terminal.heading", 10000.0);
+params.emplace_back("controller.weights.terminal.longitudinal_velocity", 100.0);
+params.emplace_back("controller.weights.terminal.lateral_velocity", 10.0);
+params.emplace_back("controller.weights.terminal.yaw_rate", 10.0);
+params.emplace_back("controller.weights.terminal.acceleration", 0.0);
+params.emplace_back("controller.weights.terminal.jerk", 0.0);
+params.emplace_back("controller.weights.terminal.steer_angle", 0.0);
+params.emplace_back("controller.weights.terminal.steer_angle_rate", 0.0);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/ray_ground_classifier.param.yaml
+---------------------------------------------------------
+params.emplace_back("timeout_ms", 10);
+params.emplace_back("cloud_timeout_ms", 110);
+params.emplace_back("pcl_size", 55000);
+params.emplace_back("frame_id", "base_link");
+params.emplace_back("is_structured", true);
+params.emplace_back("classifier.sensor_height_m", 0.368);
+params.emplace_back("classifier.max_local_slope_deg", 20.0);
+params.emplace_back("classifier.max_global_slope_deg", 7.0);
+params.emplace_back("classifier.nonground_retro_thresh_deg", 70.0);
+params.emplace_back("classifier.min_height_thresh_m", 0.05);
+params.emplace_back("classifier.max_global_height_thresh_m", 0.3);
+params.emplace_back("classifier.max_last_local_ground_thresh_m", 0.6);
+params.emplace_back("classifier.max_provisional_ground_distance_m", 5.0);
+params.emplace_back("classifier.min_height_m", -0.5);
+params.emplace_back("classifier.max_height_m", 1.5);
+params.emplace_back("aggregator.min_ray_angle_rad", -3.14159);
+params.emplace_back("aggregator.max_ray_angle_rad", 3.14159);
+params.emplace_back("aggregator.ray_width_rad", 0.01);
+params.emplace_back("aggregator.max_ray_points", 512);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/map_publisher.param.yaml
+---------------------------------------------------------
+params.emplace_back("map_pcd_file", "/home/rubis/AutowareAuto/install/rubis_0/share/rubis_0/data/autonomoustuff_parking_lot_lgsvl.pcd");
+params.emplace_back("map_yaml_file", "/home/rubis/AutowareAuto/install/rubis_0/share/rubis_0/data/autonomoustuff_parking_lot_lgsvl.yaml");
+params.emplace_back("map_frame", "map");
+params.emplace_back("map_config.capacity", 1000000);
+params.emplace_back("map_config.min_point.x", -1000.0);
+params.emplace_back("map_config.min_point.y", -1000.0);
+params.emplace_back("map_config.min_point.z", -3.0);
+params.emplace_back("map_config.max_point.x", 1000.0);
+params.emplace_back("map_config.max_point.y", 1000.0);
+params.emplace_back("map_config.max_point.z", 3.0);
+params.emplace_back("map_config.voxel_size.x", 3.5);
+params.emplace_back("map_config.voxel_size.y", 3.5);
+params.emplace_back("map_config.voxel_size.z", 3.5);
+params.emplace_back("viz_map", true);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/behavior_planner.param.yaml
+---------------------------------------------------------
+params.emplace_back("heading_weight", 0.1);
+params.emplace_back("goal_distance_thresh", 3.0);
+params.emplace_back("stop_velocity_thresh", 2.0);
+params.emplace_back("subroute_goal_offset_lane2parking", 7.5);
+params.emplace_back("subroute_goal_offset_parking2lane", 7.5);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/vlp16_sim_lexus_filter_transform.param.yaml
+---------------------------------------------------------
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.timeout_ms", 110);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.pcl_size", 55000);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.input_frame_id", "lidar_front");
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.output_frame_id", "base_link");
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.init_timeout_ms", 5000);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.expected_num_subscribers", 1);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.expected_num_publishers", 1);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.start_angle", 0.0);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.end_angle", 6.28);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.min_radius", 6.0);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.max_radius", 150.0);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.static_transformer.quaternion.x", 0.0);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.static_transformer.quaternion.y", 0.0);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.static_transformer.quaternion.z", 0.0);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.static_transformer.quaternion.w", 1.0);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.static_transformer.translation.x", 1.498);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.static_transformer.translation.y", -0.022);
+params.emplace_back("lidar_front.filter_transform_vlp16_front.ros__parameters.static_transformer.translation.z", 1.49);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.timeout_ms", 110);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.pcl_size", 55000);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.input_frame_id", "lidar_rear");
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.output_frame_id", "base_link");
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.init_timeout_ms", 5000);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.expected_num_subscribers", 1);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.expected_num_publishers", 1);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.start_angle", 0.0);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.end_angle", 6.28);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.min_radius", 6.0);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.max_radius", 150.0);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.static_transformer.quaternion.x", 0.0);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.static_transformer.quaternion.y", 0.0);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.static_transformer.quaternion.z", 0.0);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.static_transformer.quaternion.w", 1.0);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.static_transformer.translation.x", 0.308);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.static_transformer.translation.y", -0.022);
+params.emplace_back("lidar_rear.filter_transform_vlp16_rear.ros__parameters.static_transformer.translation.z", 1.49);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/lanelet2_map_provider.param.yaml
+---------------------------------------------------------
+params.emplace_back("map_osm_file", "/home/rubis/AutowareAuto/install/rubis_0/share/rubis_0/data/autonomoustuff_parking_lot.osm");
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/ndt_localizer.param.yaml
+---------------------------------------------------------
+params.emplace_back("observation_sub.history_depth", 10);
+params.emplace_back("map_sub.history_depth", 1);
+params.emplace_back("pose_pub.history_depth", 10);
+params.emplace_back("publish_tf", true);
+params.emplace_back("predict_pose_threshold.translation", 50.0);
+params.emplace_back("predict_pose_threshold.rotation", 3.15);
+params.emplace_back("init_hack.translation.x", -57.6);
+params.emplace_back("init_hack.translation.y", -41.0);
+params.emplace_back("init_hack.translation.z", -2.01);
+params.emplace_back("init_hack.quaternion.x", 0.0);
+params.emplace_back("init_hack.quaternion.y", 0.0);
+params.emplace_back("init_hack.quaternion.z", 0.0);
+params.emplace_back("init_hack.quaternion.w", 1.0);
+params.emplace_back("init_hack.enabled", false);
+params.emplace_back("localizer.map.capacity", 1000000);
+params.emplace_back("localizer.map.min_point.x", -1000.0);
+params.emplace_back("localizer.map.min_point.y", -1000.0);
+params.emplace_back("localizer.map.min_point.z", -3.0);
+params.emplace_back("localizer.map.max_point.x", 1000.0);
+params.emplace_back("localizer.map.max_point.y", 1000.0);
+params.emplace_back("localizer.map.max_point.z", 3.0);
+params.emplace_back("localizer.map.voxel_size.x", 3.5);
+params.emplace_back("localizer.map.voxel_size.y", 3.5);
+params.emplace_back("localizer.map.voxel_size.z", 3.5);
+params.emplace_back("localizer.scan.capacity", 55000);
+params.emplace_back("localizer.optimization.outlier_ratio", 0.55);
+params.emplace_back("localizer.optimizer.max_iterations", 30);
+params.emplace_back("localizer.optimizer.score_tolerance", 0.0002);
+params.emplace_back("localizer.optimizer.parameter_tolerance", 0.0002);
+params.emplace_back("localizer.optimizer.gradient_tolerance", 0.0002);
+params.emplace_back("localizer.optimizer.line_search.step_max", 0.12);
+params.emplace_back("localizer.optimizer.line_search.step_min", 0.0001);
+params.emplace_back("localizer.guess_time_tolerance_ms", 10000);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/lgsvl_interface.param.yaml
+---------------------------------------------------------
+params.emplace_back("cycle_time_ms", 10);
+params.emplace_back("control_command", "basic");
+params.emplace_back("lgsvl.use_nav_odometry_topic", true);
+params.emplace_back("lgsvl.throttle.domain", [0.0, 3.0]);
+params.emplace_back("lgsvl.throttle.range", [0.0, 100.0]);
+params.emplace_back("lgsvl.brake.domain", [-3.0, 0.0]);
+params.emplace_back("lgsvl.brake.range", [100.0, 0.0]);
+params.emplace_back("lgsvl.steer.domain", [-0.331, 0.331]);
+params.emplace_back("lgsvl.steer.range", [-100.0, 100.0]);
+params.emplace_back("lgsvl.publish_tf", false);
+params.emplace_back("state_machine.gear_shift_velocity_threshold_mps", 0.5);
+params.emplace_back("state_machine.acceleration_limits.min", -3.0);
+params.emplace_back("state_machine.acceleration_limits.max", 3.0);
+params.emplace_back("state_machine.acceleration_limits.threshold", 1.0);
+params.emplace_back("state_machine.front_steer_limits.min", -0.331);
+params.emplace_back("state_machine.front_steer_limits.max", 0.331);
+params.emplace_back("state_machine.front_steer_limits.threshold", 0.3);
+params.emplace_back("state_machine.time_step_ms", 100);
+params.emplace_back("state_machine.timeout_acceleration_mps2", 3.0);
+params.emplace_back("state_machine.state_transition_timeout_ms", 3000);
+params.emplace_back("state_machine.gear_shift_accel_deadzone_mps2", 0.5);
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/object_collision_estimator.param.yaml
+---------------------------------------------------------
+params.emplace_back("vehicle.cg_to_front_m", 2.74);
+params.emplace_back("vehicle.cg_to_rear_m", 0.1);
+params.emplace_back("vehicle.front_corner_stiffness", 0.1);
+params.emplace_back("vehicle.rear_corner_stiffness", 0.1);
+params.emplace_back("vehicle.mass_kg", 1500.0);
+params.emplace_back("vehicle.yaw_inertia_kgm2", 12.0);
+params.emplace_back("vehicle.width_m", 1.83);
+params.emplace_back("vehicle.front_overhang_m", 1.0);
+params.emplace_back("vehicle.rear_overhang_m", 1.03);
+params.emplace_back("safety_factor", 2.0);
+params.emplace_back("stop_margin", 20.0);
+params.emplace_back("trajectory_smoother.kernel_std", 5.0);
+params.emplace_back("trajectory_smoother.kernel_size", 25);
+params.emplace_back("target_frame_id", "map");
+---------------------------------------------------------
+
+/home/rubis/AutowareAuto/src/rubis_0/param/scan_downsampler_ms3.param.yaml
+---------------------------------------------------------
+params.emplace_back("is_approximate", false);
+params.emplace_back("config.capacity", 55000);
+params.emplace_back("config.min_point.x", -130.0);
+params.emplace_back("config.min_point.y", -130.0);
+params.emplace_back("config.min_point.z", -3.0);
+params.emplace_back("config.max_point.x", 130.0);
+params.emplace_back("config.max_point.y", 130.0);
+params.emplace_back("config.max_point.z", 3.0);
+params.emplace_back("config.voxel_size.x", 1.0);
+params.emplace_back("config.voxel_size.y", 1.0);
+params.emplace_back("config.voxel_size.z", 1.0);
+---------------------------------------------------------

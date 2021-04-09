@@ -73,5 +73,5 @@ endif()
 
 # ament package generation and installing
 ament_auto_package(INSTALL_TO_SHARE
-  launch
+  param data launch
 )

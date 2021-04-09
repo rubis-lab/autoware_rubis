@@ -1,0 +1,6 @@
+# params/lanelet2_map_publisher.param.yaml
+---
+
+/**:
+   ros__parameters:
+     map_osm_file: "/home/rubis/AutowareAuto/install/rubis_0/share/rubis_0/data/autonomoustuff_parking_lot.osm"
