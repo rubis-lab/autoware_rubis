@@ -22,6 +22,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <iostream>
 
 namespace motion
 {
@@ -222,6 +223,7 @@ bool ControllerBase::is_past_trajectory(const State & state) const noexcept
 ////////////////////////////////////////////////////////////////////////////////
 Command ControllerBase::compute_stop_command(const State & state) const noexcept
 {
+  std::cout << "ControllerBase::compute_stop_command " << std::endl;
   Command ret{rosidl_runtime_cpp::MessageInitialization::ALL};
   ret.stamp = state.header.stamp;
   // Steering angle "uses up" stopping power/grip capacity
