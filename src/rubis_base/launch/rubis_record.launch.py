@@ -4,6 +4,8 @@ from ament_index_python import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 import os
 
@@ -37,8 +39,16 @@ def generate_launch_description():
     )
         # ('obstacle_bounding_boxes', '/perception/lidar_bounding_boxes'),
 
+    core_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            get_package_share_directory('rubis_base'),
+            '/launch/rubis_base.launch.py']),
+        launch_arguments={}.items()
+    )
 
     return LaunchDescription([
+        core_launch,
+
         recordreplay_planner_param,
         recordreplay_planner_node,
     ])

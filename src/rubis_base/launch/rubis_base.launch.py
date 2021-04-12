@@ -343,23 +343,6 @@ def generate_launch_description():
         ]
     )
 
-    parking_planner_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/parking_planner.param.yaml')
-    parking_planner_param = DeclareLaunchArgument(
-        'parking_planner_param_file',
-        default_value=parking_planner_param_file,
-        description='Path to paramter file for parking planner'
-    )
-    parking_planner = Node(
-        package='parking_planner_nodes',
-        name='parking_planner_node',
-        namespace='planning',
-        executable='parking_planner_node_exe',
-        parameters=[LaunchConfiguration('parking_planner_param_file')],
-        remappings=[('HAD_Map_Service', '/had_maps/HAD_Map_Service')]
-    )
-
     # mpc
     mpc_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
@@ -514,9 +497,6 @@ def generate_launch_description():
 
         off_map_obstacles_filter_param,
         off_map_obstacles_filter,
-
-        parking_planner_param,
-        parking_planner,
 
         # mpc
         # mpc_param,
