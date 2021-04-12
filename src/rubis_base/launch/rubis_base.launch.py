@@ -172,29 +172,6 @@ def generate_launch_description():
         ]
     )
 
-    # lanelet
-    lanelet2_map_provider_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/lanelet2_map_provider.param.yaml')
-    lanelet2_map_provider_param = DeclareLaunchArgument(
-        'lanelet2_map_provider_param_file',
-        default_value=lanelet2_map_provider_param_file,
-        description='Path to parameter file for Lanelet2 Map Provider'
-    )
-    lanelet2_map_provider = Node(
-        package='lanelet2_map_provider',
-        executable='lanelet2_map_provider_exe',
-        namespace='had_maps',
-        name='lanelet2_map_provider_node',
-        parameters=[LaunchConfiguration('lanelet2_map_provider_param_file')]
-    )
-    lanelet2_map_visualizer = Node(
-        package='lanelet2_map_provider',
-        executable='lanelet2_map_visualizer_exe',
-        name='lanelet2_map_visualizer_node',
-        namespace='had_maps'
-    )
-
     # ndt_localizer
     ndt_localizer_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
@@ -232,114 +209,6 @@ def generate_launch_description():
         parameters=[LaunchConfiguration('object_collision_estimator_param_file')],
         remappings=[
             ('obstacle_topic', '/perception/lidar_bounding_boxes'),
-        ]
-    )
-
-    # off_map_obstacles_filter = Node(
-    #     package='off_map_obstacles_filter_nodes',
-    #     name='off_map_obstacles_filter_node',
-    #     namespace='perception',
-    #     executable='off_map_obstacles_filter_nodes_exe',
-    #     parameters=[LaunchConfiguration('off_map_obstacles_filter_param_file')],
-    #     output='screen',
-    #     remappings=[
-    #         ('bounding_boxes_in', 'lidar_bounding_boxes'),
-    #         ('bounding_boxes_out', 'lidar_bounding_boxes_filtered'),
-    #         ('HAD_Map_Service', '/had_maps/HAD_Map_Service'),
-    #     ]
-    # )
-
-    # planners
-    # recordreplay_planner_param_file = os.path.join(
-    #     get_package_share_directory('rubis_base'),
-    #     'param/recordreplay_planner.param.yaml')
-    # recordreplay_planner_param = DeclareLaunchArgument(
-    #     'recordreplay_planner_param_file',
-    #     default_value=recordreplay_planner_param_file,
-    #     description='Path to config file for record/replay planner'
-    # )
-    # recordreplay_planner = Node(
-    #     package='recordreplay_planner_nodes',
-    #     executable='recordreplay_planner_node_exe',
-    #     name='recordreplay_planner',
-    #     namespace='planning',
-    #     parameters=[LaunchConfiguration('recordreplay_planner_param_file')],
-    #     remappings=[
-    #         ('vehicle_state', '/vehicle/vehicle_kinematic_state'),
-    #         ('planned_trajectory', '/planning/trajectory'),
-    #         ('obstacle_bounding_boxes', '/perception/lidar_bounding_boxes'),
-    #     ]
-    # )
-
-    global_planner = Node(
-        package='lanelet2_global_planner_nodes',
-        name='lanelet2_global_planner_node',
-        namespace='planning',
-        executable='lanelet2_global_planner_node_exe',
-        remappings=[('HAD_Map_Client', '/had_maps/HAD_Map_Service'),
-                    ('vehicle_kinematic_state', '/vehicle/vehicle_kinematic_state')]
-    )
-
-    lane_planner_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/lane_planner.param.yaml')
-    lane_planner_param = DeclareLaunchArgument(
-        'lane_planner_param_file',
-        default_value=lane_planner_param_file,
-        description='Path to parameter file for lane planner'
-    )
-    lane_planner = Node(
-        package='lane_planner_nodes',
-        name='lane_planner_node',
-        namespace='planning',
-        executable='lane_planner_node_exe',
-        parameters=[LaunchConfiguration('lane_planner_param_file')],
-        remappings=[('HAD_Map_Service', '/had_maps/HAD_Map_Service')]
-    )
-
-    behavior_planner_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/behavior_planner.param.yaml')
-    behavior_planner_param = DeclareLaunchArgument(
-        'behavior_planner_param_file',
-        default_value=behavior_planner_param_file,
-        description='Path to paramter file for behavior planner'
-    )
-    behavior_planner = Node(
-        package='behavior_planner_nodes',
-        name='behavior_planner_node',
-        namespace='planning',
-        executable='behavior_planner_node_exe',
-        parameters=[LaunchConfiguration('behavior_planner_param_file')],
-        output='screen',
-        remappings=[
-            ('HAD_Map_Service', '/had_maps/HAD_Map_Service'),
-            ('vehicle_state', '/vehicle/vehicle_kinematic_state'),
-            ('route', 'global_path'),
-            ('vehicle_state_report', '/vehicle/state_report'),
-            ('vehicle_state_command', '/vehicle/state_command')
-        ]
-    )
-
-    off_map_obstacles_filter_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/off_map_obstacles_filter.param.yaml')
-    off_map_obstacles_filter_param = DeclareLaunchArgument(
-        'off_map_obstacles_filter_param_file',
-        default_value=off_map_obstacles_filter_param_file,
-        description='Path to parameter file for off-map obstacle filter'
-    )
-    off_map_obstacles_filter = Node(
-        package='off_map_obstacles_filter_nodes',
-        name='off_map_obstacles_filter_node',
-        namespace='perception',
-        executable='off_map_obstacles_filter_nodes_exe',
-        parameters=[LaunchConfiguration('off_map_obstacles_filter_param_file')],
-        output='screen',
-        remappings=[
-            ('bounding_boxes_in', 'lidar_bounding_boxes'),
-            ('bounding_boxes_out', 'lidar_bounding_boxes_filtered'),
-            ('HAD_Map_Service', '/had_maps/HAD_Map_Service'),
         ]
     )
 
@@ -471,11 +340,6 @@ def generate_launch_description():
         object_collision_estimator_param,
         object_collision_estimator,
 
-        # lanelet
-        lanelet2_map_provider_param,
-        lanelet2_map_provider,
-        lanelet2_map_visualizer,
-
         # ndt_localizer
         ndt_localizer_param,
         ndt_localizer,
@@ -483,27 +347,12 @@ def generate_launch_description():
         # odom hack
         odom_bl_publisher,
 
-        # planners
-        # recordreplay_planner_param,
-        # recordreplay_planner,
-
-        global_planner,
-
-        lane_planner_param,
-        lane_planner,
-
-        behavior_planner_param,
-        behavior_planner,
-
-        off_map_obstacles_filter_param,
-        off_map_obstacles_filter,
-
         # mpc
-        # mpc_param,
-        # mpc,
+        mpc_param,
+        mpc,
 
-        pure_pursuit_param,
-        pure_pursuit,
+        # pure_pursuit_param,
+        # pure_pursuit,
 
         # lgsvl
         lgsvl_interface_param,
