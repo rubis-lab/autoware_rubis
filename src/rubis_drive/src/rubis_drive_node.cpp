@@ -29,7 +29,7 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
   timer_ = this->create_wall_timer(
     4000ms, std::bind(&RubisDriveNode::timer_callback, this));
 
-  command_publisher_ = this->create_publisher<Command>("rubis_command_topic", 10);
+  command_publisher_ = this->create_publisher<Command>("/vehicle/vehicle_command", 10);
 //   command_timer_ = this->create_wall_timer(
 //     1000ms, std::bind(&RubisDriveNode::command_timer_callback, this));
 
