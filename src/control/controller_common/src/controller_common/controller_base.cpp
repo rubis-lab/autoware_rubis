@@ -111,6 +111,7 @@ const Trajectory & ControllerBase::get_reference_trajectory() const noexcept
 Command ControllerBase::compute_command(const State & state)
 {
   if (m_reference_trajectory.points.empty()) {
+    std::cout << "ControllerBase::compute_command: empty m_reference_trajectory" << std::endl;
     return compute_stop_command(state);
   }
   if (state.header.frame_id != m_reference_trajectory.header.frame_id) {
@@ -118,6 +119,7 @@ Command ControllerBase::compute_command(const State & state)
   }
   update_reference_indices(state);
   if (!is_state_ok(state)) {
+    std::cout << "ControllerBase::compute_command: state not okay" << std::endl;
     return compute_stop_command(state);
   }
   auto ret = compute_command_impl(state);
@@ -176,6 +178,11 @@ bool ControllerBase::is_state_ok(const State & state) const noexcept
   const auto pose_ok = !is_past_trajectory(state);
   const auto t = time_utils::from_message(state.header.stamp);
   const auto time_ok = t < m_latest_reference;
+  // rubis
+  if(!(pose_ok && time_ok)) {
+    std::cout << "ControllerBase::is_state_ok: not okay. pose_ok: " << pose_ok << ", time_ok: " << time_ok << std::endl;
+  }
+
   return pose_ok && time_ok;
 }
 
