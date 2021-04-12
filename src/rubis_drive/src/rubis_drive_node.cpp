@@ -14,6 +14,8 @@
 
 #include "rubis_drive/rubis_drive_node.hpp"
 
+using namespace std::chrono_literals;
+
 namespace autoware
 {
 namespace rubis_drive
@@ -23,12 +25,23 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
 :  Node("rubis_drive", options),
   verbose(true)
 {
-  print_hello();
+  publisher_ = this->create_publisher<std_msgs::msg::String>("rubis_drive_topic", 10);
+  timer_ = this->create_wall_timer(
+    4000ms, std::bind(&RubisDriveNode::timer_callback, this));
 }
 
 int32_t RubisDriveNode::print_hello() const
 {
   return rubis_drive::print_hello();
+}
+
+void RubisDriveNode::timer_callback()
+{
+  RCLCPP_WARN(get_logger(), "Timer triggered.");
+  auto message = std_msgs::msg::String();
+  message.data = "Hello, RUBIS! " + std::to_string(100);
+  RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
+  publisher_->publish(message);
 }
 
 }  // namespace rubis_drive

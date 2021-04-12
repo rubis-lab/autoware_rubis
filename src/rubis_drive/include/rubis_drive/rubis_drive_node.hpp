@@ -22,6 +22,7 @@
 #include <rubis_drive/rubis_drive.hpp>
 
 #include <rclcpp/rclcpp.hpp>
+#include "std_msgs/msg/string.hpp"
 
 namespace autoware
 {
@@ -43,6 +44,11 @@ public:
 
 private:
   bool verbose;  ///< whether to use verbose output or not.
+
+  // Timer related
+  void timer_callback();
+  rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
 };
 }  // namespace rubis_drive
 }  // namespace autoware
