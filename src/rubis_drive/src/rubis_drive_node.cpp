@@ -28,6 +28,15 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
   publisher_ = this->create_publisher<std_msgs::msg::String>("rubis_drive_topic", 10);
   timer_ = this->create_wall_timer(
     4000ms, std::bind(&RubisDriveNode::timer_callback, this));
+
+  command_publisher_ = this->create_publisher<Command>("rubis_command_topic", 10);
+//   command_timer_ = this->create_wall_timer(
+//     1000ms, std::bind(&RubisDriveNode::command_timer_callback, this));
+
+  using SubAllocT = rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>;
+  state_subscriber_ = create_subscription<State>(
+    "/vehicle/vehicle_kinematic_state", 10,
+    [this](const State::SharedPtr msg) {on_state(msg);}, SubAllocT{});
 }
 
 int32_t RubisDriveNode::print_hello() const
@@ -44,6 +53,20 @@ void RubisDriveNode::timer_callback()
   publisher_->publish(message);
 }
 
+// void RubisDriveNode::command_timer_callback()
+// {
+//   RCLCPP_WARN(get_logger(), "(Command) Timer triggered.");
+// //   auto message = compute_command();
+//   auto message = 1;
+//   command_publisher_->publish(message);
+// }
+
+void RubisDriveNode::on_state(const State::SharedPtr & msg)
+{
+  const auto cmd{compute_command(*msg)};
+  command_publisher_->publish(cmd);
+}
+
 Command RubisDriveNode::compute_command(const State & state) const noexcept
 {
   // dummy command
@@ -54,12 +77,16 @@ Command RubisDriveNode::compute_command(const State & state) const noexcept
   ret.rear_wheel_angle_rad = Real{};
   // Compute stopping acceleration
   // validate input
-  const auto velocity = std::fabs(state.state.longitudinal_velocity_mps);
-  const auto dt = std::chrono::duration_cast<std::chrono::duration<Real>>(std::chrono::milliseconds(100L));
-  const auto decel = std::min(
-    velocity / dt.count(),
-    3.0F);   // positive
-  ret.long_accel_mps2 = state.state.longitudinal_velocity_mps >= 0.0F ? -decel : decel;
+//   const auto velocity = std::fabs(state.state.longitudinal_velocity_mps);
+//   const auto dt = std::chrono::duration_cast<std::chrono::duration<Real>>(std::chrono::milliseconds(100L));
+
+//   const auto decel = std::min(
+//     velocity / dt.count(),
+//     3.0F);   // positive
+//   ret.long_accel_mps2 = state.state.longitudinal_velocity_mps >= 0.0F ? -decel : decel;
+
+  ret.long_accel_mps2 = 3.0F;
+
   return ret;
 }
 

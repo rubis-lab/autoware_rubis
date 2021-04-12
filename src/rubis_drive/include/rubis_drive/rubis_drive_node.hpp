@@ -36,6 +36,7 @@ namespace rubis_drive
 using motion::control::controller_common::Command;
 using motion::control::controller_common::State;
 using motion::control::controller_common::Real;
+using std::placeholders::_1;
 
 
 /// \class RubisDriveNode
@@ -58,7 +59,13 @@ private:
   void timer_callback();
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+
+  rclcpp::TimerBase::SharedPtr command_timer_;
+  rclcpp::Publisher<Command>::SharedPtr command_publisher_;
   Command compute_command(const State & state) const noexcept;
+
+  rclcpp::Subscription<State>::SharedPtr state_subscriber_{};
+  void on_state(const State::SharedPtr & msg);
 };
 }  // namespace rubis_drive
 }  // namespace autoware
