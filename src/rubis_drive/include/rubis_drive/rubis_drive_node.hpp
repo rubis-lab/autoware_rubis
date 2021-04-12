@@ -24,10 +24,19 @@
 #include <rclcpp/rclcpp.hpp>
 #include "std_msgs/msg/string.hpp"
 
+#include <controller_common/controller_base.hpp>
+#include <chrono>
+#include <string>
+
 namespace autoware
 {
 namespace rubis_drive
 {
+
+using motion::control::controller_common::Command;
+using motion::control::controller_common::State;
+using motion::control::controller_common::Real;
+
 
 /// \class RubisDriveNode
 /// \brief ROS 2 Node for hello world.
@@ -49,6 +58,7 @@ private:
   void timer_callback();
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+  Command compute_command(const State & state) const noexcept;
 };
 }  // namespace rubis_drive
 }  // namespace autoware

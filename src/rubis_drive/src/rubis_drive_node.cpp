@@ -44,6 +44,25 @@ void RubisDriveNode::timer_callback()
   publisher_->publish(message);
 }
 
+Command RubisDriveNode::compute_command(const State & state) const noexcept
+{
+  // dummy command
+  Command ret{rosidl_runtime_cpp::MessageInitialization::ALL};
+  ret.stamp = state.header.stamp;
+  // Steering angle "uses up" stopping power/grip capacity
+  ret.front_wheel_angle_rad = Real{};  // zero initialization etc.
+  ret.rear_wheel_angle_rad = Real{};
+  // Compute stopping acceleration
+  // validate input
+  const auto velocity = std::fabs(state.state.longitudinal_velocity_mps);
+  const auto dt = std::chrono::duration_cast<std::chrono::duration<Real>>(std::chrono::milliseconds(100L));
+  const auto decel = std::min(
+    velocity / dt.count(),
+    3.0F);   // positive
+  ret.long_accel_mps2 = state.state.longitudinal_velocity_mps >= 0.0F ? -decel : decel;
+  return ret;
+}
+
 }  // namespace rubis_drive
 }  // namespace autoware
 
