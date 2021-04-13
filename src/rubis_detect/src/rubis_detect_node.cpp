@@ -24,6 +24,10 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
   verbose(true)
 {
   using SubAllocT = rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>;
+  state_subscriber_ = create_subscription<State>(
+    "/vehicle/vehicle_kinematic_state", 10,
+    [this](const State::SharedPtr msg) {on_state(msg);}, SubAllocT{});
+
   bounding_box_subscriber_ = create_subscription<BoundingBoxArray>(
     "/perception/lidar_bounding_boxes_filtered", 10,
     [this](const BoundingBoxArray::SharedPtr msg) {on_bounding_box(msg);}, SubAllocT{});
@@ -32,6 +36,11 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
 int32_t RubisDetectNode::print_hello() const
 {
   return rubis_detect::print_hello();
+}
+
+void RubisDetectNode::on_state(const State::SharedPtr & msg)
+{
+//   const auto cmd{compute_command(*msg)};
 }
 
 void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)

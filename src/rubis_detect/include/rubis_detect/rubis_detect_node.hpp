@@ -23,6 +23,9 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include "std_msgs/msg/string.hpp"
+#include <motion_common/motion_common.hpp>
+#include <controller_common/controller_base.hpp>
+#include <autoware_auto_msgs/msg/vehicle_kinematic_state.hpp>
 #include <autoware_auto_msgs/msg/bounding_box_array.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <visualization_msgs/msg/marker.hpp>
@@ -32,6 +35,8 @@ namespace autoware
 namespace rubis_detect
 {
 
+using motion::control::controller_common::State;
+using motion::control::controller_common::Real;
 using autoware_auto_msgs::msg::BoundingBoxArray;
 using visualization_msgs::msg::MarkerArray;
 using visualization_msgs::msg::Marker;
@@ -54,6 +59,9 @@ private:
 
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr danger_publisher_;
   std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
+
+  rclcpp::Subscription<State>::SharedPtr state_subscriber_{};
+  void on_state(const State::SharedPtr & msg);
 
   rclcpp::Subscription<BoundingBoxArray>::SharedPtr bounding_box_subscriber_{};
   void on_bounding_box(const BoundingBoxArray::SharedPtr & msg);
