@@ -22,11 +22,19 @@
 #include <rubis_detect/rubis_detect.hpp>
 
 #include <rclcpp/rclcpp.hpp>
+#include "std_msgs/msg/string.hpp"
+#include <autoware_auto_msgs/msg/bounding_box_array.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+#include <visualization_msgs/msg/marker.hpp>
 
 namespace autoware
 {
 namespace rubis_detect
 {
+
+using autoware_auto_msgs::msg::BoundingBoxArray;
+using visualization_msgs::msg::MarkerArray;
+using visualization_msgs::msg::Marker;
 
 /// \class RubisDetectNode
 /// \brief ROS 2 Node for hello world.
@@ -43,6 +51,12 @@ public:
 
 private:
   bool verbose;  ///< whether to use verbose output or not.
+
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr danger_publisher_;
+  std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
+
+  rclcpp::Subscription<BoundingBoxArray>::SharedPtr bounding_box_subscriber_{};
+  void on_bounding_box(const BoundingBoxArray::SharedPtr & msg);
 };
 }  // namespace rubis_detect
 }  // namespace autoware

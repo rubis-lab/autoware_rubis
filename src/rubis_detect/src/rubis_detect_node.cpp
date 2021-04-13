@@ -23,12 +23,28 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
 :  Node("rubis_detect", options),
   verbose(true)
 {
-  print_hello();
+  using SubAllocT = rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>;
+  bounding_box_subscriber_ = create_subscription<BoundingBoxArray>(
+    "/perception/lidar_bounding_boxes_filtered", 10,
+    [this](const BoundingBoxArray::SharedPtr msg) {on_bounding_box(msg);}, SubAllocT{});
 }
 
 int32_t RubisDetectNode::print_hello() const
 {
   return rubis_detect::print_hello();
+}
+
+void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)
+{
+  const auto cmd{compute_danger(*msg)};
+  danger_publisher_->publish(cmd);
+}
+
+std_msgs::msg::String compute_danger(const BoundingBoxArray & msg)
+{
+  auto message = std_msgs::msg::String();
+  message.data = "Hello, RUBIS! " + std::to_string(200);
+  return message;
 }
 
 }  // namespace rubis_detect
