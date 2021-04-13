@@ -42,6 +42,9 @@ void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)
 
 std_msgs::msg::String compute_danger(const BoundingBoxArray & msg)
 {
+  for(const auto &bbox : msg.boxes) {
+    auto centroid = bbox.centroid;
+  }
   auto message = std_msgs::msg::String();
   message.data = "Hello, RUBIS! " + std::to_string(200);
   return message;
