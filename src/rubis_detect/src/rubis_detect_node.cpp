@@ -53,11 +53,11 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
       "vehicle.rear_overhang_m"
     ).get<float32_t>())
   };
-  init_vehicle(vehicle_param);
   safety_factor =
     static_cast<float32_t>(declare_parameter(
       "safety_factor"
     ).get<float32_t>());
+
   stop_margin =
     static_cast<float32_t>(declare_parameter(
       "stop_margin"
@@ -67,6 +67,8 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
     static_cast<int32_t>(declare_parameter(
       "lookahead_boxes"
     ).get<int32_t>());
+
+  init_vehicle(vehicle_param);
 
   // init
   last_p = Point32{};
@@ -136,7 +138,7 @@ std_msgs::msg::String RubisDetectNode::compute_danger(const BoundingBoxArray & m
 {
   // compute heading
   auto angle = to_angle(last_heading);
-  RCLCPP_WARN(get_logger(), "RubisDetectNode::compute_danger: angle" + std::to_string(angle));
+//   RCLCPP_WARN(get_logger(), "RubisDetectNode::compute_danger: angle" + std::to_string(angle));
 
   auto collision_index = detect_collision(last_p, last_heading, msg);
   auto collision_distance = calc_collision_distance(collision_index);
@@ -193,8 +195,8 @@ std::list<Point32> RubisDetectNode::get_expected_trajectory(const Point32 _p, co
   std::list<Point32> expected_trajectory;
   for(int32_t i = 0; i < lookahead_boxes; i++) {
     auto p = Point32{};
-    p.x = _p.x + ((lf + lr) * ch);
-    p.y = _p.y + ((lf + lr) * sh);
+    p.x = _p.x + i * ((lf + lr) * ch);
+    p.y = _p.y + i * ((lf + lr) * sh);
     expected_trajectory.push_back(p);
   }
   return expected_trajectory;
@@ -216,13 +218,13 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
           obstacle_bbox.corners.begin(), obstacle_bbox.corners.end())) {
           // Collision detected
           collision_index = t_idx;
-          break;
+          RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: collision" + std::to_string(collision_index));
+          return collision_index;
         }
       }
     }
     t_idx++;
   }
-  RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: collision" + std::to_string(collision_index));
 
   return collision_index;
 }
