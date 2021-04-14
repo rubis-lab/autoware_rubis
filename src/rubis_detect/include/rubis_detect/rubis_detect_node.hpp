@@ -73,6 +73,11 @@ private:
   float32_t lf;
   float32_t lr;
   float32_t wh;
+  float32_t vehicle_length;
+  float32_t vehicle_width;
+  float32_t vehicle_diagonal;
+  float32_t distance_threshold;
+  int32_t lookahead_boxes;
   void init_vehicle(const VehicleConfig & _vehicle_param);
   bool verbose;  ///< whether to use verbose output or not.
   Real last_x;
@@ -89,6 +94,8 @@ private:
   std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
 
   BoundingBox point_to_box(const Real _x, const Real _y, const Complex32 _heading);
+  std::list<Point32> get_expected_trajectory(const Real _x, const Real _y, const Complex32 _heading);
+  int32_t detectCollision(const Real _x, const Real _y, const Complex32 _heading, const BoundingBoxArray & obstacles);
 };
 }  // namespace rubis_detect
 }  // namespace autoware

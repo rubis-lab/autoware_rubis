@@ -63,8 +63,12 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
       "stop_margin"
     ).get<float32_t>());
 
-  // init
+  lookahead_boxes =
+    static_cast<int32_t>(declare_parameter(
+      "lookahead_boxes"
+    ).get<int32_t>());
 
+  // init
   using SubAllocT = rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>;
   state_subscriber_ = create_subscription<State>(
     "/vehicle/vehicle_kinematic_state", 10,
@@ -82,6 +86,21 @@ void RubisDetectNode::init_vehicle(const VehicleConfig & _vehicle_param)
   lf = _vehicle_param.length_cg_front_axel() + _vehicle_param.front_overhang();
   lr = _vehicle_param.length_cg_rear_axel() + _vehicle_param.rear_overhang();
   wh = _vehicle_param.width() * 0.5f;
+  // inflate size of vehicle by safety factor
+  lf *= safety_factor;
+  lr *= safety_factor;
+  wh *= safety_factor;
+
+  // find the dimension of the ego vehicle.
+  vehicle_length =
+    _vehicle_param.front_overhang() + _vehicle_param.length_cg_front_axel() +
+    _vehicle_param.length_cg_rear_axel() + _vehicle_param.rear_overhang();
+  vehicle_width = _vehicle_param.width();
+  vehicle_diagonal = sqrtf(
+    (vehicle_width * vehicle_width) + (vehicle_length * vehicle_length));
+
+  // define a distance threshold to filter obstacles that are too far away to cause any collision.
+  distance_threshold = vehicle_diagonal * safety_factor;
   return;
 }
 
@@ -136,11 +155,6 @@ BoundingBox RubisDetectNode::point_to_box(const Real _x, const Real _y, const Co
   float32_t ch = std::cos(angle);
   float32_t sh = std::sin(angle);
 
-  // inflate size of vehicle by safety factor
-  lf *= safety_factor;
-  lr *= safety_factor;
-  wh *= safety_factor;
-
   // Create a list of corners for the vehicle
   std::list<Point32> corners;
   {     // Front left
@@ -170,6 +184,35 @@ BoundingBox RubisDetectNode::point_to_box(const Real _x, const Real _y, const Co
   return minimum_perimeter_bounding_box(corners);
 }
 
+std::list<Point32> RubisDetectNode::get_expected_trajectory(const Real _x, const Real _y, const Complex32 _heading)
+{
+  // Shorthands to keep the formulas sane
+  float32_t angle = to_angle(_heading);
+  float32_t ch = std::cos(angle);
+  float32_t sh = std::sin(angle);
+
+  std::list<Point32> expected_trajectory;
+  for(int32_t i = 0; i < lookahead_boxes; i++) {
+    auto p = Point32{};
+    p.x = _x + 2 * (lf * ch);
+    p.y = _y + 2 * (lf * sh);
+    expected_trajectory.push_back(p);
+  }
+  return expected_trajectory;
+}
+
+int32_t RubisDetectNode::detectCollision(const Real _x, const Real _y, const Complex32 _heading, const BoundingBoxArray & obstacles)
+{
+  int32_t collision_index = -1;
+
+  auto expected_trajectory = get_expected_trajectory(_x, _y,_heading);
+//   waypoint_bboxes.boxes.clear();
+//   for (std::size_t i = 0; i < trajectory.points.size(); ++i) {
+//     waypoint_bboxes.boxes.push_back(
+//       point_to_box(trajectory.points[i], vehicle_param, safety_factor));
+//   }
+  return 0;
+}
 }  // namespace rubis_detect
 }  // namespace autoware
 
