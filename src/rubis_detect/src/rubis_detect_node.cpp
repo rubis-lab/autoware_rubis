@@ -53,12 +53,12 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
       "vehicle.rear_overhang_m"
     ).get<float32_t>())
   };
-
-  const auto safety_factor =
+  init_vehicle(vehicle_param);
+  safety_factor =
     static_cast<float32_t>(declare_parameter(
       "safety_factor"
     ).get<float32_t>());
-  const auto stop_margin =
+  stop_margin =
     static_cast<float32_t>(declare_parameter(
       "stop_margin"
     ).get<float32_t>());
@@ -75,6 +75,14 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
     [this](const BoundingBoxArray::SharedPtr msg) {on_bounding_box(msg);}, SubAllocT{});
 
   danger_publisher_ = this->create_publisher<std_msgs::msg::String>("rubis_danger", 10);
+}
+
+void RubisDetectNode::init_vehicle(const VehicleConfig & _vehicle_param)
+{
+  lf = _vehicle_param.length_cg_front_axel() + _vehicle_param.front_overhang();
+  lr = _vehicle_param.length_cg_rear_axel() + _vehicle_param.rear_overhang();
+  wh = _vehicle_param.width() * 0.5f;
+  return;
 }
 
 int32_t RubisDetectNode::print_hello() const
@@ -121,12 +129,9 @@ std_msgs::msg::String RubisDetectNode::compute_danger(const BoundingBoxArray & m
 }
 
 // modified from object_collision_estimator.cpp
-BoundingBox RubisDetectNode::point_to_box(const Real _x, const Real _y, const Complex32 _heading, const VehicleConfig & vehicle_param, const float32_t safety_factor)
+BoundingBox RubisDetectNode::point_to_box(const Real _x, const Real _y, const Complex32 _heading)
 {
   // Shorthands to keep the formulas sane
-  float32_t lf = vehicle_param.length_cg_front_axel() + vehicle_param.front_overhang();
-  float32_t lr = vehicle_param.length_cg_rear_axel() + vehicle_param.rear_overhang();
-  float32_t wh = vehicle_param.width() * 0.5f;
   float32_t angle = to_angle(_heading);
   float32_t ch = std::cos(angle);
   float32_t sh = std::sin(angle);

@@ -68,9 +68,12 @@ public:
   int32_t print_hello() const;
 
 private:
-  const VehicleConfig vehicle_param(Real, Real, Real, Real, Real, Real, Real, Real, Real);
   float32_t safety_factor;
   float32_t stop_margin;
+  float32_t lf;
+  float32_t lr;
+  float32_t wh;
+  void init_vehicle(const VehicleConfig & _vehicle_param);
   bool verbose;  ///< whether to use verbose output or not.
   Real last_x;
   Real last_y;
@@ -85,7 +88,7 @@ private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr danger_publisher_;
   std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
 
-  BoundingBox point_to_box(const Real _x, const Real _y, const Complex32 _heading, const VehicleConfig & vehicle_param, const float32_t safety_factor);
+  BoundingBox point_to_box(const Real _x, const Real _y, const Complex32 _heading);
 };
 }  // namespace rubis_detect
 }  // namespace autoware
