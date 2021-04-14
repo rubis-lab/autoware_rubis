@@ -23,6 +23,48 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
 :  Node("rubis_detect", options),
   verbose(true)
 {
+  // config
+  const auto vehicle_param = VehicleConfig{
+    static_cast<Real>(declare_parameter(
+      "vehicle.cg_to_front_m"
+    ).get<float32_t>()),
+    static_cast<Real>(declare_parameter(
+      "vehicle.cg_to_rear_m"
+    ).get<float32_t>()),
+    static_cast<Real>(declare_parameter(
+      "vehicle.front_corner_stiffness"
+    ).get<float32_t>()),
+    static_cast<Real>(declare_parameter(
+      "vehicle.rear_corner_stiffness"
+    ).get<float32_t>()),
+    static_cast<Real>(declare_parameter(
+      "vehicle.mass_kg"
+    ).get<float32_t>()),
+    static_cast<Real>(declare_parameter(
+      "vehicle.yaw_inertia_kgm2"
+    ).get<float32_t>()),
+    static_cast<Real>(declare_parameter(
+      "vehicle.width_m"
+    ).get<float32_t>()),
+    static_cast<Real>(declare_parameter(
+      "vehicle.front_overhang_m"
+    ).get<float32_t>()),
+    static_cast<Real>(declare_parameter(
+      "vehicle.rear_overhang_m"
+    ).get<float32_t>())
+  };
+
+  const auto safety_factor =
+    static_cast<float32_t>(declare_parameter(
+      "safety_factor"
+    ).get<float32_t>());
+  const auto stop_margin =
+    static_cast<float32_t>(declare_parameter(
+      "stop_margin"
+    ).get<float32_t>());
+
+  // init
+
   using SubAllocT = rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>;
   state_subscriber_ = create_subscription<State>(
     "/vehicle/vehicle_kinematic_state", 10,

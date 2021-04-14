@@ -20,7 +20,6 @@
 #define RUBIS_DETECT__RUBIS_DETECT_HPP_
 
 #include <rubis_detect/visibility_control.hpp>
-
 #include <cstdint>
 
 namespace autoware

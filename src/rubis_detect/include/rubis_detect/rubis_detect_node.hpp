@@ -25,6 +25,7 @@
 #include "std_msgs/msg/string.hpp"
 #include <geometry/intersection.hpp>
 #include <geometry/bounding_box/rotating_calipers.hpp>
+#include <motion_common/config.hpp>
 #include <motion_common/motion_common.hpp>
 #include <controller_common/controller_base.hpp>
 #include <autoware_auto_msgs/msg/vehicle_kinematic_state.hpp>
@@ -42,8 +43,9 @@ namespace rubis_detect
 
 using motion::control::controller_common::State;
 using motion::control::controller_common::Real;
-using motion::motion_common::to_angle;
 using motion::motion_common::VehicleConfig;
+using autoware::common::types::float32_t;
+using motion::motion_common::to_angle;
 using autoware_auto_msgs::msg::BoundingBox;
 using autoware_auto_msgs::msg::BoundingBoxArray;
 using autoware_auto_msgs::msg::Complex32;
@@ -51,7 +53,6 @@ using visualization_msgs::msg::MarkerArray;
 using visualization_msgs::msg::Marker;
 using autoware::common::geometry::bounding_box::minimum_perimeter_bounding_box;
 using geometry_msgs::msg::Point32;
-
 
 /// \class RubisDetectNode
 /// \brief ROS 2 Node for hello world.
@@ -67,6 +68,9 @@ public:
   int32_t print_hello() const;
 
 private:
+  const VehicleConfig vehicle_param(Real, Real, Real, Real, Real, Real, Real, Real, Real);
+  float32_t safety_factor;
+  float32_t stop_margin;
   bool verbose;  ///< whether to use verbose output or not.
   Real last_x;
   Real last_y;
