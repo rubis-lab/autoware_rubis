@@ -96,6 +96,7 @@ private:
   std::list<Point32> get_expected_trajectory(const Point32 _p, const Complex32 _heading);
   int32_t detect_collision(const Point32 _p, const Complex32 _heading, const BoundingBoxArray & obstacles);
   bool8_t is_too_far_away(const Point32 _p, const BoundingBox obstacle_bbox, const float32_t distance_threshold);
+  float32_t calc_collision_distance(int32_t collision_index);
 };
 }  // namespace rubis_detect
 }  // namespace autoware

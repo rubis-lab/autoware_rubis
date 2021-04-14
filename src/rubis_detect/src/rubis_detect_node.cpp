@@ -139,8 +139,10 @@ std_msgs::msg::String RubisDetectNode::compute_danger(const BoundingBoxArray & m
   RCLCPP_WARN(get_logger(), "RubisDetectNode::compute_danger: angle" + std::to_string(angle));
 
   auto collision_index = detect_collision(last_p, last_heading, msg);
+  auto collision_distance = calc_collision_distance(collision_index);
+
   auto message = std_msgs::msg::String();
-  message.data = "Collision with " + std::to_string(collision_index);
+  message.data = "Collision distance " + std::to_string(collision_distance);
   return message;
 }
 
@@ -191,8 +193,8 @@ std::list<Point32> RubisDetectNode::get_expected_trajectory(const Point32 _p, co
   std::list<Point32> expected_trajectory;
   for(int32_t i = 0; i < lookahead_boxes; i++) {
     auto p = Point32{};
-    p.x = _p.x + 2 * (lf * ch);
-    p.y = _p.y + 2 * (lf * sh);
+    p.x = _p.x + ((lf + lr) * ch);
+    p.y = _p.y + ((lf + lr) * sh);
     expected_trajectory.push_back(p);
   }
   return expected_trajectory;
@@ -242,6 +244,16 @@ bool8_t RubisDetectNode::is_too_far_away(const Point32 _p, const BoundingBox obs
   }
 
   return is_too_far_away;
+}
+
+float32_t RubisDetectNode::calc_collision_distance(int32_t collision_index)
+{
+  float32_t distance_increment = lf + lr;
+  float32_t max_distance = lookahead_boxes * distance_increment;
+  if(collision_index == -1) {
+    return max_distance;
+  }
+  return distance_increment * collision_index;
 }
 
 }  // namespace rubis_detect

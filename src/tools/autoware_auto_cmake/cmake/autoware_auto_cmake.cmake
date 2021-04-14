@@ -71,7 +71,7 @@ function(autoware_set_compile_options target)
       -pedantic
       -Wcast-align
       -Wunused
-      -Wconversion
+    #   -Wconversion
       -Wsign-conversion
       -Wdouble-promotion
       #-Wnull-dereference    # gcc6
