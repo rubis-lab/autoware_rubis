@@ -80,8 +80,7 @@ private:
   int32_t lookahead_boxes;
   void init_vehicle(const VehicleConfig & _vehicle_param);
   bool verbose;  ///< whether to use verbose output or not.
-  Real last_x;
-  Real last_y;
+  Point32 last_p;
   Complex32 last_heading;
 
   rclcpp::Subscription<State>::SharedPtr state_subscriber_{};
@@ -93,9 +92,9 @@ private:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr danger_publisher_;
   std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
 
-  BoundingBox point_to_box(const Real _x, const Real _y, const Complex32 _heading);
-  std::list<Point32> get_expected_trajectory(const Real _x, const Real _y, const Complex32 _heading);
-  int32_t detectCollision(const Real _x, const Real _y, const Complex32 _heading, const BoundingBoxArray & obstacles);
+  BoundingBox point_to_box(const Point32 _p, const Complex32 _heading);
+  std::list<Point32> get_expected_trajectory(const Point32 _p, const Complex32 _heading);
+  int32_t detectCollision(const Point32 _p, const Complex32 _heading, const BoundingBoxArray & obstacles);
 };
 }  // namespace rubis_detect
 }  // namespace autoware

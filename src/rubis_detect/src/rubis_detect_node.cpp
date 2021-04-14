@@ -69,6 +69,9 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
     ).get<int32_t>());
 
   // init
+  last_p = Point32{};
+  last_p.x = 0;
+  last_p.y = 0;
   using SubAllocT = rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>;
   state_subscriber_ = create_subscription<State>(
     "/vehicle/vehicle_kinematic_state", 10,
@@ -117,8 +120,8 @@ void RubisDetectNode::on_state(const State::SharedPtr & msg)
 
 void RubisDetectNode::save_state(const State & state)
 {
-  last_x = state.state.x;
-  last_y = state.state.y;
+  last_p.x = state.state.x;
+  last_p.y = state.state.y;
   last_heading = state.state.heading;
 //   RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: last_x" + std::to_string(last_x));
 }
@@ -148,7 +151,7 @@ std_msgs::msg::String RubisDetectNode::compute_danger(const BoundingBoxArray & m
 }
 
 // modified from object_collision_estimator.cpp
-BoundingBox RubisDetectNode::point_to_box(const Real _x, const Real _y, const Complex32 _heading)
+BoundingBox RubisDetectNode::point_to_box(const Point32 _p, const Complex32 _heading)
 {
   // Shorthands to keep the formulas sane
   float32_t angle = to_angle(_heading);
@@ -159,32 +162,32 @@ BoundingBox RubisDetectNode::point_to_box(const Real _x, const Real _y, const Co
   std::list<Point32> corners;
   {     // Front left
     auto p = Point32{};
-    p.x = _x + (lf * ch) - (wh * sh);
-    p.y = _y + (lf * sh) + (wh * ch);
+    p.x = _p.x + (lf * ch) - (wh * sh);
+    p.y = _p.y + (lf * sh) + (wh * ch);
     corners.push_back(p);
   }
   {     // Front right
     auto p = Point32{};
-    p.x = _x + (lf * ch) + (wh * sh);
-    p.y = _y + (lf * sh) - (wh * ch);
+    p.x = _p.x + (lf * ch) + (wh * sh);
+    p.y = _p.y + (lf * sh) - (wh * ch);
     corners.push_back(p);
   }
   {     // Rear right
     auto p = Point32{};
-    p.x = _x - (lr * ch) + (wh * sh);
-    p.y = _y - (lr * sh) - (wh * ch);
+    p.x = _p.x - (lr * ch) + (wh * sh);
+    p.y = _p.y - (lr * sh) - (wh * ch);
     corners.push_back(p);
   }
   {     // Rear left
     auto p = Point32{};
-    p.x = _x - (lr * ch) - (wh * sh);
-    p.y = _y - (lr * sh) + (wh * ch);
+    p.x = _p.x - (lr * ch) - (wh * sh);
+    p.y = _p.y - (lr * sh) + (wh * ch);
     corners.push_back(p);
   }
   return minimum_perimeter_bounding_box(corners);
 }
 
-std::list<Point32> RubisDetectNode::get_expected_trajectory(const Real _x, const Real _y, const Complex32 _heading)
+std::list<Point32> RubisDetectNode::get_expected_trajectory(const Point32 _p, const Complex32 _heading)
 {
   // Shorthands to keep the formulas sane
   float32_t angle = to_angle(_heading);
@@ -194,23 +197,25 @@ std::list<Point32> RubisDetectNode::get_expected_trajectory(const Real _x, const
   std::list<Point32> expected_trajectory;
   for(int32_t i = 0; i < lookahead_boxes; i++) {
     auto p = Point32{};
-    p.x = _x + 2 * (lf * ch);
-    p.y = _y + 2 * (lf * sh);
+    p.x = _p.x + 2 * (lf * ch);
+    p.y = _p.y + 2 * (lf * sh);
     expected_trajectory.push_back(p);
   }
   return expected_trajectory;
 }
 
-int32_t RubisDetectNode::detectCollision(const Real _x, const Real _y, const Complex32 _heading, const BoundingBoxArray & obstacles)
+int32_t RubisDetectNode::detectCollision(const Point32 _p, const Complex32 _heading, const BoundingBoxArray & obstacles)
 {
   int32_t collision_index = -1;
 
-  auto expected_trajectory = get_expected_trajectory(_x, _y,_heading);
-//   waypoint_bboxes.boxes.clear();
-//   for (std::size_t i = 0; i < trajectory.points.size(); ++i) {
-//     waypoint_bboxes.boxes.push_back(
-//       point_to_box(trajectory.points[i], vehicle_param, safety_factor));
-//   }
+  auto expected_trajectory = get_expected_trajectory(_p,_heading);
+
+  BoundingBoxArray waypoint_bboxes;
+
+  for(auto const& p : expected_trajectory) {
+    waypoint_bboxes.boxes.push_back(point_to_box(p, _heading));
+  }
+
   return 0;
 }
 }  // namespace rubis_detect
