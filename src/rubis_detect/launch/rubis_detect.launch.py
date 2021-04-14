@@ -18,26 +18,34 @@ Example launch file for a new package.
 Note: Does not work in ROS2 dashing!
 """
 
-import ament_index_python
-import launch
-import launch_ros.actions
+from ament_index_python import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+import os
 
 
 def generate_launch_description():
     """Generate launch description with a single component."""
-    rubis_detect_node = launch_ros.actions.Node(
-        package='rubis_detect'
-        executable='rubis_detect_exe',
-        name='rubis_detect_node',
-        namespace='',
-        output='screen',
-        parameters=[
-            "{}/param/rubis_detect.param.yaml".format(
-                ament_index_python.get_package_share_directory(
-                    "rubis_detect"
-                )
-            ),
-        ]
+    rubis_detect_param_file = os.path.join(
+        get_package_share_directory('rubis_detect'),
+        'param/rubis_detect.param.yaml')
+    rubis_detect_param = DeclareLaunchArgument(
+        'rubis_detect_param_file',
+        default_value=rubis_detect_param_file,
+        description='Path to config file to Rubis Detect'
     )
-    ld = launch.LaunchDescription([rubis_detect_node])
-    return ld
+
+    rubis_detect = Node(
+        package="rubis_detect",
+        executable="rubis_detect_node_exe",
+        name="rubis_detect_node",
+        output="screen",
+        parameters=[LaunchConfiguration("rubis_detect_param_file"), {}],
+    )
+
+    return LaunchDescription([
+        rubis_detect_param,
+        rubis_detect,
+    ])
