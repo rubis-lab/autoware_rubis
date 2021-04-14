@@ -138,15 +138,9 @@ std_msgs::msg::String RubisDetectNode::compute_danger(const BoundingBoxArray & m
   auto angle = to_angle(last_heading);
   RCLCPP_WARN(get_logger(), "RubisDetectNode::compute_danger: angle" + std::to_string(angle));
 
-  // create dummy collision box
-//   auto box = point_to_box(last_x, last_y, last_heading);
-  // find collision
-
-  for(const auto &bbox : msg.boxes) {
-    auto centroid = bbox.centroid;
-  }
+  auto collision_index = detect_collision(last_p, last_heading, msg);
   auto message = std_msgs::msg::String();
-  message.data = "Hello, RUBIS! " + std::to_string(200);
+  message.data = "Collision with " + std::to_string(collision_index);
   return message;
 }
 
@@ -204,20 +198,17 @@ std::list<Point32> RubisDetectNode::get_expected_trajectory(const Point32 _p, co
   return expected_trajectory;
 }
 
-int32_t RubisDetectNode::detectCollision(const Point32 _p, const Complex32 _heading, const BoundingBoxArray & obstacles)
+int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _heading, const BoundingBoxArray & obstacles)
 {
   int32_t collision_index = -1;
 
   auto expected_trajectory = get_expected_trajectory(_p,_heading);
 
-  // BoundingBoxArray waypoint_bboxes;
-
   int32_t t_idx = 0;
   for(auto const& p : expected_trajectory) {
-    // waypoint_bboxes.boxes.push_back(point_to_box(p, _heading));
     const auto p_box = point_to_box(p, _heading);
     for(const auto & obstacle_bbox : obstacles.boxes) {
-      if(!isTooFarAway(p, obstacle_bbox, distance_threshold)) {
+      if(!is_too_far_away(p, obstacle_bbox, distance_threshold)) {
         if(autoware::common::geometry::intersect(
           p_box.corners.begin(), p_box.corners.end(),
           obstacle_bbox.corners.begin(), obstacle_bbox.corners.end())) {
@@ -229,12 +220,12 @@ int32_t RubisDetectNode::detectCollision(const Point32 _p, const Complex32 _head
     }
     t_idx++;
   }
-  RCLCPP_WARN(get_logger(), "RubisDetectNode::detectCollision: collision" + std::to_string(collision_index));
+  RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: collision" + std::to_string(collision_index));
 
-  return 0;
+  return collision_index;
 }
 
-bool8_t RubisDetectNode::isTooFarAway(const Point32 _p, const BoundingBox obstacle_bbox, const float32_t distance_threshold)
+bool8_t RubisDetectNode::is_too_far_away(const Point32 _p, const BoundingBox obstacle_bbox, const float32_t distance_threshold)
 {
   bool is_too_far_away{true};
   auto distance_threshold_squared = distance_threshold * distance_threshold;
