@@ -40,7 +40,15 @@ int32_t RubisDetectNode::print_hello() const
 
 void RubisDetectNode::on_state(const State::SharedPtr & msg)
 {
-//   const auto cmd{compute_command(*msg)};
+  save_state(*msg);
+  return;
+}
+
+void RubisDetectNode::save_state(const State & state)
+{
+  last_x = state.state.x;
+  last_y = state.state.y;
+  RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: last_x" + std::to_string(last_x));
 }
 
 void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)

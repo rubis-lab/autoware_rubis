@@ -56,15 +56,17 @@ public:
 
 private:
   bool verbose;  ///< whether to use verbose output or not.
-
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr danger_publisher_;
-  std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
+  Real last_x;
+  Real last_y;
 
   rclcpp::Subscription<State>::SharedPtr state_subscriber_{};
   void on_state(const State::SharedPtr & msg);
+  void save_state(const State & state);
 
   rclcpp::Subscription<BoundingBoxArray>::SharedPtr bounding_box_subscriber_{};
   void on_bounding_box(const BoundingBoxArray::SharedPtr & msg);
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr danger_publisher_;
+  std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
 };
 }  // namespace rubis_detect
 }  // namespace autoware
