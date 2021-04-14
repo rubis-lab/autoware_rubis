@@ -18,25 +18,26 @@ Example launch file for a new package.
 Note: Does not work in ROS2 dashing!
 """
 
+import ament_index_python
 import launch
-from launch_ros.actions import ComposableNodeContainer
-from launch_ros.descriptions import ComposableNode
+import launch_ros.actions
 
 
 def generate_launch_description():
     """Generate launch description with a single component."""
-    container = ComposableNodeContainer(
-            name='rubis_detect_container',
-            namespace='',
-            package='rclcpp_components',
-            executable='component_container',
-            composable_node_descriptions=[
-                ComposableNode(
-                    package='rubis_detect',
-                    plugin='autoware::rubis_detect::RubisDetectNode',
-                    name='rubis_detect_node'),
-            ],
-            output='screen',
+    rubis_detect_node = launch_ros.actions.Node(
+        package='rubis_detect'
+        executable='rubis_detect_exe',
+        name='rubis_detect_node',
+        namespace='',
+        output='screen',
+        parameters=[
+            "{}/param/rubis_detect.param.yaml".format(
+                ament_index_python.get_package_share_directory(
+                    "rubis_detect"
+                )
+            ),
+        ]
     )
-
-    return launch.LaunchDescription([container])
+    ld = launch.LaunchDescription([rubis_detect_node])
+    return ld

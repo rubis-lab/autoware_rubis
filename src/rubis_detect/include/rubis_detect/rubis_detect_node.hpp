@@ -23,6 +23,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include "std_msgs/msg/string.hpp"
+#include <geometry/intersection.hpp>
+#include <geometry/bounding_box/rotating_calipers.hpp>
 #include <motion_common/motion_common.hpp>
 #include <controller_common/controller_base.hpp>
 #include <autoware_auto_msgs/msg/vehicle_kinematic_state.hpp>
@@ -30,6 +32,8 @@
 #include <autoware_auto_msgs/msg/complex32.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <visualization_msgs/msg/marker.hpp>
+#include <common/types.hpp>
+#include <list>
 
 namespace autoware
 {
@@ -39,10 +43,15 @@ namespace rubis_detect
 using motion::control::controller_common::State;
 using motion::control::controller_common::Real;
 using motion::motion_common::to_angle;
+using motion::motion_common::VehicleConfig;
+using autoware_auto_msgs::msg::BoundingBox;
 using autoware_auto_msgs::msg::BoundingBoxArray;
 using autoware_auto_msgs::msg::Complex32;
 using visualization_msgs::msg::MarkerArray;
 using visualization_msgs::msg::Marker;
+using autoware::common::geometry::bounding_box::minimum_perimeter_bounding_box;
+using geometry_msgs::msg::Point32;
+
 
 /// \class RubisDetectNode
 /// \brief ROS 2 Node for hello world.
@@ -61,7 +70,7 @@ private:
   bool verbose;  ///< whether to use verbose output or not.
   Real last_x;
   Real last_y;
-  autoware_auto_msgs::msg::Complex32 last_heading;
+  Complex32 last_heading;
 
   rclcpp::Subscription<State>::SharedPtr state_subscriber_{};
   void on_state(const State::SharedPtr & msg);
@@ -71,6 +80,8 @@ private:
   void on_bounding_box(const BoundingBoxArray::SharedPtr & msg);
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr danger_publisher_;
   std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
+
+  BoundingBox point_to_box(const Real _x, const Real _y, const Complex32 _heading, const VehicleConfig & vehicle_param, const float32_t safety_factor);
 };
 }  // namespace rubis_detect
 }  // namespace autoware
