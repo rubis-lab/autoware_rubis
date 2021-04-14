@@ -29,8 +29,10 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
     [this](const State::SharedPtr msg) {on_state(msg);}, SubAllocT{});
 
   bounding_box_subscriber_ = create_subscription<BoundingBoxArray>(
-    "/perception/lidar_bounding_boxes_filtered", 10,
+    "/perception/lidar_bounding_boxes", 10,
     [this](const BoundingBoxArray::SharedPtr msg) {on_bounding_box(msg);}, SubAllocT{});
+
+  danger_publisher_ = this->create_publisher<std_msgs::msg::String>("rubis_danger", 10);
 }
 
 int32_t RubisDetectNode::print_hello() const
@@ -48,17 +50,21 @@ void RubisDetectNode::save_state(const State & state)
 {
   last_x = state.state.x;
   last_y = state.state.y;
-  RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: last_x" + std::to_string(last_x));
+  last_heading = state.state.heading;
+//   RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: last_x" + std::to_string(last_x));
 }
 
 void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)
 {
-  const auto cmd{compute_danger(*msg)};
-  danger_publisher_->publish(cmd);
+  const auto danger{compute_danger(*msg)};
+  danger_publisher_->publish(danger);
 }
 
-std_msgs::msg::String compute_danger(const BoundingBoxArray & msg)
+std_msgs::msg::String RubisDetectNode::compute_danger(const BoundingBoxArray & msg)
 {
+  // compute heading
+  auto angle = to_angle(last_heading);
+  RCLCPP_WARN(get_logger(), "RubisDetectNode::compute_danger: angle" + std::to_string(angle));
   for(const auto &bbox : msg.boxes) {
     auto centroid = bbox.centroid;
   }

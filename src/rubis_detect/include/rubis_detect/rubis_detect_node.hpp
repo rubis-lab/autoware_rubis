@@ -27,6 +27,7 @@
 #include <controller_common/controller_base.hpp>
 #include <autoware_auto_msgs/msg/vehicle_kinematic_state.hpp>
 #include <autoware_auto_msgs/msg/bounding_box_array.hpp>
+#include <autoware_auto_msgs/msg/complex32.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 
@@ -37,7 +38,9 @@ namespace rubis_detect
 
 using motion::control::controller_common::State;
 using motion::control::controller_common::Real;
+using motion::motion_common::to_angle;
 using autoware_auto_msgs::msg::BoundingBoxArray;
+using autoware_auto_msgs::msg::Complex32;
 using visualization_msgs::msg::MarkerArray;
 using visualization_msgs::msg::Marker;
 
@@ -58,6 +61,7 @@ private:
   bool verbose;  ///< whether to use verbose output or not.
   Real last_x;
   Real last_y;
+  autoware_auto_msgs::msg::Complex32 last_heading;
 
   rclcpp::Subscription<State>::SharedPtr state_subscriber_{};
   void on_state(const State::SharedPtr & msg);
