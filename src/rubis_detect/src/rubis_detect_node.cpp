@@ -210,14 +210,49 @@ int32_t RubisDetectNode::detectCollision(const Point32 _p, const Complex32 _head
 
   auto expected_trajectory = get_expected_trajectory(_p,_heading);
 
-  BoundingBoxArray waypoint_bboxes;
+  // BoundingBoxArray waypoint_bboxes;
 
+  int32_t t_idx = 0;
   for(auto const& p : expected_trajectory) {
-    waypoint_bboxes.boxes.push_back(point_to_box(p, _heading));
+    // waypoint_bboxes.boxes.push_back(point_to_box(p, _heading));
+    const auto p_box = point_to_box(p, _heading);
+    for(const auto & obstacle_bbox : obstacles.boxes) {
+      if(!isTooFarAway(p, obstacle_bbox, distance_threshold)) {
+        if(autoware::common::geometry::intersect(
+          p_box.corners.begin(), p_box.corners.end(),
+          obstacle_bbox.corners.begin(), obstacle_bbox.corners.end())) {
+          // Collision detected
+          collision_index = t_idx;
+          break;
+        }
+      }
+    }
+    t_idx++;
   }
+  RCLCPP_WARN(get_logger(), "RubisDetectNode::detectCollision: collision" + std::to_string(collision_index));
 
   return 0;
 }
+
+bool8_t RubisDetectNode::isTooFarAway(const Point32 _p, const BoundingBox obstacle_bbox, const float32_t distance_threshold)
+{
+  bool is_too_far_away{true};
+  auto distance_threshold_squared = distance_threshold * distance_threshold;
+
+  for (auto corner : obstacle_bbox.corners) {
+    auto dx = corner.x - _p.x;
+    auto dy = corner.y - _p.y;
+    auto distance_squared = (dx * dx) + (dy * dy);
+
+    if (distance_threshold_squared > distance_squared) {
+      is_too_far_away = false;
+      break;
+    }
+  }
+
+  return is_too_far_away;
+}
+
 }  // namespace rubis_detect
 }  // namespace autoware
 
