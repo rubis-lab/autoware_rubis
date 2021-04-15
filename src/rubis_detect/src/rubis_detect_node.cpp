@@ -141,6 +141,7 @@ void RubisDetectNode::save_state(const State & state)
 void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)
 {
   if(!has_received_state) {
+      RCLCPP_WARN(get_logger(), "RubisDetectNode::on_bounding_box: did not receive state yet");
     return;
   }
   const auto danger{compute_danger(*msg)};
@@ -247,7 +248,7 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
           if(collision_index != -1) {
             collision_index = t_idx;
           }
-          RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: collision" + std::to_string(collision_index));
+          RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: collision: " + std::to_string(collision_index));
         //   return collision_index;
         }
       }
