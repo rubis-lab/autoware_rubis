@@ -84,6 +84,7 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
     [this](const BoundingBoxArray::SharedPtr msg) {on_bounding_box(msg);}, SubAllocT{});
 
   danger_publisher_ = this->create_publisher<std_msgs::msg::String>("rubis_danger", 10);
+  danger_publisher_debug_ = this->create_publisher<MarkerArray>("rubis_danger_debug", 10);
 }
 
 void RubisDetectNode::init_vehicle(const VehicleConfig & _vehicle_param)
@@ -125,7 +126,9 @@ void RubisDetectNode::save_state(const State & state)
   last_p.x = state.state.x;
   last_p.y = state.state.y;
   last_heading = state.state.heading;
-//   RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: last_x" + std::to_string(last_x));
+  last_timestamp = state.header.stamp;
+//   RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: frame_id" + std::to_string(state.header.frame_id));
+//   RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: frame_id" + state.header.frame_id);
 }
 
 void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)
@@ -208,23 +211,34 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
 
   auto expected_trajectory = get_expected_trajectory(_p,_heading);
 
+  BoundingBoxArray bboxes_debug;  // for visualization
+  bboxes_debug.header.stamp = last_timestamp;
+  bboxes_debug.header.frame_id = "base_link";
   int32_t t_idx = 0;
   for(auto const& p : expected_trajectory) {
     const auto p_box = point_to_box(p, _heading);
+    bboxes_debug.boxes.push_back(p_box);
+
     for(const auto & obstacle_bbox : obstacles.boxes) {
       if(!is_too_far_away(p, obstacle_bbox, distance_threshold)) {
         if(autoware::common::geometry::intersect(
           p_box.corners.begin(), p_box.corners.end(),
           obstacle_bbox.corners.begin(), obstacle_bbox.corners.end())) {
           // Collision detected
-          collision_index = t_idx;
+          if(collision_index != -1) {
+            collision_index = t_idx;
+          }
           RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: collision" + std::to_string(collision_index));
-          return collision_index;
+        //   return collision_index;
         }
       }
     }
     t_idx++;
   }
+  // debug publisher
+//   auto marker = to_visualization_marker_array(bboxes_debug, collision_index);
+  auto marker = to_visualization_marker_array(bboxes_debug, 10);
+  danger_publisher_debug_->publish(marker);
 
   return collision_index;
 }
@@ -256,6 +270,69 @@ float32_t RubisDetectNode::calc_collision_distance(int32_t collision_index)
     return max_distance;
   }
   return distance_increment * collision_index;
+}
+
+MarkerArray RubisDetectNode::to_visualization_marker_array(const BoundingBoxArray bboxes, const int32_t collision_idx)
+{
+  MarkerArray marker_array{};
+
+  // delete previous markers
+  // TODO(mitsudome-r): remove delete_marker once lifetime is supported by rviz
+  Marker delete_marker{};
+  delete_marker.header = bboxes.header;
+  delete_marker.ns = "bounding_box";
+  delete_marker.action = Marker::DELETEALL;
+  marker_array.markers.push_back(delete_marker);
+
+  // create markers for bounding boxes
+  Marker marker{};
+  marker.header = bboxes.header;
+  marker.ns = "bounding_box";
+  marker.type = visualization_msgs::msg::Marker::LINE_STRIP;
+  marker.action = Marker::ADD;
+  marker.lifetime = time_utils::to_message(std::chrono::nanoseconds(100000));
+
+  for (std::size_t i = 0; i < bboxes.boxes.size(); ++i) {
+    marker.id = static_cast<int32_t>(i);
+    marker.pose.orientation.w = 1.0;
+    if (i < collision_idx) {
+      marker.scale.x = 0.2;
+      marker.color.a = 0.3F;
+      marker.color.r = 0.0F;
+      marker.color.g = 1.0F;
+      marker.color.b = 0.0F;
+    } else if (i == collision_idx) {
+      marker.scale.x = 0.2;
+      marker.color.a = 1.0F;
+      marker.color.r = 1.0F;
+      marker.color.g = 0.0F;
+      marker.color.b = 0.0F;
+    } else {
+      marker.scale.x = 0.2;
+      marker.color.a = 0.3F;
+      marker.color.r = 0.7F;
+      marker.color.g = 0.7F;
+      marker.color.b = 0.7F;
+    }
+    marker.points.clear();
+    const auto box = bboxes.boxes.at(i);
+    for (std::size_t j = 0; j < 4; ++j) {
+      geometry_msgs::msg::Point point;
+      point.x = static_cast<float64_t>(box.corners.at(j).x);
+      point.y = static_cast<float64_t>(box.corners.at(j).y);
+      point.z = static_cast<float64_t>(box.corners.at(j).z);
+      marker.points.push_back(point);
+    }
+    geometry_msgs::msg::Point point;
+    point.x = static_cast<float64_t>(box.corners.at(0).x);
+    point.y = static_cast<float64_t>(box.corners.at(0).y);
+    point.z = static_cast<float64_t>(box.corners.at(0).z);
+    marker.points.push_back(point);
+
+    marker_array.markers.push_back(marker);
+  }
+
+  return marker_array;
 }
 
 }  // namespace rubis_detect

@@ -12,6 +12,7 @@
 
   <depend>motion_common</depend>
   <depend>autoware_auto_geometry</depend>
+  <depend>builtin_interfaces</depend>
 
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>

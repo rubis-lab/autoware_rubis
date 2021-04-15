@@ -22,6 +22,7 @@
 #include <rubis_detect/rubis_detect.hpp>
 
 #include <rclcpp/rclcpp.hpp>
+#include <builtin_interfaces/msg/time.hpp>
 #include "std_msgs/msg/string.hpp"
 #include <geometry/intersection.hpp>
 #include <geometry/bounding_box/rotating_calipers.hpp>
@@ -45,6 +46,7 @@ using motion::control::controller_common::State;
 using motion::control::controller_common::Real;
 using motion::motion_common::VehicleConfig;
 using autoware::common::types::float32_t;
+using autoware::common::types::float64_t;
 using motion::motion_common::to_angle;
 using autoware_auto_msgs::msg::BoundingBox;
 using autoware_auto_msgs::msg::BoundingBoxArray;
@@ -53,6 +55,8 @@ using visualization_msgs::msg::MarkerArray;
 using visualization_msgs::msg::Marker;
 using autoware::common::geometry::bounding_box::minimum_perimeter_bounding_box;
 using geometry_msgs::msg::Point32;
+using TimeStamp = builtin_interfaces::msg::Time;
+
 
 /// \class RubisDetectNode
 /// \brief ROS 2 Node for hello world.
@@ -82,6 +86,7 @@ private:
   bool verbose;  ///< whether to use verbose output or not.
   Point32 last_p;
   Complex32 last_heading;
+  TimeStamp last_timestamp;
 
   rclcpp::Subscription<State>::SharedPtr state_subscriber_{};
   void on_state(const State::SharedPtr & msg);
@@ -90,6 +95,7 @@ private:
   rclcpp::Subscription<BoundingBoxArray>::SharedPtr bounding_box_subscriber_{};
   void on_bounding_box(const BoundingBoxArray::SharedPtr & msg);
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr danger_publisher_;
+  rclcpp::Publisher<MarkerArray>::SharedPtr danger_publisher_debug_;
   std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
 
   BoundingBox point_to_box(const Point32 _p, const Complex32 _heading);
@@ -97,6 +103,7 @@ private:
   int32_t detect_collision(const Point32 _p, const Complex32 _heading, const BoundingBoxArray & obstacles);
   bool8_t is_too_far_away(const Point32 _p, const BoundingBox obstacle_bbox, const float32_t distance_threshold);
   float32_t calc_collision_distance(int32_t collision_index);
+  MarkerArray to_visualization_marker_array(const BoundingBoxArray bboxes, const int32_t collision_idx);
 };
 }  // namespace rubis_detect
 }  // namespace autoware
