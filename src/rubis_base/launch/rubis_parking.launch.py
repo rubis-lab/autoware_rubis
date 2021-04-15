@@ -13,30 +13,6 @@ import os
 def generate_launch_description():
     """RUBIS launch description"""
 
-    # lanelet
-    lanelet2_map_provider_param_file = os.path.join(
-        get_package_share_directory('rubis_base'),
-        'param/lanelet2_map_provider.param.yaml')
-    lanelet2_map_provider_param = DeclareLaunchArgument(
-        'lanelet2_map_provider_param_file',
-        default_value=lanelet2_map_provider_param_file,
-        description='Path to parameter file for Lanelet2 Map Provider'
-    )
-    lanelet2_map_provider = Node(
-        package='lanelet2_map_provider',
-        executable='lanelet2_map_provider_exe',
-        namespace='had_maps',
-        name='lanelet2_map_provider_node',
-        parameters=[LaunchConfiguration('lanelet2_map_provider_param_file')]
-    )
-    lanelet2_map_visualizer = Node(
-        package='lanelet2_map_provider',
-        executable='lanelet2_map_visualizer_exe',
-        name='lanelet2_map_visualizer_node',
-        namespace='had_maps'
-    )
-
-
     parking_planner_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
         'param/parking_planner.param.yaml')
@@ -135,11 +111,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         core_launch,
-
-        # lanelet
-        lanelet2_map_provider_param,
-        lanelet2_map_provider,
-        lanelet2_map_visualizer,
 
         parking_planner_param,
         parking_planner,

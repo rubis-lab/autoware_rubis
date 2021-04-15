@@ -85,6 +85,11 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
 
   danger_publisher_ = this->create_publisher<std_msgs::msg::String>("rubis_danger", 10);
   danger_publisher_debug_ = this->create_publisher<MarkerArray>("rubis_danger_debug", 10);
+  // Create a tf interface to perform transforms on obstacle bounding boxes
+//   m_tf_buffer = std::make_shared<tf2_ros::Buffer>(this->get_clock());
+//   m_tf_listener = std::make_shared<tf2_ros::TransformListener>(
+//     *m_tf_buffer,
+//     std::shared_ptr<rclcpp::Node>(this, [](auto) {}), false);
 }
 
 void RubisDetectNode::init_vehicle(const VehicleConfig & _vehicle_param)
@@ -127,6 +132,7 @@ void RubisDetectNode::save_state(const State & state)
   last_p.y = state.state.y;
   last_heading = state.state.heading;
   last_timestamp = state.header.stamp;
+  last_frame_id = state.header.frame_id;
 //   RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: frame_id" + std::to_string(state.header.frame_id));
 //   RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: frame_id" + state.header.frame_id);
 }
@@ -142,12 +148,13 @@ std_msgs::msg::String RubisDetectNode::compute_danger(const BoundingBoxArray & m
   // compute heading
   auto angle = to_angle(last_heading);
 //   RCLCPP_WARN(get_logger(), "RubisDetectNode::compute_danger: angle" + std::to_string(angle));
-
+  // rubis_danger
+  // data : {distance}
   auto collision_index = detect_collision(last_p, last_heading, msg);
   auto collision_distance = calc_collision_distance(collision_index);
 
   auto message = std_msgs::msg::String();
-  message.data = "Collision distance " + std::to_string(collision_distance);
+  message.data = std::to_string(collision_distance);
   return message;
 }
 
@@ -212,8 +219,10 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
   auto expected_trajectory = get_expected_trajectory(_p,_heading);
 
   BoundingBoxArray bboxes_debug;  // for visualization
-  bboxes_debug.header.stamp = last_timestamp;
-  bboxes_debug.header.frame_id = "base_link";
+  auto new_timestamp = last_timestamp;
+  new_timestamp.sec -= 1;
+  bboxes_debug.header.stamp = new_timestamp;
+  bboxes_debug.header.frame_id = last_frame_id;
   int32_t t_idx = 0;
   for(auto const& p : expected_trajectory) {
     const auto p_box = point_to_box(p, _heading);

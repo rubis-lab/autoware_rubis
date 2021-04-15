@@ -45,6 +45,29 @@ def generate_launch_description():
         parameters=[LaunchConfiguration('map_publisher_param_file')]
     )
 
+    # lanelet
+    lanelet2_map_provider_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/lanelet2_map_provider.param.yaml')
+    lanelet2_map_provider_param = DeclareLaunchArgument(
+        'lanelet2_map_provider_param_file',
+        default_value=lanelet2_map_provider_param_file,
+        description='Path to parameter file for Lanelet2 Map Provider'
+    )
+    lanelet2_map_provider = Node(
+        package='lanelet2_map_provider',
+        executable='lanelet2_map_provider_exe',
+        namespace='had_maps',
+        name='lanelet2_map_provider_node',
+        parameters=[LaunchConfiguration('lanelet2_map_provider_param_file')]
+    )
+    lanelet2_map_visualizer = Node(
+        package='lanelet2_map_provider',
+        executable='lanelet2_map_visualizer_exe',
+        name='lanelet2_map_visualizer_node',
+        namespace='had_maps'
+    )
+
     # # map downsampler paramter file definition
     # ndt_map_downsampler_file_path = os.path.join(
     #     get_package_share_directory('ndt_nodes'),
@@ -315,6 +338,11 @@ def generate_launch_description():
         map_publisher_param,
         map_publisher,
         # map_downsampler_node_runner,
+
+        # lanelet
+        lanelet2_map_provider_param,
+        lanelet2_map_provider,
+        lanelet2_map_visualizer,
 
         # point_cloud_transform (lidar)
         pc_filter_transform_param,

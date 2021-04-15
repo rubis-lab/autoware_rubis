@@ -34,8 +34,11 @@
 #include <autoware_auto_msgs/msg/complex32.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <visualization_msgs/msg/marker.hpp>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
 #include <common/types.hpp>
 #include <list>
+#include <chrono>
 
 namespace autoware
 {
@@ -87,6 +90,7 @@ private:
   Point32 last_p;
   Complex32 last_heading;
   TimeStamp last_timestamp;
+  std::string last_frame_id;
 
   rclcpp::Subscription<State>::SharedPtr state_subscriber_{};
   void on_state(const State::SharedPtr & msg);
@@ -104,6 +108,9 @@ private:
   bool8_t is_too_far_away(const Point32 _p, const BoundingBox obstacle_bbox, const float32_t distance_threshold);
   float32_t calc_collision_distance(int32_t collision_index);
   MarkerArray to_visualization_marker_array(const BoundingBoxArray bboxes, const int32_t collision_idx);
+
+//   std::shared_ptr<tf2_ros::Buffer> m_tf_buffer;
+//   std::shared_ptr<tf2_ros::TransformListener> m_tf_listener;
 };
 }  // namespace rubis_detect
 }  // namespace autoware
