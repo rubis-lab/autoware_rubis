@@ -39,6 +39,7 @@
 #include <common/types.hpp>
 #include <list>
 #include <chrono>
+#include <time_utils/time_utils.hpp>
 
 namespace autoware
 {
@@ -58,6 +59,8 @@ using visualization_msgs::msg::MarkerArray;
 using visualization_msgs::msg::Marker;
 using autoware::common::geometry::bounding_box::minimum_perimeter_bounding_box;
 using geometry_msgs::msg::Point32;
+using time_utils::to_message;
+using time_utils::from_message;
 using TimeStamp = builtin_interfaces::msg::Time;
 
 
@@ -93,6 +96,7 @@ private:
   std::string last_frame_id;
 
   rclcpp::Subscription<State>::SharedPtr state_subscriber_{};
+  bool8_t has_received_state = false;
   void on_state(const State::SharedPtr & msg);
   void save_state(const State & state);
 

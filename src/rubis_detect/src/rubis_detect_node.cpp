@@ -122,6 +122,7 @@ int32_t RubisDetectNode::print_hello() const
 
 void RubisDetectNode::on_state(const State::SharedPtr & msg)
 {
+  has_received_state = true;
   save_state(*msg);
   return;
 }
@@ -139,6 +140,9 @@ void RubisDetectNode::save_state(const State & state)
 
 void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)
 {
+  if(!has_received_state) {
+    return;
+  }
   const auto danger{compute_danger(*msg)};
   danger_publisher_->publish(danger);
 }
@@ -205,8 +209,8 @@ std::list<Point32> RubisDetectNode::get_expected_trajectory(const Point32 _p, co
   std::list<Point32> expected_trajectory;
   for(int32_t i = 0; i < lookahead_boxes; i++) {
     auto p = Point32{};
-    p.x = _p.x + i * ((lf + lr) * ch);
-    p.y = _p.y + i * ((lf + lr) * sh);
+    p.x = _p.x - i * ((lf + lr) * ch);
+    p.y = _p.y - i * ((lf + lr) * sh);
     expected_trajectory.push_back(p);
   }
   return expected_trajectory;
@@ -219,8 +223,14 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
   auto expected_trajectory = get_expected_trajectory(_p,_heading);
 
   BoundingBoxArray bboxes_debug;  // for visualization
-  auto new_timestamp = last_timestamp;
-  new_timestamp.sec -= 1;
+//   RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: last_timestamp.sec" + std::to_string(last_timestamp.sec));
+//   RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: last_timestamp.nanosec" + std::to_string(last_timestamp.nanosec));
+  auto t_true = from_message(last_timestamp);
+  auto t_buff = t_true - std::chrono::milliseconds(100);
+  auto new_timestamp = to_message(t_buff);
+//   auto new_timestamp = last_timestamp;
+//   new_timestamp.sec -= 1;
+
   bboxes_debug.header.stamp = new_timestamp;
   bboxes_debug.header.frame_id = last_frame_id;
   int32_t t_idx = 0;
