@@ -9,7 +9,6 @@ Panels:
         - /Trajectory1
         - /BoundingBoxArray1
         - /MarkerArray2
-        - /TF1
         - /TF1/Frames1
         - /TF1/Tree1
       Splitter Ratio: 0.3559139668941498
@@ -96,7 +95,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 213
+      Max Intensity: 213.00006103515625
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: PointCloud2
@@ -173,7 +172,7 @@ Visualization Manager:
       Enabled: true
       Name: MarkerArray
       Namespaces:
-        {}
+        bounding_box: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -269,25 +268,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/XYOrbit
-      Distance: 162.88616943359375
+      Distance: 51.478641510009766
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -68.33917236328125
-        Y: -34.844398498535156
-        Z: -5.525941014639102e-05
+        X: -74.14747619628906
+        Y: -27.0389347076416
+        Z: -6.840642890892923e-05
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.1297966241836548
+      Pitch: 0.8447965383529663
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz_default_plugins)
-      Yaw: 0.5603950619697571
+      Yaw: 5.303574562072754
     Saved: ~
 Window Geometry:
   Displays:

@@ -108,6 +108,7 @@ private:
   std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
 
   BoundingBox point_to_box(const Point32 _p, const Complex32 _heading);
+  BoundingBox point_to_box_alt(const Point32 _p, const Complex32 _heading);
   std::list<Point32> get_expected_trajectory();
   std::list<Point32> get_expected_trajectory_alt(const Point32 _p, const Complex32 _heading);
   int32_t detect_collision(const Point32 _p, const Complex32 _heading, const BoundingBoxArray & obstacles);

@@ -172,6 +172,42 @@ BoundingBox RubisDetectNode::point_to_box(const Point32 _p, const Complex32 _hea
   std::list<Point32> corners;
   {     // Front left
     auto p = Point32{};
+    p.x = _p.x + (0.5 * ch) - (1 * sh);
+    p.y = _p.y + (0.5 * sh) + (1 * ch);
+    corners.push_back(p);
+  }
+  {     // Front right
+    auto p = Point32{};
+    p.x = _p.x + (0.5 * ch) + (1 * sh);
+    p.y = _p.y + (0.5 * sh) - (1 * ch);
+    corners.push_back(p);
+  }
+  {     // Rear right
+    auto p = Point32{};
+    p.x = _p.x - (0.5 * ch) + (1 * sh);
+    p.y = _p.y - (0.5 * sh) - (1 * ch);
+    corners.push_back(p);
+  }
+  {     // Rear left
+    auto p = Point32{};
+    p.x = _p.x - (0.5 * ch) - (1 * sh);
+    p.y = _p.y - (0.5 * sh) + (1 * ch);
+    corners.push_back(p);
+  }
+  return minimum_perimeter_bounding_box(corners);
+}
+
+BoundingBox RubisDetectNode::point_to_box_alt(const Point32 _p, const Complex32 _heading)
+{
+  // Shorthands to keep the formulas sane
+  float32_t angle = to_angle(_heading);
+  float32_t ch = std::cos(angle);
+  float32_t sh = std::sin(angle);
+
+  // Create a list of corners for the vehicle
+  std::list<Point32> corners;
+  {     // Front left
+    auto p = Point32{};
     p.x = _p.x + (lf * ch) - (wh * sh);
     p.y = _p.y + (lf * sh) + (wh * ch);
     corners.push_back(p);
@@ -224,7 +260,8 @@ std::list<Point32> RubisDetectNode::get_expected_trajectory()
   std::list<Point32> expected_trajectory;
   for(int32_t i = 0; i < lookahead_boxes; i++) {
     auto p = Point32{};
-    p.x = origin.x + i * (lf + lr);
+    // p.x = origin.x + i * (lf + lr);
+    p.x = origin.x + i;
     p.y = origin.y;
     expected_trajectory.push_back(p);
   }
@@ -277,10 +314,11 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
   }
   if(collision_index == -1) {
     RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: No collision");
+    collision_index = lookahead_boxes;
   }
   // debug publisher
 //   auto marker = to_visualization_marker_array(bboxes_debug, collision_index);
-  auto marker = to_visualization_marker_array(bboxes_debug, 5);
+  auto marker = to_visualization_marker_array(bboxes_debug, collision_index);
   danger_publisher_debug_->publish(marker);
 
   return collision_index;
