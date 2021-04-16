@@ -19,4 +19,4 @@
       kernel_size: 25
     staleness_threshold_ms: 500
     target_frame_id: "map"
-    lookahead_boxes: 20
+    lookahead_boxes: 10

@@ -133,9 +133,9 @@ void RubisDetectNode::save_state(const State & state)
   last_p.y = state.state.y;
   last_heading = state.state.heading;
   last_timestamp = state.header.stamp;
-  last_frame_id = state.header.frame_id;
-//   RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: frame_id" + std::to_string(state.header.frame_id));
+  last_frame_id = state.header.frame_id; // odom
 //   RCLCPP_WARN(get_logger(), "RubisDetectNode::on_state: frame_id" + state.header.frame_id);
+  return;
 }
 
 void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)
@@ -150,9 +150,6 @@ void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)
 
 std_msgs::msg::String RubisDetectNode::compute_danger(const BoundingBoxArray & msg)
 {
-  // compute heading
-  auto angle = to_angle(last_heading);
-//   RCLCPP_WARN(get_logger(), "RubisDetectNode::compute_danger: angle" + std::to_string(angle));
   // rubis_danger
   // data : {distance}
   auto collision_index = detect_collision(last_p, last_heading, msg);
@@ -200,7 +197,7 @@ BoundingBox RubisDetectNode::point_to_box(const Point32 _p, const Complex32 _hea
   return minimum_perimeter_bounding_box(corners);
 }
 
-std::list<Point32> RubisDetectNode::get_expected_trajectory(const Point32 _p, const Complex32 _heading)
+std::list<Point32> RubisDetectNode::get_expected_trajectory_alt(const Point32 _p, const Complex32 _heading)
 {
   // Shorthands to keep the formulas sane
   float32_t angle = to_angle(_heading);
@@ -210,8 +207,25 @@ std::list<Point32> RubisDetectNode::get_expected_trajectory(const Point32 _p, co
   std::list<Point32> expected_trajectory;
   for(int32_t i = 0; i < lookahead_boxes; i++) {
     auto p = Point32{};
-    p.x = _p.x - i * ((lf + lr) * ch);
-    p.y = _p.y - i * ((lf + lr) * sh);
+    p.x = _p.x + i * ((lf + lr) * ch);
+    p.y = _p.y + i * ((lf + lr) * sh);
+    expected_trajectory.push_back(p);
+    // RCLCPP_WARN(get_logger(), "RubisDetectNode::get_expected_trajectory: " + std::to_string(i) + ": (" + std::to_string(p.x) + ", " + std::to_string(p.y) + ")");
+  }
+  return expected_trajectory;
+}
+
+std::list<Point32> RubisDetectNode::get_expected_trajectory()
+{
+  auto origin = Point32{};
+  origin.x = 0;
+  origin.y = 0;
+
+  std::list<Point32> expected_trajectory;
+  for(int32_t i = 0; i < lookahead_boxes; i++) {
+    auto p = Point32{};
+    p.x = origin.x + i * (lf + lr);
+    p.y = origin.y;
     expected_trajectory.push_back(p);
   }
   return expected_trajectory;
@@ -221,7 +235,8 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
 {
   int32_t collision_index = -1;
 
-  auto expected_trajectory = get_expected_trajectory(_p,_heading);
+  auto expected_trajectory = get_expected_trajectory();
+//   auto expected_trajectory = get_expected_trajectory_alt(_p, _heading);
 
   BoundingBoxArray bboxes_debug;  // for visualization
 //   RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: last_timestamp.sec" + std::to_string(last_timestamp.sec));
@@ -233,31 +248,39 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
 //   new_timestamp.sec -= 1;
 
   bboxes_debug.header.stamp = new_timestamp;
-  bboxes_debug.header.frame_id = last_frame_id;
+  bboxes_debug.header.frame_id = "base_link";
   int32_t t_idx = 0;
   for(auto const& p : expected_trajectory) {
-    const auto p_box = point_to_box(p, _heading);
+    auto heading_straight = from_angle(0.0F);
+    // const auto p_box = point_to_box(p, _heading);
+    const auto p_box = point_to_box(p, heading_straight);
     bboxes_debug.boxes.push_back(p_box);
 
+    int32_t o_idx = 0;
     for(const auto & obstacle_bbox : obstacles.boxes) {
+    //   RCLCPP_WARN(get_logger(), "RubisDetectNode::get_expected_trajectory: " + std::to_string(o_idx) + ": (" + std::to_string(obstacle_bbox.centroid.x) + ", " + std::to_string(obstacle_bbox.centroid.y) + ")");
       if(!is_too_far_away(p, obstacle_bbox, distance_threshold)) {
         if(autoware::common::geometry::intersect(
           p_box.corners.begin(), p_box.corners.end(),
           obstacle_bbox.corners.begin(), obstacle_bbox.corners.end())) {
+
           // Collision detected
-          if(collision_index != -1) {
+          if(collision_index == -1) {
             collision_index = t_idx;
+            RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: collision: " + std::to_string(collision_index));
           }
-          RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: collision: " + std::to_string(collision_index));
-        //   return collision_index;
         }
       }
+      o_idx++;
     }
     t_idx++;
   }
+  if(collision_index == -1) {
+    RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: No collision");
+  }
   // debug publisher
 //   auto marker = to_visualization_marker_array(bboxes_debug, collision_index);
-  auto marker = to_visualization_marker_array(bboxes_debug, 10);
+  auto marker = to_visualization_marker_array(bboxes_debug, 5);
   danger_publisher_debug_->publish(marker);
 
   return collision_index;

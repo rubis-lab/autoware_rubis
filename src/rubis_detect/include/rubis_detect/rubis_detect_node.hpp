@@ -51,6 +51,7 @@ using motion::control::controller_common::Real;
 using motion::motion_common::VehicleConfig;
 using autoware::common::types::float32_t;
 using autoware::common::types::float64_t;
+using motion::motion_common::from_angle;
 using motion::motion_common::to_angle;
 using autoware_auto_msgs::msg::BoundingBox;
 using autoware_auto_msgs::msg::BoundingBoxArray;
@@ -107,7 +108,8 @@ private:
   std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);
 
   BoundingBox point_to_box(const Point32 _p, const Complex32 _heading);
-  std::list<Point32> get_expected_trajectory(const Point32 _p, const Complex32 _heading);
+  std::list<Point32> get_expected_trajectory();
+  std::list<Point32> get_expected_trajectory_alt(const Point32 _p, const Complex32 _heading);
   int32_t detect_collision(const Point32 _p, const Complex32 _heading, const BoundingBoxArray & obstacles);
   bool8_t is_too_far_away(const Point32 _p, const BoundingBox obstacle_bbox, const float32_t distance_threshold);
   float32_t calc_collision_distance(int32_t collision_index);
