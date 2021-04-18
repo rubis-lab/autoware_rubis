@@ -120,10 +120,6 @@ Visualization Manager:
         center_lane_line: true
         lanelet_triangles: true
         left_lane_bound: true
-        parking_access_area_bounds: true
-        parking_access_area_triangles: true
-        parking_area_bounds: true
-        parking_area_triangles: true
         right_lane_bound: true
       Topic:
         Depth: 5
@@ -157,7 +153,7 @@ Visualization Manager:
       Motorcycle Color: 0; 255; 0
       Name: BoundingBoxArray
       Namespaces:
-        bounding_box: true
+        {}
       No Label Color: 255; 255; 255
       Other Color: 0; 0; 0
       Pedestrian Color: 0; 0; 255
@@ -172,7 +168,7 @@ Visualization Manager:
       Enabled: true
       Name: MarkerArray
       Namespaces:
-        bounding_box: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -211,18 +207,19 @@ Visualization Manager:
       Tree:
         earth:
           map:
-            odom:
-              base_link:
-                gnss:
-                  {}
-                imu:
-                  {}
-                lidar_front:
-                  {}
-                lidar_rear:
-                  {}
-                nav_base:
-                  {}
+            {}
+        odom:
+          base_link:
+            gnss:
+              {}
+            imu:
+              {}
+            lidar_front:
+              {}
+            lidar_rear:
+              {}
+            nav_base:
+              {}
       Update Interval: 0
       Value: true
   Enabled: true
@@ -268,25 +265,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/XYOrbit
-      Distance: 51.478641510009766
+      Distance: 121.40518951416016
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -74.14747619628906
-        Y: -27.0389347076416
-        Z: -6.840642890892923e-05
-      Focal Shape Fixed Size: false
+        X: -5.809831142425537
+        Y: -56.58924102783203
+        Z: 3.0631085792265367e-06
+      Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8447965383529663
+      Pitch: 0.4547967314720154
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz_default_plugins)
-      Yaw: 5.303574562072754
+      Yaw: 4.053574085235596
     Saved: ~
 Window Geometry:
   Displays:
