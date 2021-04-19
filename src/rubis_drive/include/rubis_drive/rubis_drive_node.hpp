@@ -26,10 +26,12 @@
 
 #include <motion_common/motion_common.hpp>
 #include <controller_common/controller_base.hpp>
+#include <lgsvl_msgs/msg/can_bus_data.hpp>
 
 #include <string>
 #include <chrono>
 #include <time_utils/time_utils.hpp>
+#include <common/types.hpp>
 #include <algorithm>
 #include <limits>
 #include <utility>
@@ -43,6 +45,9 @@ using motion::control::controller_common::Command;
 using motion::control::controller_common::State;
 // using State = autoware_auto_msgs::msg::VehicleKinematicState;
 using motion::control::controller_common::Real;
+// using VSD = lgsvl_msgs::msg::VehicleStateData;
+using CBD = lgsvl_msgs::msg::CanBusData;
+using autoware::common::types::float32_t;
 using std::placeholders::_1;
 
 
@@ -62,11 +67,11 @@ public:
 private:
   bool verbose;  ///< whether to use verbose output or not.
 
-  double dist;
-  double cur_vel;
-  double cur_acc;
-  double target_vel;
-  double cur2tar;
+  float32_t dist;
+  float32_t cur_vel;
+  float32_t cur_acc;
+  float32_t target_vel;
+  float32_t cur2tar;
 
   // Timer related
   void timer_callback();
@@ -75,13 +80,13 @@ private:
 
   rclcpp::TimerBase::SharedPtr command_timer_;
   rclcpp::Publisher<Command>::SharedPtr command_publisher_;
-  Command compute_command(const State & state) const noexcept;
+  Command compute_command(const CBD & state) const noexcept;
 
-  Command compute_command_rubis(const State & state);
+  Command compute_command_rubis(const CBD & state);
 
-  rclcpp::Subscription<State>::SharedPtr state_subscriber_{};
+  rclcpp::Subscription<CBD>::SharedPtr state_subscriber_{};
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr danger_subscriber_{};
-  void on_state(const State::SharedPtr & msg);
+  void on_state(const CBD::SharedPtr & msg);
   void on_danger(const std_msgs::msg::String::SharedPtr & msg);
 };
 }  // namespace rubis_drive
