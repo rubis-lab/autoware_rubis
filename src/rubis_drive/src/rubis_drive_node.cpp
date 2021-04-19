@@ -37,6 +37,11 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
   state_subscriber_ = create_subscription<State>(
     "/vehicle/vehicle_kinematic_state", 10,
     [this](const State::SharedPtr msg) {on_state(msg);}, SubAllocT{});
+  
+  danger_subscriber_ = create_subscription<std_msgs::msg::String>(
+    "rubis_danger", 10,
+    [this](const std_msgs::msg::String::SharedPtr msg) {on_danger(msg);}, SubAllocT{});
+
 }
 
 int32_t RubisDriveNode::print_hello() const
@@ -63,13 +68,22 @@ void RubisDriveNode::timer_callback()
 
 void RubisDriveNode::on_state(const State::SharedPtr & msg)
 {
-  const auto cmd{compute_command(*msg)};
+  std::cout<<"onstate callback"<<std::endl;
+  // const auto cmd{compute_command(*msg)};
+  auto cmd = compute_command_rubis(*msg);
   command_publisher_->publish(cmd);
 }
 
-Command RubisDriveNode::compute_command(const State & state) const noexcept
+void RubisDriveNode::on_danger(const std_msgs::msg::String::SharedPtr & msg)
+{
+  std::string collision_distance = msg->data;
+  dist = std::stod(collision_distance, nullptr);
+}
+
+Command RubisDriveNode::compute_command_rubis(const State & state)
 {
   // dummy command
+  std::cout << "compute_command_start" << std::endl;
   Command ret{rosidl_runtime_cpp::MessageInitialization::ALL};
   ret.stamp = state.header.stamp;
   // Steering angle "uses up" stopping power/grip capacity
@@ -84,9 +98,28 @@ Command RubisDriveNode::compute_command(const State & state) const noexcept
 //     velocity / dt.count(),
 //     3.0F);   // positive
 //   ret.long_accel_mps2 = state.state.longitudinal_velocity_mps >= 0.0F ? -decel : decel;
+  double danger;
+  double safe_dist;
+  target_vel = 10;
+  cur2tar = 5;  //reach target velocity in {cur2tar}s later
+  cur_vel = state.state.longitudinal_velocity_mps;
+  cur_acc = state.state.acceleration_mps2;
+    
+  safe_dist = (target_vel >= 60/3.6) ? cur_vel * 3.6 : cur_vel * 3.6 - 15;
+  
+  std::cout<<"current_velocity = " << cur_vel << std::endl;
+  std::cout<<"dist = " << dist << std::endl;
+  std::cout<<"safe_dist = " << safe_dist << std::endl;
 
-  ret.long_accel_mps2 = 3.0F;
-
+  if(dist >= safe_dist)
+    danger = 0;
+  else if( (safe_dist - dist) * 5 < 100 )
+    danger = (safe_dist - dist) * 5;
+  else
+    danger = 100;
+  
+  ret.long_accel_mps2 = static_cast<float>((target_vel - cur_vel)/cur2tar - danger*danger/100);
+  std::cout << "compute_command_end" << std::endl;
   return ret;
 }
 
