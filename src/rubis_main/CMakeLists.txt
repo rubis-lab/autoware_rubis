@@ -34,7 +34,12 @@ add_executable(rubis_main_runner
 ament_target_dependencies(
   rubis_main_runner
   rclcpp
+
+  ndt_nodes
+
+  rubis_drive
 )
+
 install(
   TARGETS rubis_main_runner
   DESTINATION lib/${PROJECT_NAME}
