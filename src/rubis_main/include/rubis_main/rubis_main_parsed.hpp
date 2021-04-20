@@ -1,3 +1,8 @@
+#ifndef RUBIS_MAIN__RUBIS_MAIN_PARSED_HPP_
+#define RUBIS_MAIN__RUBIS_MAIN_PARSED_HPP_
+
+#include "rclcpp/rclcpp.hpp"
+#include "rubis_drive/rubis_drive_node.hpp"
 
 // rubis_drive
 rclcpp::NodeOptions configure_rubis_drive_nodes(void) {
@@ -12,3 +17,6 @@ rclcpp::NodeOptions configure_rubis_drive_nodes(void) {
   
   return node_options;
 }
+
+
+#endif
