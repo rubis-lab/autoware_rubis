@@ -49,6 +49,7 @@ using motion::control::controller_common::Real;
 using CBD = lgsvl_msgs::msg::CanBusData;
 using autoware::common::types::float32_t;
 using std::placeholders::_1;
+using SubAllocT = rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>;
 
 
 /// \class RubisDriveNode
@@ -60,10 +61,6 @@ public:
   /// \throw runtime error if failed to start threads or configure driver
   explicit RubisDriveNode(const rclcpp::NodeOptions & options);
 
-  /// \brief print hello
-  /// return 0 if successful.
-  int32_t print_hello() const;
-
 private:
   bool verbose;  ///< whether to use verbose output or not.
 
@@ -74,21 +71,17 @@ private:
   // drive param
   float32_t target_vel;
   float32_t cur2tar;
-
-  // Timer related
-  void timer_callback();
-  rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+  float32_t safe_dist;
+  int32_t danger_scale;
 
   rclcpp::TimerBase::SharedPtr command_timer_;
   rclcpp::Publisher<Command>::SharedPtr command_publisher_;
-  Command compute_command(const CBD & state) const noexcept;
-
-  Command compute_command_rubis(const CBD & state);
+  Command compute_command(const CBD & state);
 
   rclcpp::Subscription<CBD>::SharedPtr state_subscriber_{};
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr danger_subscriber_{};
   void on_state(const CBD::SharedPtr & msg);
+
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr danger_subscriber_{};
   void on_danger(const std_msgs::msg::String::SharedPtr & msg);
 };
 }  // namespace rubis_drive
