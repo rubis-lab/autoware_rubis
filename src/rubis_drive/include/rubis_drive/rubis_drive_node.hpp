@@ -63,8 +63,6 @@ public:
 
 private:
   bool verbose;  ///< whether to use verbose output or not.
-
-  float32_t dist;
   float32_t cur_vel;
   float32_t cur_acc;
 
@@ -76,11 +74,15 @@ private:
 
   rclcpp::TimerBase::SharedPtr command_timer_;
   rclcpp::Publisher<Command>::SharedPtr command_publisher_;
-  Command compute_command(const CBD & state);
+  // Command compute_command(const CBD & state);
+  Command compute_command(float32_t dist);
 
+  // state
+  CBD last_cbd_msg;
   rclcpp::Subscription<CBD>::SharedPtr state_subscriber_{};
   void on_state(const CBD::SharedPtr & msg);
 
+  // danger
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr danger_subscriber_{};
   void on_danger(const std_msgs::msg::String::SharedPtr & msg);
 };

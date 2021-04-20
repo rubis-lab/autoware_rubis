@@ -63,21 +63,22 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
 
 void RubisDriveNode::on_state(const CBD::SharedPtr & msg)
 {
-  auto cmd = compute_command(*msg);
-  command_publisher_->publish(cmd);
+  last_cbd_msg = *msg;
 }
 
 void RubisDriveNode::on_danger(const std_msgs::msg::String::SharedPtr & msg)
 {
   std::string collision_distance = msg->data;
-  dist = std::stod(collision_distance, nullptr);
+  auto dist = static_cast<float32_t>(
+    std::stod(collision_distance, nullptr));
+
+  auto cmd = compute_command(dist);
+  command_publisher_->publish(cmd);
 }
 
-Command RubisDriveNode::compute_command(const CBD & state)
+Command RubisDriveNode::compute_command(float32_t dist)
 {
-  cur_vel = state.speed_mps;
-  // safe_dist = (target_vel >= 60/3.6) ? cur_vel * 3.6 : cur_vel * 3.6 - 15;
-
+  cur_vel = last_cbd_msg.speed_mps;
   std::cout << "current_velocity = " << cur_vel << std::endl;
   std::cout << "dist/safe_dist = " << dist << "/" << safe_dist << std::endl;
 
@@ -103,7 +104,7 @@ Command RubisDriveNode::compute_command(const CBD & state)
 
   // construct steering command
   Command ret{rosidl_runtime_cpp::MessageInitialization::ALL};
-  ret.stamp = state.header.stamp;
+  ret.stamp = last_cbd_msg.header.stamp;
   ret.front_wheel_angle_rad = Real{};  // zero initialization etc.
   ret.rear_wheel_angle_rad = Real{};
   ret.long_accel_mps2 = accel;
