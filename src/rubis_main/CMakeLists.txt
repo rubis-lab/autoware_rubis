@@ -30,6 +30,11 @@ add_executable(rubis_main_runner
   src/rubis_main_runner.cpp
 )
 
+# add package.xml dependencies here.
+ament_target_dependencies(
+  rubis_main_runner
+  rclcpp
+)
 install(
   TARGETS rubis_main_runner
   DESTINATION lib/${PROJECT_NAME}
