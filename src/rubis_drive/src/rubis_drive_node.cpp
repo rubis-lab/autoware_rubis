@@ -100,14 +100,14 @@ Command RubisDriveNode::compute_command_rubis(const CBD & state)
 //   ret.long_accel_mps2 = state.state.longitudinal_velocity_mps >= 0.0F ? -decel : decel;
   float32_t danger;
   float32_t safe_dist;
-  target_vel = 5;
-  cur2tar = 5;  //reach target velocity in {cur2tar}s later
+  target_vel = 10;
+  cur2tar = 1;  //reach target velocity in {cur2tar}s later
 //   cur_vel = state.state.longitudinal_velocity_mps;
   cur_vel = state.speed_mps;
 //   cur_acc = state.state.acceleration_mps2;
     
   // safe_dist = (target_vel >= 60/3.6) ? cur_vel * 3.6 : cur_vel * 3.6 - 15;
-  safe_dist = cur_vel;
+  safe_dist = 30;
   RCLCPP_WARN(get_logger(), "RubisDriveNode::compute_command_rubis: cur_vel: " + std::to_string(cur_vel));
   std::cout<<"current_velocity = " << cur_vel << std::endl;
   std::cout<<"dist = " << dist << std::endl;
@@ -115,12 +115,14 @@ Command RubisDriveNode::compute_command_rubis(const CBD & state)
 
   if(dist >= safe_dist)
     danger = 0;
-  else if( (safe_dist - dist) * 5 < 100 )
-    danger = (safe_dist - dist) * 5;
+  else if( (safe_dist - dist) * 20 < 100 )
+    danger = (safe_dist - dist) * 20;
   else
     danger = 100;
   
+  std::cout<<"danger: " << danger << std::endl;
   ret.long_accel_mps2 = static_cast<float32_t>((target_vel - cur_vel)/cur2tar - danger*danger/100);
+  std::cout << "command: " << (target_vel - cur_vel)/cur2tar - danger*danger/100 << std::endl;
   std::cout << "compute_command_end" << std::endl;
   return ret;
 }
