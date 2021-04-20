@@ -9,8 +9,6 @@
 #include "rclcpp/rclcpp.hpp"
 
 // rubis dependencies
-#include "rubis_drive/rubis_drive_node.hpp"
-
 #include "rubis_main/rubis_main_parsed.hpp"
 
 using rclcpp::executors::SingleThreadedExecutor;
@@ -23,7 +21,7 @@ int main(int argc, char * argv[])
   std::cout << "hi!" << std::endl;
   std::vector<std::thread> thrs;
 
-  //rubis_drive_nodes
+  //rubis_drive
   using autoware::rubis_drive::RubisDriveNode;
 
   auto ptr_rubis_drive_nodes = std::make_shared<RubisDriveNode>(
@@ -35,6 +33,19 @@ int main(int argc, char * argv[])
     exec_rubis_drive_nodes.spin();
   }));
   std::cout << "rubis_drive_nodes" << std::endl;
+
+  //rubis_detect
+  using autoware::rubis_detect::RubisDetectNode;
+
+  auto ptr_rubis_detect_nodes = std::make_shared<RubisDetectNode>(
+    configure_rubis_detect());
+  SingleThreadedExecutor exec_rubis_detect_nodes;
+  exec_rubis_detect_nodes.add_node(ptr_rubis_detect_nodes);
+
+  thrs.emplace_back(std::thread([&](){
+    exec_rubis_detect_nodes.spin();
+  }));
+  std::cout << "rubis_detect_nodes" << std::endl;
 
   for(int i=0; i<thrs.size(); i++) {
     thrs.at(i).join();

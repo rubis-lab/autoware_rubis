@@ -5,7 +5,6 @@ project(rubis_main)
 
 # require that dependencies from package.xml be available
 find_package(ament_cmake_auto REQUIRED)
-include_directories(SYSTEM ${YAML_CPP_INCLUDE_DIRS})
 
 ament_auto_find_build_dependencies(REQUIRED
   ${${PROJECT_NAME}_BUILD_DEPENDS}
@@ -45,6 +44,7 @@ ament_target_dependencies(
   ndt_nodes
 
   rubis_drive
+  rubis_detect
 )
 
 install(

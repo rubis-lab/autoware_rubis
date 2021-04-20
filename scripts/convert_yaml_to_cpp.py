@@ -1,6 +1,13 @@
 import os
 import yaml
 
+target = [
+    'rubis_detect',
+    'rubis_drive',
+]
+
+
+
 yaml_dir = '/home/rubis/AutowareAuto/src/rubis_main/param/'
 
 # output
@@ -64,8 +71,10 @@ for yf in os.listdir(yaml_dir):
 
     node_name = yfull.split('param/')[-1].split('.param')[0]
     
-    if node_name != 'rubis_main_runner':
-        output_header += '#include \"' + node_name + '/' +  node_name + '_node.hpp\"\n'
+    if node_name not in target:
+        continue
+
+    output_header += '#include \"' + node_name + '/' +  node_name + '_node.hpp\"\n'
 
     output_body += "\n"
     # output_body += yfull    #yfull = yaml file name
