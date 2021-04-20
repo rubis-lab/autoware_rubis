@@ -1,9 +1,32 @@
 import os
 import yaml
 
-yaml_dir = '/home/rubis/AutowareAuto/src/rubis_0/param/'
+yaml_dir = '/home/rubis/AutowareAuto/src/rubis_main/param/'
 
-# print(os.listdir(yaml_dir))
+# output
+out_file = '/home/rubis/AutowareAuto/src/rubis_main/include/rubis_main/rubis_main_parsed_dev.hpp'
+
+output_header = '''
+#ifndef RUBIS_MAIN__RUBIS_MAIN_PARSED_HPP_
+#define RUBIS_MAIN__RUBIS_MAIN_PARSED_HPP_
+
+#include "rclcpp/rclcpp.hpp"
+'''
+
+output_body = '''
+RUBIS
+'''
+output_footer = '''
+#endif
+'''
+
+output = output_header + output_body + output_footer
+with open(out_file, 'w') as f:
+    f.write(output)
+exit()
+
+
+
 
 def dict2cpp(d, nested_k=[]):
     for k, v in d.items():
