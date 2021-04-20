@@ -13,6 +13,7 @@
 
 #include "rubis_main/rubis_main_parsed.hpp"
 
+using rclcpp::executors::SingleThreadedExecutor;
 
 int main(int argc, char * argv[])
 {
@@ -25,10 +26,9 @@ int main(int argc, char * argv[])
   //rubis_drive_nodes
   using autoware::rubis_drive::RubisDriveNode;
 
-  rclcpp::NodeOptions rubis_drive_nodes_node_options = configure_rubis_drive_nodes();
-  std::shared_ptr<RubisDriveNode> ptr_rubis_drive_nodes;
-  ptr_rubis_drive_nodes = std::make_shared<RubisDriveNode>(rubis_drive_nodes_node_options);
-  rclcpp::executors::SingleThreadedExecutor exec_rubis_drive_nodes;
+  auto ptr_rubis_drive_nodes = std::make_shared<RubisDriveNode>(
+    configure_rubis_drive());
+  SingleThreadedExecutor exec_rubis_drive_nodes;
   exec_rubis_drive_nodes.add_node(ptr_rubis_drive_nodes);
 
   thrs.emplace_back(std::thread([&](){
@@ -42,6 +42,6 @@ int main(int argc, char * argv[])
   thrs.clear();
 
   rclcpp::shutdown();
-  std::cout << "rubis_main_runner launched 222." << std::endl;
+  std::cout << "rubis_main_runner launched." << std::endl;
   return 0;
 }
