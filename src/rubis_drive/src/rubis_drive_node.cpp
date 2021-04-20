@@ -25,6 +25,15 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
 :  Node("rubis_drive", options),
   verbose(true)
 {
+  target_vel = static_cast<float32_t>(declare_parameter(
+      "target_vel"
+    ).get<float32_t>());
+
+  // reach target velocity in {cur2tar}s later
+  cur2tar = static_cast<float32_t>(declare_parameter(
+      "cur2tar"
+    ).get<float32_t>());; 
+
   publisher_ = this->create_publisher<std_msgs::msg::String>("rubis_drive_topic", 10);
   timer_ = this->create_wall_timer(
     4000ms, std::bind(&RubisDriveNode::timer_callback, this));
@@ -82,8 +91,6 @@ void RubisDriveNode::on_danger(const std_msgs::msg::String::SharedPtr & msg)
 
 Command RubisDriveNode::compute_command_rubis(const CBD & state)
 {
-  // dummy command
-  std::cout << "compute_command_start" << std::endl;
   Command ret{rosidl_runtime_cpp::MessageInitialization::ALL};
   ret.stamp = state.header.stamp;
   // Steering angle "uses up" stopping power/grip capacity
@@ -100,8 +107,6 @@ Command RubisDriveNode::compute_command_rubis(const CBD & state)
 //   ret.long_accel_mps2 = state.state.longitudinal_velocity_mps >= 0.0F ? -decel : decel;
   float32_t danger;
   float32_t safe_dist;
-  target_vel = 10;
-  cur2tar = 1;  //reach target velocity in {cur2tar}s later
 //   cur_vel = state.state.longitudinal_velocity_mps;
   cur_vel = state.speed_mps;
 //   cur_acc = state.state.acceleration_mps2;

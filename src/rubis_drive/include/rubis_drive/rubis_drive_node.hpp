@@ -70,6 +70,8 @@ private:
   float32_t dist;
   float32_t cur_vel;
   float32_t cur_acc;
+
+  // drive param
   float32_t target_vel;
   float32_t cur2tar;
 

@@ -18,25 +18,34 @@ Example launch file for a new package.
 Note: Does not work in ROS2 dashing!
 """
 
-import launch
-from launch_ros.actions import ComposableNodeContainer
-from launch_ros.descriptions import ComposableNode
+from ament_index_python import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+import os
 
 
 def generate_launch_description():
     """Generate launch description with a single component."""
-    container = ComposableNodeContainer(
-            name='rubis_drive_container',
-            namespace='',
-            package='rclcpp_components',
-            executable='component_container',
-            composable_node_descriptions=[
-                ComposableNode(
-                    package='rubis_drive',
-                    plugin='autoware::rubis_drive::RubisDriveNode',
-                    name='rubis_drive_node'),
-            ],
-            output='screen',
+    rubis_drive_param_file = os.path.join(
+        get_package_share_directory('rubis_drive'),
+        'param/rubis_drive.param.yaml')
+    rubis_drive_param = DeclareLaunchArgument(
+        'rubis_drive_param_file',
+        default_value=rubis_drive_param_file,
+        description='Path to config file to Rubis Drive'
     )
 
-    return launch.LaunchDescription([container])
+    rubis_drive = Node(
+        package="rubis_drive",
+        executable="rubis_drive_node_exe",
+        name="rubis_drive_node",
+        output="screen",
+        parameters=[LaunchConfiguration("rubis_drive_param_file"), {}],
+    )
+
+    return LaunchDescription([
+        rubis_drive_param,
+        rubis_drive,
+    ])

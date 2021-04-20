@@ -1,0 +1,6 @@
+# Copyright 2020 RUBIS
+
+/**:
+  ros__parameters:
+    target_vel: 10.0
+    cur2tar: 1.0
