@@ -69,7 +69,8 @@ using geometry_msgs::msg::Point32;
 using time_utils::to_message;
 using time_utils::from_message;
 using TimeStamp = builtin_interfaces::msg::Time;
-
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_data;
 
 /// \class RubisDetectNode
 /// \brief ROS 2 Node for hello world.
@@ -85,6 +86,12 @@ public:
   int32_t print_hello() const;
 
 private:
+  SchedLog _slog;
+  int32_t _task_id;
+  int32_t _iter;
+  float32_t _period;
+  float32_t _deadline;
+
   float32_t safety_factor;
   float32_t stop_margin;
   float32_t lf;

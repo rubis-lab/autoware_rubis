@@ -23,6 +23,13 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
 :  Node("rubis_detect", options),
   verbose(true)
 {
+  // sched_log params
+  _slog = SchedLog("log_test", "/home/rubis/AutowareAuto/src/rubis_detect/log.txt");
+  _task_id = 1;
+  _iter = 0;
+  _period = 20.0;
+  _deadline = 30.0;
+
   // config
   const auto vehicle_param = VehicleConfig{
     static_cast<Real>(declare_parameter(
@@ -90,16 +97,6 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
 //   m_tf_listener = std::make_shared<tf2_ros::TransformListener>(
 //     *m_tf_buffer,
 //     std::shared_ptr<rclcpp::Node>(this, [](auto) {}), false);
-  using rubis::sched_log::SchedLog;
-  using rubis::sched_log::sched_data;
-  auto sl = SchedLog("log_test", "/home/rubis/AutowareAuto/src/rubis_detect/log.txt");
-  sched_data sd;
-  sd.task_id = 1;
-  sd.iter = 5;
-  sd.resp_time = 10.0;
-  sd.period = 20.0;
-  sd.deadline = 30.0;
-  sl.add_entry(sd);
 }
 
 void RubisDetectNode::init_vehicle(const VehicleConfig & _vehicle_param)
@@ -322,6 +319,14 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
   auto end_time = omp_get_wtime();
   auto response_time = (end_time - start_time) * 1e3;
   RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: response_time(ms): \n" + std::to_string(response_time));
+  _iter += 1;
+  sched_data sd;
+  sd.task_id = _task_id;
+  sd.iter = _iter;
+  sd.resp_time = response_time;
+  sd.period = _period;
+  sd.deadline = _deadline;
+  _slog.add_entry(sd);
 
   if(collision_index == -1) {
     RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: No collision");
