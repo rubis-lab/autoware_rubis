@@ -91,7 +91,15 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
 //     *m_tf_buffer,
 //     std::shared_ptr<rclcpp::Node>(this, [](auto) {}), false);
   using rubis::sched_log::SchedLog;
+  using rubis::sched_log::sched_data;
   auto sl = SchedLog("log_test", "/home/rubis/AutowareAuto/src/rubis_detect/log.txt");
+  sched_data sd;
+  sd.task_id = 1;
+  sd.iter = 5;
+  sd.resp_time = 10.0;
+  sd.period = 20.0;
+  sd.deadline = 30.0;
+  sl.add_entry(sd);
 }
 
 void RubisDetectNode::init_vehicle(const VehicleConfig & _vehicle_param)
