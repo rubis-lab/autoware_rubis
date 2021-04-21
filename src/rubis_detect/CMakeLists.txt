@@ -23,6 +23,10 @@ ament_auto_find_build_dependencies(REQUIRED
   ${${PROJECT_NAME}_BUILDTOOL_DEPENDS}
 )
 
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
+
 set(RUBIS_DETECT_LIB_SRC
   src/rubis_detect.cpp
 )
@@ -57,6 +61,8 @@ rclcpp_components_register_node(${PROJECT_NAME}_node
   PLUGIN "autoware::rubis_detect::RubisDetectNode"
   EXECUTABLE ${PROJECT_NAME}_node_exe
 )
+
+target_link_libraries(${PROJECT_NAME}_node ${OpenMP_LIBS})
 
 # Testing
 if(BUILD_TESTING)

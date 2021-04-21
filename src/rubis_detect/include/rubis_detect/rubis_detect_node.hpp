@@ -41,6 +41,8 @@
 #include <chrono>
 #include <time_utils/time_utils.hpp>
 
+#include <omp.h>
+
 namespace autoware
 {
 namespace rubis_detect

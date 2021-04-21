@@ -10,6 +10,8 @@
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
   <buildtool_depend>autoware_auto_cmake</buildtool_depend>
 
+  <build_depend>libomp-dev</build_depend>
+
   <depend>motion_common</depend>
   <depend>autoware_auto_geometry</depend>
   <depend>builtin_interfaces</depend>
