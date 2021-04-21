@@ -27,6 +27,8 @@ find_package(OpenMP REQUIRED)
 set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
 set(OpenMP_LIBS gomp)
 
+find_package(spdlog REQUIRED)
+
 set(RUBIS_DETECT_LIB_SRC
   src/rubis_detect.cpp
 )
@@ -45,6 +47,7 @@ autoware_set_compile_options(${PROJECT_NAME})
 
 set(RUBIS_DETECT_NODE_SRC
   src/rubis_detect_node.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
 )
 
 set(RUBIS_DETECT_NODE_HEADERS
@@ -62,7 +65,14 @@ rclcpp_components_register_node(${PROJECT_NAME}_node
   EXECUTABLE ${PROJECT_NAME}_node_exe
 )
 
-target_link_libraries(${PROJECT_NAME}_node ${OpenMP_LIBS})
+target_include_directories(${PROJECT_NAME}_node PUBLIC
+  /home/rubis/AutowareAuto/src/rubis_rt/include/
+)
+
+target_link_libraries(${PROJECT_NAME}_node
+  ${OpenMP_LIBS}
+  spdlog::spdlog
+)
 
 # Testing
 if(BUILD_TESTING)

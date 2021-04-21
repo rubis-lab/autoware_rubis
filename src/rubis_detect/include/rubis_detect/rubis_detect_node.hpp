@@ -19,6 +19,8 @@
 #ifndef RUBIS_DETECT__RUBIS_DETECT_NODE_HPP_
 #define RUBIS_DETECT__RUBIS_DETECT_NODE_HPP_
 
+#include "rubis_rt/sched_log.hpp"
+
 #include <rubis_detect/rubis_detect.hpp>
 
 #include <rclcpp/rclcpp.hpp>
@@ -40,6 +42,8 @@
 #include <list>
 #include <chrono>
 #include <time_utils/time_utils.hpp>
+
+#include <spdlog/spdlog.h>
 
 #include <omp.h>
 
