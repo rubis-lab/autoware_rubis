@@ -13,6 +13,10 @@
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
 
+  <depend>point_cloud_filter_transform_nodes</depend>
+  <depend>point_cloud_fusion_nodes</depend>
+  <depend>ray_ground_classifier_nodes</depend>
+  <depend>euclidean_cluster_nodes</depend>
   <depend>ndt_nodes</depend>
   <depend>rubis_drive</depend>
   <depend>rubis_detect</depend>

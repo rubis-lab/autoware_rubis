@@ -4,6 +4,7 @@ import yaml
 target = [
     'rubis_detect',
     'rubis_drive',
+    'point_cloud_filter_transform'
 ]
 
 
@@ -24,9 +25,6 @@ output_body = '''
 '''
 output_footer = '''
 #endif  //RUBIS_MAIN__RUBIS_MAIN_PARSED_HPP_
-'''
-
-temp_string = '''
 '''
 
 def dict2cpp(d, nested_k=[]):
@@ -72,6 +70,35 @@ for yf in os.listdir(yaml_dir):
     node_name = yfull.split('param/')[-1].split('.param')[0]
     
     if node_name not in target:
+        continue
+
+    # output_footer += node_name
+    if node_name == "point_cloud_filter_transform":
+        output_header += '#include \"' + node_name + "_nodes" + '/' +  node_name + '_node.hpp\"\n'
+        
+        with open(yfull, 'r') as y:
+            r_params = yaml.load(y, Loader=yaml.FullLoader)
+    
+        if '/**' in r_params:
+            if 'ros__parameters' in r_params['/**']:
+                r_data = r_params['/**']['ros__parameters']
+        else:
+            r_data = r_params
+
+        for i in r_data:
+
+            output_body += "\n"
+            # output_body += yfull    #yfull = yaml file name
+            output_body += "rclcpp::NodeOptions configure_"
+            output_body += node_name + "_" + i + "(void) {\n"
+            output_body += "  std::vector<rclcpp::Parameter> params;\n\n"
+            # print('processing {}'.format(yfull))
+
+            output_body += dict2cpp(r_data[i])
+            output_body += "  rclcpp::NodeOptions node_options;\n"
+            output_body += "  node_options.parameter_overrides(params);\n\n"
+            output_body += "  return node_options;\n}\n"
+
         continue
 
     output_header += '#include \"' + node_name + '/' +  node_name + '_node.hpp\"\n'

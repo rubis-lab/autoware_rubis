@@ -41,6 +41,10 @@ ament_target_dependencies(
   rubis_main_runner
   rclcpp
 
+  point_cloud_filter_transform_nodes
+  point_cloud_fusion_nodes
+  ray_ground_classifier_nodes
+  euclidean_cluster_nodes
   ndt_nodes
 
   rubis_drive

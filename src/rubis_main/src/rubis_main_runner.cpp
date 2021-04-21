@@ -21,6 +21,30 @@ int main(int argc, char * argv[])
   std::cout << "hi!" << std::endl;
   std::vector<std::thread> thrs;
 
+  //point_cloud_filter_transform_nodes
+  using autoware::perception::filters::point_cloud_filter_transform_nodes::PointCloud2FilterTransformNode;
+
+  auto ptr_point_cloud_filter_transform_lidar_front_nodes = std::make_shared<PointCloud2FilterTransformNode>(
+    configure_point_cloud_filter_transform_lidar_front_nodes());
+  SingleThreadedExecutor exec_point_cloud_filter_transform_lidar_front_nodes;
+  exec_point_cloud_filter_transform_lidar_front_nodes.add_node(ptr_point_cloud_filter_transform_lidar_front_nodes);
+
+  thrs.emplace_back(std::thread([&](){
+    exec_point_cloud_filter_transform_lidar_front_nodes.spin();
+  }));
+  std::cout << "point_cloud_filter_transform_lidar_front_nodes" << std::endl;  
+
+  auto ptr_point_cloud_filter_transform_lidar_rear_nodes = std::make_shared<PointCloud2FilterTransformNode>(
+    configure_point_cloud_filter_transform_lidar_rear_nodes());
+  SingleThreadedExecutor exec_point_cloud_filter_transform_lidar_rear_nodes;
+  exec_point_cloud_filter_transform_lidar_rear_nodes.add_node(ptr_point_cloud_filter_transform_lidar_rear_nodes);
+
+  thrs.emplace_back(std::thread([&](){
+    exec_point_cloud_filter_transform_lidar_rear_nodes.spin();
+  }));
+  std::cout << "point_cloud_filter_transform_lidar_rear_nodes" << std::endl;  
+
+
   //rubis_drive
   using autoware::rubis_drive::RubisDriveNode;
 
