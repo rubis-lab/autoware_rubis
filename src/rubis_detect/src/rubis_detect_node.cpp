@@ -90,6 +90,8 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
 //   m_tf_listener = std::make_shared<tf2_ros::TransformListener>(
 //     *m_tf_buffer,
 //     std::shared_ptr<rclcpp::Node>(this, [](auto) {}), false);
+  using rubis::sched_log::SchedLog;
+  auto sl = SchedLog("log_test", "/home/rubis/AutowareAuto/src/rubis_detect/log.txt");
 }
 
 void RubisDetectNode::init_vehicle(const VehicleConfig & _vehicle_param)
