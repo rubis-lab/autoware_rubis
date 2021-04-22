@@ -27,6 +27,9 @@
 #include <ray_ground_classifier/ray_ground_classifier.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
+#include <ctime>
+#include "rubis_rt/sched_log.hpp"
+
 
 #include <memory>
 #include <string>
@@ -34,6 +37,9 @@
 
 using autoware::common::types::bool8_t;
 using autoware::common::types::char8_t;
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
 
 namespace autoware
 {
@@ -60,6 +66,8 @@ public:
     const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & options);
 
 private:
+  SchedLog __slog;
+  int32_t __iter;
   /// \brief Resets state of ray aggregator and messages
   RAY_GROUND_CLASSIFIER_NODES_LOCAL void reset();
   // Algorithmic core

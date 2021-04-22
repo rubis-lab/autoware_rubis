@@ -17,6 +17,7 @@
 #ifndef LOCALIZATION_NODES__LOCALIZATION_NODE_HPP_
 #define LOCALIZATION_NODES__LOCALIZATION_NODE_HPP_
 
+#include <common/types.hpp>
 #include <localization_common/optimized_registration_summary.hpp>
 #include <localization_common/initialization.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -32,6 +33,8 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include "rubis_rt/sched_log.hpp"
+#include <ctime>
 
 namespace autoware
 {
@@ -41,6 +44,10 @@ namespace localization_nodes
 {
 using common::helper_functions::message_field_adapters::get_frame_id;
 using common::helper_functions::message_field_adapters::get_stamp;
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
+using autoware::common::types::float32_t;
 
 /// Helper struct that groups topic name and QoS setting for a publisher or subscription
 struct TopicQoS
@@ -195,6 +202,26 @@ public:
           initial_pose_callback(msg);
         }))
   {
+    // sched_log params
+    auto timestamp = (int32_t) std::time(nullptr);
+    auto f_timestamp = (timestamp + 50) / 100 * 100;
+    sched_info si {
+      static_cast<int32_t>(declare_parameter(
+        "rubis.sched_info.task_id").get<int32_t>()), // task_id
+      static_cast<std::string>(declare_parameter(
+        "rubis.sched_info.name").get<std::string>()), // name
+      static_cast<std::string>(declare_parameter(
+        "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+      static_cast<float32_t>(declare_parameter(
+        "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+      static_cast<float32_t>(declare_parameter(
+        "rubis.sched_info.period").get<float32_t>()), // period
+      static_cast<float32_t>(declare_parameter(
+        "rubis.sched_info.deadline").get<float32_t>()) // deadline
+    };
+    __slog = SchedLog(si);
+    __iter = 0;
+
     init();
   }
 
@@ -318,6 +345,8 @@ protected:
   }
 
 private:
+  SchedLog __slog;
+  int32_t __iter;
   /// Check the pointer and throw if null.
   template<typename PtrT>
   void assert_ptr_not_null(const PtrT & ptr, const std::string & name) const
@@ -493,6 +522,13 @@ void observation_callback_rubis(typename ObservationMsgT::ConstSharedPtr msg_ptr
       }
       on_bad_registration(std::current_exception());
     }
+    sched_data sd {
+      ++__iter,  // iter
+      0.0,  // response_time
+      0.0,  // start_time
+      0.0  // end_time
+    };
+    __slog.add_entry(sd);
   }
 
   /// Callback that updates the map.

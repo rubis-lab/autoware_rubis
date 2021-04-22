@@ -23,12 +23,17 @@ set(CLOUD_NODE_LIB ray_ground_classifier_cloud_node)
 ament_auto_add_library(${CLOUD_NODE_LIB} SHARED
   include/ray_ground_classifier_nodes/ray_ground_classifier_cloud_node.hpp
   include/ray_ground_classifier_nodes/visibility_control.hpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
   src/ray_ground_classifier_cloud_node.cpp)
 autoware_set_compile_options(${CLOUD_NODE_LIB})
 
 rclcpp_components_register_node(${CLOUD_NODE_LIB}
   PLUGIN "autoware::perception::filters::ray_ground_classifier_nodes::RayGroundClassifierCloudNode"
   EXECUTABLE ${CLOUD_NODE_LIB}_exe
+)
+
+target_include_directories(${CLOUD_NODE_LIB} PUBLIC
+  /home/rubis/AutowareAuto/src/rubis_rt/include/
 )
 
 target_link_libraries(${CLOUD_NODE_LIB} ${OpenMP_LIBS})

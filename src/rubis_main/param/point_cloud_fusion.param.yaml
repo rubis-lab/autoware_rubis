@@ -5,3 +5,11 @@
     number_of_sources: 2
     output_frame_id:  "base_link"
     cloud_size:       55000
+    rubis:
+      sched_info:
+        task_id: 1.00002
+        name: "point_cloud_fusion"
+        log_dir: "/home/rubis/rubis_log/"
+        exec_time: 10.0
+        period: 20.0
+        deadline: 30.0

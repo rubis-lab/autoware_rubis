@@ -180,6 +180,24 @@ RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(
   m_ground_pc_idx{0},
   m_nonground_pc_idx{0}
 {
+  auto timestamp = static_cast<int32_t>( std::time(nullptr));
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
+  sched_info si {
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.period").get<float32_t>()), // period
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+  };
+  __slog = SchedLog(si);
+  __iter = 0;
   // initialize messages
   init_pcl_msg(m_ground_msg, m_frame_id.c_str(), m_pcl_size);
   init_pcl_msg(m_nonground_msg, m_frame_id.c_str(), m_pcl_size);
@@ -190,7 +208,7 @@ RayGroundClassifierCloudNode::callback(const PointCloud2::SharedPtr msg)
   PointXYZIF pt_tmp;
   pt_tmp.id = static_cast<uint16_t>(PointXYZIF::END_OF_SCAN_ID);
   const ray_ground_classifier::PointXYZIFR eos_pt{&pt_tmp};
-
+  auto start_time = static_cast<int32_t>( std::time(nullptr));
   try {
     // Reset messages and aggregator to ensure they are in a good state
     reset();
@@ -391,6 +409,14 @@ RayGroundClassifierCloudNode::callback(const PointCloud2::SharedPtr msg)
       "RayGroundClassifierCloudNode has encountered an unknown failure");
     throw;
   }
+  auto end_time = static_cast<int32_t>( std::time(nullptr));
+  sched_data sd {
+    ++__iter,  // iter
+    end_time-start_time,  // response_time
+    0.0,  // start_time
+    0.0  // end_time
+  };
+  __slog.add_entry(sd);
 }
 ////////////////////////////////////////////////////////////////////////////////
 void RayGroundClassifierCloudNode::reset()

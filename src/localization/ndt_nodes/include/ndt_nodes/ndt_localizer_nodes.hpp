@@ -30,8 +30,15 @@
 #include <memory>
 #include <limits>
 
+#include "rubis_rt/sched_log.hpp"
+#include <ctime>
+
 using autoware::common::types::float32_t;
 using autoware::common::types::float64_t;
+
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
 
 namespace autoware
 {
