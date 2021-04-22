@@ -31,6 +31,9 @@
 #include <memory>
 #include <vector>
 
+#include "rubis_rt/sched_log.hpp"
+#include <ctime>
+
 using autoware::common::types::bool8_t;
 
 namespace autoware
@@ -41,6 +44,11 @@ namespace filters
 {
 namespace point_cloud_fusion_nodes
 {
+
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
+
 /// \brief Class that fuses multiple point clouds from different sources into one by concatanating
 /// them.
 class POINT_CLOUD_FUSION_NODES_PUBLIC PointCloudFusionNode : public rclcpp::Node
@@ -54,6 +62,8 @@ public:
     const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options);
 
 private:
+  SchedLog __slog;
+  int32_t __iter;
   using PointT = common::types::PointXYZIF;
   using PointCloudMsgT = sensor_msgs::msg::PointCloud2;
   using PointCloudT = sensor_msgs::msg::PointCloud2;

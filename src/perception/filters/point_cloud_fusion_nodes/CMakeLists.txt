@@ -27,7 +27,8 @@ set(PC_FUSION_LIB pointcloud_fusion_node)
 ament_auto_add_library(${PC_FUSION_LIB} SHARED
   include/point_cloud_fusion_nodes/point_cloud_fusion_node.hpp
   src/point_cloud_fusion_node.cpp
-  include/point_cloud_fusion_nodes/visibility_control.hpp)
+  include/point_cloud_fusion_nodes/visibility_control.hpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp)
 autoware_set_compile_options(${PC_FUSION_LIB})
 
 rclcpp_components_register_node(${PC_FUSION_LIB}
@@ -63,7 +64,9 @@ endif()
 target_compile_options(${PC_FUSION_LIB} PRIVATE -Wno-sign-conversion -Wno-conversion -Wno-old-style-cast
         -Wno-useless-cast -Wno-double-promotion -Wno-nonnull-compare)
 
-target_include_directories(${PC_FUSION_LIB} SYSTEM PUBLIC ${tf2_INCLUDE_DIRS})
+target_include_directories(${PC_FUSION_LIB} SYSTEM PUBLIC
+  ${tf2_INCLUDE_DIRS}
+  /home/rubis/AutowareAuto/src/rubis_rt/include/)
 
 # Ament Exporting
 ament_auto_package(

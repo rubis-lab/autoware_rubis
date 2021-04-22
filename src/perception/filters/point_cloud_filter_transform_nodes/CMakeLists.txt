@@ -27,13 +27,19 @@ set(FILTER_NODE_LIB point_cloud_filter_transform_node)
 ament_auto_add_library(${FILTER_NODE_LIB} SHARED
     include/point_cloud_filter_transform_nodes/point_cloud_filter_transform_node.hpp
     include/point_cloud_filter_transform_nodes/visibility_control.hpp
-    src/point_cloud_filter_transform_node.cpp)
+    src/point_cloud_filter_transform_node.cpp
+    /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
+    )
 autoware_set_compile_options(${FILTER_NODE_LIB})
 target_compile_options(${FILTER_NODE_LIB} PRIVATE -Wno-sign-conversion -Wno-conversion)
 
 rclcpp_components_register_node(${FILTER_NODE_LIB}
   PLUGIN "autoware::perception::filters::point_cloud_filter_transform_nodes::PointCloud2FilterTransformNode"
   EXECUTABLE ${FILTER_NODE_LIB}_exe
+)
+
+target_include_directories(${FILTER_NODE_LIB} PUBLIC
+  /home/rubis/AutowareAuto/src/rubis_rt/include/
 )
 
 if(BUILD_TESTING)

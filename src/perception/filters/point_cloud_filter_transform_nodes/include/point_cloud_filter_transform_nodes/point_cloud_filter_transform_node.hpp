@@ -22,6 +22,9 @@
 #include <lidar_utils/point_cloud_utils.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
+#include "rubis_rt/sched_log.hpp"
+#include <ctime>
+
 #include <memory>
 #include <string>
 
@@ -45,6 +48,9 @@ using geometry_msgs::msg::Transform;
 using geometry_msgs::msg::TransformStamped;
 using sensor_msgs::msg::PointCloud2;
 using std::placeholders::_1;
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
 
 TransformStamped get_transform(
   const std::string & input_frame_id,
@@ -97,6 +103,8 @@ protected:
   }
 
 private:
+  SchedLog __slog;
+  int32_t __iter;
   using AngleFilter = autoware::common::lidar_utils::AngleFilter;
   using DistanceFilter = autoware::common::lidar_utils::DistanceFilter;
   using StaticTransformer = autoware::common::lidar_utils::StaticTransformer;

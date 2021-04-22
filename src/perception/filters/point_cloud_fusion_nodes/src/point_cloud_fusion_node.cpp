@@ -44,6 +44,26 @@ PointCloudFusionNode::PointCloudFusionNode(
   m_output_frame_id(declare_parameter("output_frame_id").get<std::string>()),
   m_cloud_capacity(declare_parameter("cloud_size").get<uint32_t>())
 {
+  // sched_log params
+  auto timestamp = (int32_t) std::time(nullptr);
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
+  sched_info si {
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.period").get<float32_t>()), // period
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+  };
+  __slog = SchedLog(si);
+  __iter = 0;
+
   for (size_t i = 0; i < m_input_topics.size(); ++i) {
     m_input_topics[i] = "input_topic" + std::to_string(i + 1);
   }
@@ -59,6 +79,26 @@ PointCloudFusionNode::PointCloudFusionNode(
   m_output_frame_id(declare_parameter("output_frame_id").get<std::string>()),
   m_cloud_capacity(declare_parameter("cloud_size").get<uint32_t>())
 {
+  // sched_log params
+  auto timestamp = (int32_t) std::time(nullptr);
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
+  sched_info si {
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.period").get<float32_t>()), // period
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+  };
+  __slog = SchedLog(si);
+  __iter = 0;
+
   m_input_topics[0] = "/lidar_front/points_filtered";
   m_input_topics[1] = "/lidar_rear/points_filtered";
   for (size_t i = 2; i < m_input_topics.size(); ++i) {
@@ -164,6 +204,15 @@ PointCloudFusionNode::pointcloud_callback(
     m_cloud_concatenated.header.stamp = latest_stamp;
     m_cloud_publisher->publish(m_cloud_concatenated);
   }
+
+  sched_data sd {
+    ++__iter,  // iter
+    0.0,  // response_time
+    0.0,  // start_time
+    0.0  // end_time
+  };
+  __slog.add_entry(sd);
+
 }
 }  // namespace point_cloud_fusion_nodes
 }  // namespace filters
