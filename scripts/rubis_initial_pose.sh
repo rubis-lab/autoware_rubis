@@ -1,11 +1,11 @@
 #!/bin/bash
-p_x="-2.1169586181640625"
-p_y="-124.08137512207031"
+p_x="-75.62998962402344"
+p_y="-47.51282501220703"
 p_z="0.0"
 r_x="0.0"
 r_y="0.0"
-r_z="0.7268329636382136"
-r_w="0.6868142710870904"
+r_z="0.7570310443853707"
+r_w="0.6533789083195102"
 
 echo "P($p_x, $p_y, $p_z) R($r_x, $r_y, $r_z, $r_w)"
 ros2 topic pub --once /localization/initialpose geometry_msgs/msg/PoseWithCovarianceStamped "
