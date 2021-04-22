@@ -25,7 +25,8 @@ ament_auto_find_build_dependencies()
 set(CLUSTER_NODE_LIB euclidean_cluster_node)
 ament_auto_add_library(${CLUSTER_NODE_LIB} SHARED
   include/euclidean_cluster_nodes/euclidean_cluster_node.hpp
-  src/euclidean_cluster_node.cpp)
+  src/euclidean_cluster_node.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp)
 autoware_set_compile_options(${CLUSTER_NODE_LIB})
 target_compile_options(
   ${CLUSTER_NODE_LIB} PUBLIC "-Wno-sign-conversion" "-Wno-conversion")
@@ -33,6 +34,10 @@ target_compile_options(
 rclcpp_components_register_node(${CLUSTER_NODE_LIB}
   PLUGIN "autoware::perception::segmentation::euclidean_cluster_nodes::EuclideanClusterNode"
   EXECUTABLE ${CLUSTER_NODE_LIB}_exe
+)
+
+target_include_directories(${CLUSTER_NODE_LIB} PUBLIC
+  /home/rubis/AutowareAuto/src/rubis_rt/include/
 )
 
 ## Testing

@@ -30,6 +30,9 @@
 #include <memory>
 #include <string>
 
+#include "rubis_rt/sched_log.hpp"
+#include <ctime>
+
 namespace autoware
 {
 namespace perception
@@ -45,6 +48,10 @@ using visualization_msgs::msg::Marker;
 using visualization_msgs::msg::MarkerArray;
 using BoundingBox = autoware_auto_msgs::msg::BoundingBox;
 using BoundingBoxArray = autoware_auto_msgs::msg::BoundingBoxArray;
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
+
 /// \brief Combined object detection node, primarily does clustering, can also do in-place
 ///        downsampling and bounding box formation
 class EUCLIDEAN_CLUSTER_NODES_PUBLIC EuclideanClusterNode : public rclcpp::Node
@@ -61,6 +68,8 @@ public:
     const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options);    
 
 private:
+  SchedLog __slog;
+  int32_t __iter;
   /// \brief Main callback function
   void EUCLIDEAN_CLUSTER_NODES_LOCAL handle(const PointCloud2::SharedPtr msg_ptr);
   /// \brief Initialization function

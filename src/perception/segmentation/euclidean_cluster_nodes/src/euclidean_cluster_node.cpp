@@ -79,6 +79,26 @@ m_voxel_ptr{nullptr},  // Because voxel config's Point types don't accept positi
 m_use_lfit{declare_parameter("use_lfit").get<bool8_t>()},
 m_use_z{declare_parameter("use_z").get<bool8_t>()}
 {
+  // sched_log params
+  auto timestamp = (int32_t) std::time(nullptr);
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
+  sched_info si {
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.period").get<float32_t>()), // period
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+  };
+  __slog = SchedLog(si);
+  __iter = 0;
+
   init(m_cluster_alg.get_config());
   // Initialize voxel grid
   if (declare_parameter("downsample").get<bool8_t>()) {
@@ -150,6 +170,26 @@ m_voxel_ptr{nullptr},  // Because voxel config's Point types don't accept positi
 m_use_lfit{declare_parameter("use_lfit").get<bool8_t>()},
 m_use_z{declare_parameter("use_z").get<bool8_t>()}
 {
+  // sched_log params
+  auto timestamp = (int32_t) std::time(nullptr);
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
+  sched_info si {
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.period").get<float32_t>()), // period
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+  };
+  __slog = SchedLog(si);
+  __iter = 0;
+
   init(m_cluster_alg.get_config());
   // Initialize voxel grid
   if (declare_parameter("downsample").get<bool8_t>()) {
@@ -311,6 +351,13 @@ void EuclideanClusterNode::handle(const PointCloud2::SharedPtr msg_ptr)
     RCLCPP_FATAL(get_logger(), "EuclideanClusterNode: Unexpected error occurred!");
     throw;
   }
+  sched_data sd {
+    ++__iter,  // iter
+    0.0,  // response_time
+    0.0,  // start_time
+    0.0  // end_time
+  };
+  __slog.add_entry(sd);
 }
 }  // namespace euclidean_cluster_nodes
 }  // namespace segmentation
