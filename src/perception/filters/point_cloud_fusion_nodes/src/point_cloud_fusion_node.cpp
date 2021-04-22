@@ -50,6 +50,23 @@ PointCloudFusionNode::PointCloudFusionNode(
   init();
 }
 
+//rubis constructor
+PointCloudFusionNode::PointCloudFusionNode(
+  const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options)
+: Node(node_name, node_ns, node_options),
+  m_cloud_publisher(create_publisher<PointCloudMsgT>("points_fused", rclcpp::QoS(10))),
+  m_input_topics(declare_parameter("number_of_sources").get<std::size_t>()),
+  m_output_frame_id(declare_parameter("output_frame_id").get<std::string>()),
+  m_cloud_capacity(declare_parameter("cloud_size").get<uint32_t>())
+{
+  m_input_topics[0] = "/lidar_front/points_filtered";
+  m_input_topics[1] = "/lidar_rear/points_filtered";
+  for (size_t i = 2; i < m_input_topics.size(); ++i) {
+    m_input_topics[i] = "input_topic" + std::to_string(i + 1);
+  }
+  init();
+}
+
 void PointCloudFusionNode::init()
 {
   m_core = std::make_unique<point_cloud_fusion::PointCloudFusion>(

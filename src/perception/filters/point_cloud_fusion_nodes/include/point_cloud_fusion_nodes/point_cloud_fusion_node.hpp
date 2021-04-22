@@ -50,6 +50,8 @@ public:
   /// \param[in] node_options An rclcpp::NodeOptions object
   explicit PointCloudFusionNode(
     const rclcpp::NodeOptions & node_options);
+  explicit PointCloudFusionNode(
+    const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options);
 
 private:
   using PointT = common::types::PointXYZIF;

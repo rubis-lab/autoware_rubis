@@ -61,6 +61,7 @@ public:
   /// \brief Parameter constructor
   /// \param node_options Additional options to control creation of the node.
   explicit PointCloud2FilterTransformNode(const rclcpp::NodeOptions & node_options);
+  explicit PointCloud2FilterTransformNode(const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options);
 
 protected:
   /// \brief Call distance & angle filter and then static transformer for all the points

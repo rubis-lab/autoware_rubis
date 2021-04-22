@@ -56,6 +56,8 @@ public:
   /// \param[in] options an rclcpp::NodeOptions object to configure the node
   /// \throw std::runtime_error if configuration fails
   explicit RayGroundClassifierCloudNode(const rclcpp::NodeOptions & options);
+  explicit RayGroundClassifierCloudNode(
+    const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & options);
 
 private:
   /// \brief Resets state of ray aggregator and messages

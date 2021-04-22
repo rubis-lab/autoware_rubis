@@ -57,6 +57,8 @@ public:
   /// \param node_options Additional options to control creation of the node.
   explicit EuclideanClusterNode(
     const rclcpp::NodeOptions & node_options);
+  explicit EuclideanClusterNode(
+    const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options);    
 
 private:
   /// \brief Main callback function

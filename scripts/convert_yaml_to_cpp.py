@@ -4,7 +4,12 @@ import yaml
 target = [
     'rubis_detect',
     'rubis_drive',
-    'point_cloud_filter_transform'
+    'point_cloud_filter_transform',
+    'point_cloud_fusion',
+    'voxel_grid',
+    'ray_ground_classifier',
+    'euclidean_cluster',
+    'ndt_localizer'
 ]
 
 
@@ -90,7 +95,7 @@ for yf in os.listdir(yaml_dir):
             output_body += "\n"
             # output_body += yfull    #yfull = yaml file name
             output_body += "rclcpp::NodeOptions configure_"
-            output_body += node_name + "_" + i + "(void) {\n"
+            output_body += node_name + "_" + i + "_nodes(void) {\n"
             output_body += "  std::vector<rclcpp::Parameter> params;\n\n"
             # print('processing {}'.format(yfull))
 
@@ -99,30 +104,125 @@ for yf in os.listdir(yaml_dir):
             output_body += "  node_options.parameter_overrides(params);\n\n"
             output_body += "  return node_options;\n}\n"
 
-        continue
+    elif node_name == "rubis_drive" or node_name == "rubis_detect":
+        output_header += '#include \"' + node_name + '/' +  node_name + '_node.hpp\"\n'
 
-    output_header += '#include \"' + node_name + '/' +  node_name + '_node.hpp\"\n'
+        output_body += "\n"
+        # output_body += yfull    #yfull = yaml file name
+        output_body += "rclcpp::NodeOptions configure_"
+        output_body += node_name + "_nodes(void) {\n"
+        output_body += "  std::vector<rclcpp::Parameter> params;\n\n"
+        # print('processing {}'.format(yfull))
+        
+        with open(yfull, 'r') as y:
+            r_params = yaml.load(y, Loader=yaml.FullLoader)
+        
+        if '/**' in r_params:
+            if 'ros__parameters' in r_params['/**']:
+                r_data = r_params['/**']['ros__parameters']
+        else:
+            r_data = r_params
+        
+        output_body += dict2cpp(r_data)+"\n"
+        output_body += "  rclcpp::NodeOptions node_options;\n"
+        output_body += "  node_options.parameter_overrides(params);\n\n"
+        output_body += "  return node_options;\n}\n"
 
-    output_body += "\n"
-    # output_body += yfull    #yfull = yaml file name
-    output_body += "rclcpp::NodeOptions configure_"
-    output_body += node_name + "(void) {\n"
-    output_body += "  std::vector<rclcpp::Parameter> params;\n\n"
-    # print('processing {}'.format(yfull))
-    
-    with open(yfull, 'r') as y:
-        r_params = yaml.load(y, Loader=yaml.FullLoader)
-    
-    if '/**' in r_params:
-        if 'ros__parameters' in r_params['/**']:
-            r_data = r_params['/**']['ros__parameters']
+    elif node_name == "voxel_grid":
+        output_header += '#include \"' + node_name + "_nodes" + '/' +  "voxel_cloud" + '_node.hpp\"\n'
+
+        output_body += "\n"
+        # output_body += yfull    #yfull = yaml file name
+        output_body += "rclcpp::NodeOptions configure_"
+        output_body += node_name + "_nodes(void) {\n"
+        output_body += "  std::vector<rclcpp::Parameter> params;\n\n"
+        # print('processing {}'.format(yfull))
+        
+        with open(yfull, 'r') as y:
+            r_params = yaml.load(y, Loader=yaml.FullLoader)
+        
+        if '/**' in r_params:
+            if 'ros__parameters' in r_params['/**']:
+                r_data = r_params['/**']['ros__parameters']
+        else:
+            r_data = r_params
+        
+        output_body += dict2cpp(r_data)+"\n"
+        output_body += "  rclcpp::NodeOptions node_options;\n"
+        output_body += "  node_options.parameter_overrides(params);\n\n"
+        output_body += "  return node_options;\n}\n"
+        
+    elif node_name == "ray_ground_classifier":
+        output_header += '#include \"' + node_name + "_nodes" + '/' +  node_name + '_cloud_node.hpp\"\n'
+
+        output_body += "\n"
+        # output_body += yfull    #yfull = yaml file name
+        output_body += "rclcpp::NodeOptions configure_"
+        output_body += node_name + "_nodes(void) {\n"
+        output_body += "  std::vector<rclcpp::Parameter> params;\n\n"
+        # print('processing {}'.format(yfull))
+        
+        with open(yfull, 'r') as y:
+            r_params = yaml.load(y, Loader=yaml.FullLoader)
+        
+        if '/**' in r_params:
+            if 'ros__parameters' in r_params['/**']:
+                r_data = r_params['/**']['ros__parameters']
+        else:
+            r_data = r_params
+        
+        output_body += dict2cpp(r_data)+"\n"
+        output_body += "  rclcpp::NodeOptions node_options;\n"
+        output_body += "  node_options.parameter_overrides(params);\n\n"
+        output_body += "  return node_options;\n}\n"    
+
+    elif node_name == "ndt_localizer":
+        output_header += '#include \"' + "ndt" + "_nodes" + '/' +  node_name + '_nodes.hpp\"\n'
+
+        output_body += "\n"
+        # output_body += yfull    #yfull = yaml file name
+        output_body += "rclcpp::NodeOptions configure_"
+        output_body += node_name + "_nodes(void) {\n"
+        output_body += "  std::vector<rclcpp::Parameter> params;\n\n"
+        # print('processing {}'.format(yfull))
+        
+        with open(yfull, 'r') as y:
+            r_params = yaml.load(y, Loader=yaml.FullLoader)
+        
+        if '/**' in r_params:
+            if 'ros__parameters' in r_params['/**']:
+                r_data = r_params['/**']['ros__parameters']
+        else:
+            r_data = r_params
+        
+        output_body += dict2cpp(r_data)+"\n"
+        output_body += "  rclcpp::NodeOptions node_options;\n"
+        output_body += "  node_options.parameter_overrides(params);\n\n"
+        output_body += "  return node_options;\n}\n"   
+
     else:
-        r_data = r_params
-    
-    output_body += dict2cpp(r_data)+"\n"
-    output_body += "  rclcpp::NodeOptions node_options;\n"
-    output_body += "  node_options.parameter_overrides(params);\n\n"
-    output_body += "  return node_options;\n}\n"
+        output_header += '#include \"' + node_name + "_nodes" + '/' +  node_name + '_node.hpp\"\n'
+
+        output_body += "\n"
+        # output_body += yfull    #yfull = yaml file name
+        output_body += "rclcpp::NodeOptions configure_"
+        output_body += node_name + "_nodes(void) {\n"
+        output_body += "  std::vector<rclcpp::Parameter> params;\n\n"
+        # print('processing {}'.format(yfull))
+        
+        with open(yfull, 'r') as y:
+            r_params = yaml.load(y, Loader=yaml.FullLoader)
+        
+        if '/**' in r_params:
+            if 'ros__parameters' in r_params['/**']:
+                r_data = r_params['/**']['ros__parameters']
+        else:
+            r_data = r_params
+        
+        output_body += dict2cpp(r_data)+"\n"
+        output_body += "  rclcpp::NodeOptions node_options;\n"
+        output_body += "  node_options.parameter_overrides(params);\n\n"
+        output_body += "  return node_options;\n}\n"        
     # print("---------------------------------------------------------")
 
 output = output_header + output_body + output_footer

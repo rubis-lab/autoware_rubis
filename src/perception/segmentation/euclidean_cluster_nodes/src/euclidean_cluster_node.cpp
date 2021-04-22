@@ -109,6 +109,77 @@ m_use_z{declare_parameter("use_z").get<bool8_t>()}
             });
   }
 }
+//rubis constructor
+EuclideanClusterNode::EuclideanClusterNode(
+  const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options)
+: Node(node_name, node_ns, node_options),
+  m_cloud_sub_ptr{create_subscription<PointCloud2>(
+      "points_nonground",
+      rclcpp::QoS(10),
+      [this](const PointCloud2::SharedPtr msg) {handle(msg);})},
+  m_cluster_pub_ptr{declare_parameter("use_cluster").get<bool8_t>() ?
+  create_publisher<Clusters>(
+    "points_clustered",
+    rclcpp::QoS(10)) : nullptr},
+m_box_pub_ptr{declare_parameter("use_box").get<bool8_t>() ?
+  create_publisher<BoundingBoxArray>(
+    "lidar_bounding_boxes", rclcpp::QoS{10}) :
+  nullptr},
+m_marker_pub_ptr{get_parameter("use_box").as_bool() ?
+  create_publisher<MarkerArray>(
+    "lidar_bounding_boxes_viz", rclcpp::QoS{10}) :
+  nullptr},
+m_cluster_alg{
+  euclidean_cluster::Config{
+    declare_parameter("cluster.frame_id").get<std::string>().c_str(),
+    static_cast<std::size_t>(declare_parameter("cluster.min_cluster_size").get<std::size_t>()),
+    static_cast<std::size_t>(declare_parameter("cluster.max_num_clusters").get<std::size_t>())
+  },
+  euclidean_cluster::HashConfig{
+    static_cast<float32_t>(declare_parameter("hash.min_x").get<float32_t>()),
+    static_cast<float32_t>(declare_parameter("hash.max_x").get<float32_t>()),
+    static_cast<float32_t>(declare_parameter("hash.min_y").get<float32_t>()),
+    static_cast<float32_t>(declare_parameter("hash.max_y").get<float32_t>()),
+    static_cast<float32_t>(declare_parameter("hash.side_length").get<float32_t>()),
+    static_cast<std::size_t>(declare_parameter("max_cloud_size").get<std::size_t>())
+  }
+},
+m_clusters{},
+m_boxes{},
+m_voxel_ptr{nullptr},  // Because voxel config's Point types don't accept positional arguments
+m_use_lfit{declare_parameter("use_lfit").get<bool8_t>()},
+m_use_z{declare_parameter("use_z").get<bool8_t>()}
+{
+  init(m_cluster_alg.get_config());
+  // Initialize voxel grid
+  if (declare_parameter("downsample").get<bool8_t>()) {
+    filters::voxel_grid::PointXYZ min_point;
+    filters::voxel_grid::PointXYZ max_point;
+    filters::voxel_grid::PointXYZ voxel_size;
+    min_point.x = static_cast<float32_t>(declare_parameter("voxel.min_point.x").get<float32_t>());
+    min_point.y = static_cast<float32_t>(declare_parameter("voxel.min_point.y").get<float32_t>());
+    min_point.z = static_cast<float32_t>(declare_parameter("voxel.min_point.z").get<float32_t>());
+    max_point.x = static_cast<float32_t>(declare_parameter("voxel.max_point.x").get<float32_t>());
+    max_point.y = static_cast<float32_t>(declare_parameter("voxel.max_point.y").get<float32_t>());
+    max_point.z = static_cast<float32_t>(declare_parameter("voxel.max_point.z").get<float32_t>());
+    voxel_size.x = static_cast<float32_t>(declare_parameter("voxel.voxel_size.x").get<float32_t>());
+    voxel_size.y = static_cast<float32_t>(declare_parameter("voxel.voxel_size.y").get<float32_t>());
+    voxel_size.z = static_cast<float32_t>(declare_parameter("voxel.voxel_size.z").get<float32_t>());
+    // Aggressive downsampling if not using z
+    if (!m_use_z) {
+      voxel_size.z = (max_point.z - min_point.z) + 1.0F;
+      // Info
+      RCLCPP_INFO(get_logger(), "z is not used, height aspect is fully downsampled away");
+    }
+    m_voxel_ptr = std::make_unique<VoxelAlgorithm>(
+      filters::voxel_grid::Config{
+              min_point,
+              max_point,
+              voxel_size,
+              static_cast<std::size_t>(get_parameter("max_cloud_size").as_int())
+            });
+  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 void EuclideanClusterNode::init(const euclidean_cluster::Config & cfg)

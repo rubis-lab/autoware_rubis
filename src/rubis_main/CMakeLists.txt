@@ -30,10 +30,12 @@ autoware_set_compile_options(${PROJECT_NAME})
 add_executable(rubis_main_runner
   include/rubis_main/rubis_main_parsed.hpp
   src/rubis_main_runner.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
 )
 
 target_include_directories(rubis_main_runner PUBLIC include
   /home/rubis/AutowareAuto/src/rubis_main/include/
+  /home/rubis/AutowareAuto/src/rubis_rt/include/
 )
 
 # add package.xml dependencies here.

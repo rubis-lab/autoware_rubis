@@ -159,6 +159,45 @@ public:
     init();
   }
 
+//rubis constructor
+  RelativeLocalizerNode(
+    const std::string & node_name,
+    const std::string & node_ns,
+    const rclcpp::NodeOptions & options,
+    const PoseInitializerT & pose_initializer)
+  : Node(node_name, node_ns, options),
+    m_pose_initializer(pose_initializer),
+    m_tf_listener(m_tf_buffer, std::shared_ptr<rclcpp::Node>(this, [](auto) {}), false),
+    m_observation_sub(create_subscription<ObservationMsgT>(
+      "/lidars/points_fused_downsampled",
+        rclcpp::QoS{rclcpp::KeepLast{
+            static_cast<size_t>(declare_parameter("observation_sub.history_depth").template
+            get<size_t>())}},
+        [this](typename ObservationMsgT::ConstSharedPtr msg) {observation_callback_rubis(msg);})),
+    m_map_sub(
+      create_subscription<MapMsgT>(
+        "ndt_map",
+        rclcpp::QoS{rclcpp::KeepLast{
+            static_cast<size_t>(declare_parameter("map_sub.history_depth").
+            template get<size_t>())}}.transient_local(),
+        [this](typename MapMsgT::ConstSharedPtr msg) {map_callback(msg);})),
+    m_pose_publisher(
+      create_publisher<PoseWithCovarianceStamped>(
+        "ndt_pose",
+        rclcpp::QoS{rclcpp::KeepLast{
+            static_cast<size_t>(declare_parameter(
+              "pose_pub.history_depth").template get<size_t>())}})),
+    m_initial_pose_sub(
+      create_subscription<PoseWithCovarianceStamped>(
+        "initialpose",
+        rclcpp::QoS{rclcpp::KeepLast{10}},
+        [this](const typename PoseWithCovarianceStamped::ConstSharedPtr msg) {
+          initial_pose_callback(msg);
+        }))
+  {
+    init();
+  }
+
   /// Constructor using ros parameters
   /// \param node_name Node name
   /// \param name_space Node namespace
@@ -390,6 +429,72 @@ private:
     }
   }
 
+//rubis constructor
+void observation_callback_rubis(typename ObservationMsgT::ConstSharedPtr msg_ptr)
+  {
+    // Check to ensure the pointers are initialized.
+    assert_ptr_not_null(m_localizer_ptr, "localizer");
+    assert_ptr_not_null(m_map_ptr, "map");
+
+    if (!m_map_ptr->valid()) {
+      on_observation_with_invalid_map(msg_ptr);
+      return;
+    }
+
+    const auto observation_time = ::time_utils::from_message(get_stamp(*msg_ptr));
+    const auto & observation_frame = get_frame_id(*msg_ptr);
+    const auto & map_frame = m_map_ptr->frame_id();
+
+    try {
+      geometry_msgs::msg::TransformStamped initial_guess;
+      if (m_external_pose_available) {
+        // If someone set a transform and then requests a different transform, that's an error
+        if (m_external_pose.header.frame_id != map_frame ||
+          m_external_pose.child_frame_id != observation_frame)
+        {
+          throw std::runtime_error(
+                  "The pose initializer's set_external_pose() "
+                  "and guess() methods were called with different frames.");
+        }
+        m_external_pose_available = false;
+        initial_guess = m_external_pose;
+        initial_guess.header.stamp = get_stamp(*msg_ptr);
+      } else {
+        initial_guess =
+          m_pose_initializer.guess(m_tf_buffer, observation_time, map_frame, observation_frame);
+      }
+
+      RegistrationSummary summary{};
+      const auto pose_out =
+        m_localizer_ptr->register_measurement(*msg_ptr, initial_guess, *m_map_ptr, &summary);
+      if (validate_output(summary, pose_out, initial_guess)) {
+        m_pose_publisher->publish(pose_out);
+        // This is to be used when no state estimator or alternative source of
+        // localization is available.
+        if (m_tf_publisher) {
+          publish_tf(pose_out);
+          // republish point cloud so visualization has no issues with the timestamp
+          // being too new (no transform yet). Reset the timestamp to zero so visualization
+          // is not bothered if odom->base_link transformation is available
+          // only at different time stamps.
+          auto msg = *msg_ptr;
+          msg.header.stamp = time_utils::to_message(tf2::TimePointZero);
+          m_obs_republisher_rubis->publish(msg);
+        }
+
+        handle_registration_summary(summary);
+      } else {
+        on_invalid_output(pose_out);
+      }
+    } catch (...) {
+      // TODO(mitsudome-r) remove this hack in #458
+      if (m_tf_publisher && m_use_hack) {
+        republish_tf(get_stamp(*msg_ptr));
+      }
+      on_bad_registration(std::current_exception());
+    }
+  }
+
   /// Callback that updates the map.
   /// \param msg_ptr Pointer to the map message.
   void map_callback(typename MapMsgT::ConstSharedPtr msg_ptr)
@@ -520,6 +625,9 @@ private:
   typename rclcpp::Publisher<tf2_msgs::msg::TFMessage>::SharedPtr m_tf_publisher{nullptr};
   typename rclcpp::Publisher<ObservationMsgT>::SharedPtr m_obs_republisher{
     create_publisher<ObservationMsgT>("observation_republish", 10)};
+
+  typename rclcpp::Publisher<ObservationMsgT>::SharedPtr m_obs_republisher_rubis{
+    create_publisher<ObservationMsgT>("/lidars/points_fused/viz", 10)};
 
   // Receive updates from "/initialpose" (e.g. rviz2)
   typename rclcpp::Subscription<PoseWithCovarianceStamped>::SharedPtr m_initial_pose_sub;

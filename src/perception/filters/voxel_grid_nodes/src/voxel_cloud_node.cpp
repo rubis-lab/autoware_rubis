@@ -86,7 +86,53 @@ VoxelCloudNode::VoxelCloudNode(
   // Init
   init(cfg, declare_parameter("is_approximate").get<bool8_t>());
 }
-
+//rubis constructor
+VoxelCloudNode::VoxelCloudNode(
+  const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options)
+: Node(node_name, node_ns, node_options),
+  m_sub_ptr{create_subscription<Message>(
+      "points_fused",
+      rclcpp::QoS(
+        declare_parameter("subscription.qos.history_depth", 10)
+      ).durability(
+        parse_durability_parameter(
+          declare_parameter("subscription.qos.durability", "volatile")
+        )
+      )
+      ,
+      std::bind(&VoxelCloudNode::callback, this, std::placeholders::_1)
+    )},
+  m_pub_ptr{create_publisher<Message>(
+      "points_fused_downsampled",
+      rclcpp::QoS(
+        declare_parameter("publisher.qos.history_depth", 10)
+      ).durability(
+        parse_durability_parameter(
+          declare_parameter("publisher.qos.durability", "volatile")
+        )
+      )
+    )},
+  m_has_failed{false}
+{
+  // Build config manually (messages only have default constructors)
+  voxel_grid::PointXYZ min_point;
+  min_point.x = static_cast<float32_t>(declare_parameter("config.min_point.x").get<float32_t>());
+  min_point.y = static_cast<float32_t>(declare_parameter("config.min_point.y").get<float32_t>());
+  min_point.z = static_cast<float32_t>(declare_parameter("config.min_point.z").get<float32_t>());
+  voxel_grid::PointXYZ max_point;
+  max_point.x = static_cast<float32_t>(declare_parameter("config.max_point.x").get<float32_t>());
+  max_point.y = static_cast<float32_t>(declare_parameter("config.max_point.y").get<float32_t>());
+  max_point.z = static_cast<float32_t>(declare_parameter("config.max_point.z").get<float32_t>());
+  voxel_grid::PointXYZ voxel_size;
+  voxel_size.x = static_cast<float32_t>(declare_parameter("config.voxel_size.x").get<float32_t>());
+  voxel_size.y = static_cast<float32_t>(declare_parameter("config.voxel_size.y").get<float32_t>());
+  voxel_size.z = static_cast<float32_t>(declare_parameter("config.voxel_size.z").get<float32_t>());
+  const std::size_t capacity =
+    static_cast<std::size_t>(declare_parameter("config.capacity").get<std::size_t>());
+  const voxel_grid::Config cfg{min_point, max_point, voxel_size, capacity};
+  // Init
+  init(cfg, declare_parameter("is_approximate").get<bool8_t>());
+}
 ////////////////////////////////////////////////////////////////////////////////
 void VoxelCloudNode::callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
 {
