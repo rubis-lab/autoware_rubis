@@ -27,7 +27,7 @@
     rubis:
       sched_info:
         task_id: 7
-        name: "ray_fround_classifier"
+        name: "ray_ground_classifier"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 10.0
         period: 20.0

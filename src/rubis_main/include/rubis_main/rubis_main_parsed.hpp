@@ -19,6 +19,12 @@ rclcpp::NodeOptions configure_point_cloud_fusion_nodes(void) {
   params.emplace_back("number_of_sources", 2);
   params.emplace_back("output_frame_id", "base_link");
   params.emplace_back("cloud_size", 55000);
+  params.emplace_back("rubis.sched_info.task_id", 7);
+  params.emplace_back("rubis.sched_info.name", "point_cloud_fusion");
+  params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
+  params.emplace_back("rubis.sched_info.exec_time", 10.0);
+  params.emplace_back("rubis.sched_info.period", 20.0);
+  params.emplace_back("rubis.sched_info.deadline", 30.0);
 
   rclcpp::NodeOptions node_options;
   node_options.parameter_overrides(params);
@@ -40,6 +46,12 @@ rclcpp::NodeOptions configure_voxel_grid_nodes(void) {
   params.emplace_back("config.voxel_size.x", 1.0);
   params.emplace_back("config.voxel_size.y", 1.0);
   params.emplace_back("config.voxel_size.z", 1.0);
+  params.emplace_back("rubis.sched_info.task_id", 7);
+  params.emplace_back("rubis.sched_info.name", "voxel_grid");
+  params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
+  params.emplace_back("rubis.sched_info.exec_time", 10.0);
+  params.emplace_back("rubis.sched_info.period", 20.0);
+  params.emplace_back("rubis.sched_info.deadline", 30.0);
 
   rclcpp::NodeOptions node_options;
   node_options.parameter_overrides(params);
@@ -73,6 +85,12 @@ rclcpp::NodeOptions configure_euclidean_cluster_nodes(void) {
   params.emplace_back("voxel.voxel_size.x", 0.2);
   params.emplace_back("voxel.voxel_size.y", 0.2);
   params.emplace_back("voxel.voxel_size.z", 0.2);
+  params.emplace_back("rubis.sched_info.task_id", 2);
+  params.emplace_back("rubis.sched_info.name", "euclidean_cluster");
+  params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
+  params.emplace_back("rubis.sched_info.exec_time", 10.0);
+  params.emplace_back("rubis.sched_info.period", 20.0);
+  params.emplace_back("rubis.sched_info.deadline", 30.0);
 
   rclcpp::NodeOptions node_options;
   node_options.parameter_overrides(params);
@@ -99,6 +117,12 @@ rclcpp::NodeOptions configure_rubis_detect_nodes(void) {
   params.emplace_back("staleness_threshold_ms", 500);
   params.emplace_back("target_frame_id", "map");
   params.emplace_back("lookahead_boxes", 30);
+  params.emplace_back("rubis.sched_info.task_id", 1);
+  params.emplace_back("rubis.sched_info.name", "rubis_detect");
+  params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
+  params.emplace_back("rubis.sched_info.exec_time", 10.0);
+  params.emplace_back("rubis.sched_info.period", 20.0);
+  params.emplace_back("rubis.sched_info.deadline", 30.0);
 
   rclcpp::NodeOptions node_options;
   node_options.parameter_overrides(params);
@@ -128,6 +152,12 @@ rclcpp::NodeOptions configure_ray_ground_classifier_nodes(void) {
   params.emplace_back("aggregator.max_ray_angle_rad", 3.14159);
   params.emplace_back("aggregator.ray_width_rad", 0.01);
   params.emplace_back("aggregator.max_ray_points", 512);
+  params.emplace_back("rubis.sched_info.task_id", 7);
+  params.emplace_back("rubis.sched_info.name", "ray_ground_classifier");
+  params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
+  params.emplace_back("rubis.sched_info.exec_time", 10.0);
+  params.emplace_back("rubis.sched_info.period", 20.0);
+  params.emplace_back("rubis.sched_info.deadline", 30.0);
 
   rclcpp::NodeOptions node_options;
   node_options.parameter_overrides(params);
@@ -156,6 +186,12 @@ rclcpp::NodeOptions configure_point_cloud_filter_transform_lidar_front_nodes(voi
   params.emplace_back("static_transformer.translation.x", 1.498);
   params.emplace_back("static_transformer.translation.y", -0.022);
   params.emplace_back("static_transformer.translation.z", 1.49);
+  params.emplace_back("rubis.sched_info.task_id", 7);
+  params.emplace_back("rubis.sched_info.name", "point_cloud_filter_transform");
+  params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
+  params.emplace_back("rubis.sched_info.exec_time", 10.0);
+  params.emplace_back("rubis.sched_info.period", 20.0);
+  params.emplace_back("rubis.sched_info.deadline", 30.0);
   rclcpp::NodeOptions node_options;
   node_options.parameter_overrides(params);
 
@@ -183,6 +219,12 @@ rclcpp::NodeOptions configure_point_cloud_filter_transform_lidar_rear_nodes(void
   params.emplace_back("static_transformer.translation.x", 0.308);
   params.emplace_back("static_transformer.translation.y", -0.022);
   params.emplace_back("static_transformer.translation.z", 1.49);
+  params.emplace_back("rubis.sched_info.task_id", 7);
+  params.emplace_back("rubis.sched_info.name", "point_cloud_filter_transform");
+  params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
+  params.emplace_back("rubis.sched_info.exec_time", 10.0);
+  params.emplace_back("rubis.sched_info.period", 20.0);
+  params.emplace_back("rubis.sched_info.deadline", 30.0);
   rclcpp::NodeOptions node_options;
   node_options.parameter_overrides(params);
 
@@ -225,6 +267,12 @@ rclcpp::NodeOptions configure_ndt_localizer_nodes(void) {
   params.emplace_back("localizer.optimizer.line_search.step_max", 0.12);
   params.emplace_back("localizer.optimizer.line_search.step_min", 0.0001);
   params.emplace_back("localizer.guess_time_tolerance_ms", 10000);
+  params.emplace_back("rubis.sched_info.task_id", 7);
+  params.emplace_back("rubis.sched_info.name", "ndt_localizer");
+  params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
+  params.emplace_back("rubis.sched_info.exec_time", 10.0);
+  params.emplace_back("rubis.sched_info.period", 20.0);
+  params.emplace_back("rubis.sched_info.deadline", 30.0);
 
   rclcpp::NodeOptions node_options;
   node_options.parameter_overrides(params);
@@ -239,6 +287,12 @@ rclcpp::NodeOptions configure_rubis_drive_nodes(void) {
   params.emplace_back("cur2tar", 1.0);
   params.emplace_back("safe_dist", 30.0);
   params.emplace_back("danger_scale", 20);
+  params.emplace_back("rubis.sched_info.task_id", 1);
+  params.emplace_back("rubis.sched_info.name", "rubis_drive");
+  params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
+  params.emplace_back("rubis.sched_info.exec_time", 10.0);
+  params.emplace_back("rubis.sched_info.period", 20.0);
+  params.emplace_back("rubis.sched_info.deadline", 30.0);
 
   rclcpp::NodeOptions node_options;
   node_options.parameter_overrides(params);

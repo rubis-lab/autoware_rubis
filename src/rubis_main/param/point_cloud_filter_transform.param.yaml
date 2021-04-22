@@ -24,6 +24,15 @@
           x:                    1.498
           y:                    -0.022
           z:                    1.49
+      rubis:
+        sched_info:
+          task_id: 7
+          name: "point_cloud_filter_transform"
+          log_dir: "/home/rubis/rubis_log/"
+          exec_time: 10.0
+          period: 20.0
+          deadline: 30.0
+
     lidar_rear:
       timeout_ms:       110
       pcl_size:         55000
@@ -46,11 +55,11 @@
           x:                    0.308
           y:                    -0.022
           z:                    1.49
-    rubis:
-      sched_info:
-        task_id: 1.00002
-        name: "point_cloud_filter_transform"
-        log_dir: "/home/rubis/rubis_log/"
-        exec_time: 10.0
-        period: 20.0
-        deadline: 30.0
+      rubis:
+        sched_info:
+          task_id: 7
+          name: "point_cloud_filter_transform"
+          log_dir: "/home/rubis/rubis_log/"
+          exec_time: 10.0
+          period: 20.0
+          deadline: 30.0
