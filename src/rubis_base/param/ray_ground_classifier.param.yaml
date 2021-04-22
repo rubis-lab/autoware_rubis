@@ -24,3 +24,11 @@
       max_ray_angle_rad:  3.14159
       ray_width_rad:      0.01
       max_ray_points:     512
+    rubis:
+      sched_info:
+        task_id: 7
+        name: "ray_fround_classifier"
+        log_dir: "/home/rubis/rubis_log/"
+        exec_time: 10.0
+        period: 20.0
+        deadline: 30.0

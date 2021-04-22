@@ -67,7 +67,7 @@
       guess_time_tolerance_ms: 10000
     rubis:
       sched_info:
-        task_id: 1.00002
+        task_id: 7
         name: "ndt_localizer"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 10.0

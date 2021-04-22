@@ -7,7 +7,7 @@
     cloud_size:       55000
     rubis:
       sched_info:
-        task_id: 1.00002
+        task_id: 7
         name: "point_cloud_fusion"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 10.0

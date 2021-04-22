@@ -12,6 +12,14 @@
         y: 130.0
         z: 3.0
       voxel_size:
-        x: 2.0
-        y: 2.0
-        z: 2.0
+        x: 1.00001
+        y: 1.00001
+        z: 1.00001
+    rubis:
+      sched_info:
+        task_id: 7
+        name: "voxel_grid"
+        log_dir: "/home/rubis/rubis_log/"
+        exec_time: 10.0
+        period: 20.0
+        deadline: 30.0

@@ -1,9 +1,9 @@
 /**:
   ros__parameters:
-    map_pcd_file: "/home/rubis/AutowareAuto/install/rubis_base/share/rubis_base/data/SingleLaneRoad.pcd"
-    # map_pcd_file: "/home/rubis/AutowareAuto/install/rubis_base/share/rubis_base/data/autonomoustuff_parking_lot_lgsvl.pcd"
-    map_yaml_file: "/home/rubis/AutowareAuto/install/rubis_base/share/rubis_base/data/SingleLaneRoad.yaml"
-    # map_yaml_file: "/home/rubis/AutowareAuto/install/rubis_base/share/rubis_base/data/autonomoustuff_parking_lot_lgsvl.yaml"
+    map_pcd_file: "/home/rubis/AutowareAuto/install/rubis_base/share/rubis_base/data/autonomoustuff_parking_lot_lgsvl.pcd"
+    # map_pcd_file: "/home/rubis/AutowareAuto/install/rubis_base/share/rubis_base/data/SingleLaneRoad.pcd"
+    # map_yaml_file: "/home/rubis/AutowareAuto/install/rubis_base/share/rubis_base/data/SingleLaneRoad.yaml"
+    map_yaml_file: "/home/rubis/AutowareAuto/install/rubis_base/share/rubis_base/data/autonomoustuff_parking_lot_lgsvl.yaml"
     map_frame: "map"
     map_config:
       capacity: 1000000

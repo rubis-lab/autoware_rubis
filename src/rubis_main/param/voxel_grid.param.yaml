@@ -19,7 +19,7 @@
         z: 1.00001
     rubis:
       sched_info:
-        task_id: 1.00002
+        task_id: 7
         name: "voxel_grid"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 10.0
