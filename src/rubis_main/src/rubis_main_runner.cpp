@@ -25,7 +25,7 @@ int main(int argc, char * argv[])
   using autoware::perception::filters::point_cloud_filter_transform_nodes::PointCloud2FilterTransformNode;
 
   auto ptr_point_cloud_filter_transform_lidar_front_nodes = std::make_shared<PointCloud2FilterTransformNode>(
-    "filter_transform_vlp16_front", "lidar_front", configure_point_cloud_filter_transform_lidar_front_nodes());
+    "point_cloud_filter_transform_front", "lidar_front", configure_point_cloud_filter_transform_lidar_front_nodes());
   SingleThreadedExecutor exec_point_cloud_filter_transform_lidar_front_nodes;
   exec_point_cloud_filter_transform_lidar_front_nodes.add_node(ptr_point_cloud_filter_transform_lidar_front_nodes);
 
@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
   std::cout << "point_cloud_filter_transform_lidar_front_nodes" << std::endl;  
 
   auto ptr_point_cloud_filter_transform_lidar_rear_nodes = std::make_shared<PointCloud2FilterTransformNode>(
-    "filter_transform_vlp16_rear", "lidar_rear", configure_point_cloud_filter_transform_lidar_rear_nodes());
+    "point_cloud_filter_transform_rear", "lidar_rear", configure_point_cloud_filter_transform_lidar_rear_nodes());
   SingleThreadedExecutor exec_point_cloud_filter_transform_lidar_rear_nodes;
   exec_point_cloud_filter_transform_lidar_rear_nodes.add_node(ptr_point_cloud_filter_transform_lidar_rear_nodes);
 

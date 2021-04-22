@@ -173,7 +173,7 @@ PointCloud2FilterTransformNode::PointCloud2FilterTransformNode(
   m_pcl_size{static_cast<size_t>(declare_parameter("pcl_size").get<int32_t>())}
 {  /// Declare transform parameters with the namespace
   // sched_log params
-  auto timestamp = (int32_t) std::time(nullptr);
+  auto timestamp = static_cast<int32_t>( std::time(nullptr));
   auto f_timestamp = (timestamp + 50) / 100 * 100;
   sched_info si {
     static_cast<int32_t>(declare_parameter(

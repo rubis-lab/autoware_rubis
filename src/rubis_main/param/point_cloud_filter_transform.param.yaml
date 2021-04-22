@@ -26,8 +26,8 @@
           z:                    1.49
       rubis:
         sched_info:
-          task_id: 7
-          name: "point_cloud_filter_transform"
+          task_id: 8022
+          name: "point_cloud_filter_transform_front"
           log_dir: "/home/rubis/rubis_log/"
           exec_time: 10.0
           period: 20.0
@@ -57,8 +57,8 @@
           z:                    1.49
       rubis:
         sched_info:
-          task_id: 7
-          name: "point_cloud_filter_transform"
+          task_id: 8022
+          name: "point_cloud_filter_transform_rear"
           log_dir: "/home/rubis/rubis_log/"
           exec_time: 10.0
           period: 20.0

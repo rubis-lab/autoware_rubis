@@ -27,7 +27,7 @@ lidar_front:
       rubis:
         sched_info:
           task_id: 7
-          name: "point_cloud_filter_transform"
+          name: "point_cloud_filter_transform_front"
           log_dir: "/home/rubis/rubis_log/"
           exec_time: 10.0
           period: 20.0
@@ -60,7 +60,7 @@ lidar_rear:
       rubis:
         sched_info:
           task_id: 7
-          name: "point_cloud_filter_transform"
+          name: "point_cloud_filter_transform_rear"
           log_dir: "/home/rubis/rubis_log/"
           exec_time: 10.0
           period: 20.0

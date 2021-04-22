@@ -186,8 +186,8 @@ rclcpp::NodeOptions configure_point_cloud_filter_transform_lidar_front_nodes(voi
   params.emplace_back("static_transformer.translation.x", 1.498);
   params.emplace_back("static_transformer.translation.y", -0.022);
   params.emplace_back("static_transformer.translation.z", 1.49);
-  params.emplace_back("rubis.sched_info.task_id", 7);
-  params.emplace_back("rubis.sched_info.name", "point_cloud_filter_transform");
+  params.emplace_back("rubis.sched_info.task_id", 8022);
+  params.emplace_back("rubis.sched_info.name", "point_cloud_filter_transform_front");
   params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
   params.emplace_back("rubis.sched_info.exec_time", 10.0);
   params.emplace_back("rubis.sched_info.period", 20.0);
@@ -219,8 +219,8 @@ rclcpp::NodeOptions configure_point_cloud_filter_transform_lidar_rear_nodes(void
   params.emplace_back("static_transformer.translation.x", 0.308);
   params.emplace_back("static_transformer.translation.y", -0.022);
   params.emplace_back("static_transformer.translation.z", 1.49);
-  params.emplace_back("rubis.sched_info.task_id", 7);
-  params.emplace_back("rubis.sched_info.name", "point_cloud_filter_transform");
+  params.emplace_back("rubis.sched_info.task_id", 8022);
+  params.emplace_back("rubis.sched_info.name", "point_cloud_filter_transform_rear");
   params.emplace_back("rubis.sched_info.log_dir", "/home/rubis/rubis_log/");
   params.emplace_back("rubis.sched_info.exec_time", 10.0);
   params.emplace_back("rubis.sched_info.period", 20.0);
