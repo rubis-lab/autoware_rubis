@@ -15,3 +15,11 @@
         x: 2.0
         y: 2.0
         z: 2.0
+    rubis:
+      sched_info:
+        task_id: 4
+        name: "voxel_grid"
+        log_dir: "/home/rubis/rubis_log/"
+        exec_time: 10.0
+        period: 20.0
+        deadline: 30.0

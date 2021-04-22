@@ -67,6 +67,26 @@ VoxelCloudNode::VoxelCloudNode(
     )},
   m_has_failed{false}
 {
+  // sched_log params
+  auto timestamp = (int32_t) std::time(nullptr);
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
+  sched_info si {
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.period").get<float32_t>()), // period
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+  };
+  __slog = SchedLog(si);
+  __iter = 0;
+
   // Build config manually (messages only have default constructors)
   voxel_grid::PointXYZ min_point;
   min_point.x = static_cast<float32_t>(declare_parameter("config.min_point.x").get<float32_t>());
@@ -114,6 +134,26 @@ VoxelCloudNode::VoxelCloudNode(
     )},
   m_has_failed{false}
 {
+  // sched_log params
+  auto timestamp = (int32_t) std::time(nullptr);
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
+  sched_info si {
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.period").get<float32_t>()), // period
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+  };
+  __slog = SchedLog(si);
+  __iter = 0;
+
   // Build config manually (messages only have default constructors)
   voxel_grid::PointXYZ min_point;
   min_point.x = static_cast<float32_t>(declare_parameter("config.min_point.x").get<float32_t>());
@@ -150,6 +190,13 @@ void VoxelCloudNode::callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg
     RCLCPP_ERROR(this->get_logger(), err_msg.c_str());
     throw;
   }
+  sched_data sd {
+    ++__iter,  // iter
+    0.0,  // response_time
+    0.0,  // start_time
+    0.0  // end_time
+  };
+  __slog.add_entry(sd);
 }
 ////////////////////////////////////////////////////////////////////////////////
 void VoxelCloudNode::init(const voxel_grid::Config & cfg, const bool8_t is_approximate)

@@ -34,12 +34,17 @@ ament_auto_add_library(${VOXEL_GRID_NODE_LIB} SHARED
   src/algorithm/voxel_cloud_centroid.cpp
   include/voxel_grid_nodes/voxel_cloud_node.hpp
   src/voxel_cloud_node.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
 )
 autoware_set_compile_options(${VOXEL_GRID_NODE_LIB})
 
 rclcpp_components_register_node(${VOXEL_GRID_NODE_LIB}
   PLUGIN "autoware::perception::filters::voxel_grid_nodes::VoxelCloudNode"
   EXECUTABLE ${VOXEL_GRID_NODE_LIB}_exe
+)
+
+target_include_directories(${VOXEL_GRID_NODE_LIB} PUBLIC
+  /home/rubis/AutowareAuto/src/rubis_rt/include/
 )
 
 if(BUILD_TESTING)

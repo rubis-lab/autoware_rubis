@@ -26,6 +26,9 @@
 #include <memory>
 #include <string>
 
+#include "rubis_rt/sched_log.hpp"
+#include <ctime>
+
 using autoware::common::types::bool8_t;
 
 namespace autoware
@@ -34,6 +37,11 @@ namespace perception
 {
 namespace filters
 {
+
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
+
 /// \brief Objects that tie voxel_grid classes to Apex.OS and interprocess communication
 namespace voxel_grid_nodes
 {
@@ -57,6 +65,9 @@ private:
   /// \brief Initialize state transition callbacks and voxel grid
   /// \param[in] cfg Configuration object for voxel grid
   /// \param[in] is_approximate whether to instantiate an approximate or centroid voxel grid
+  SchedLog __slog;
+  int32_t __iter;
+
   void VOXEL_GRID_NODES_LOCAL init(const voxel_grid::Config & cfg, const bool8_t is_approximate);
 
   using Message = sensor_msgs::msg::PointCloud2;
