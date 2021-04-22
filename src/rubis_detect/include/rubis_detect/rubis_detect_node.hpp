@@ -70,6 +70,7 @@ using TimeStamp = builtin_interfaces::msg::Time;
 using rubis::sched_log::SchedLog;
 using rubis::sched_log::sched_info;
 using rubis::sched_log::sched_data;
+using namespace std::chrono_literals;
 
 /// \class RubisDetectNode
 /// \brief ROS 2 Node for hello world.
@@ -112,6 +113,12 @@ private:
 
   rclcpp::Subscription<BoundingBoxArray>::SharedPtr bounding_box_subscriber_{};
   void on_bounding_box(const BoundingBoxArray::SharedPtr & msg);
+
+  bool8_t has_received_bounding_box = false;
+  BoundingBoxArray::SharedPtr last_bboxes;
+  rclcpp::TimerBase::SharedPtr danger_timer_;
+  void danger_timer_callback();
+
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr danger_publisher_;
   rclcpp::Publisher<MarkerArray>::SharedPtr danger_publisher_debug_;
   std_msgs::msg::String compute_danger(const BoundingBoxArray & msg);

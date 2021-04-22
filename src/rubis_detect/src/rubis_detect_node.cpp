@@ -105,11 +105,12 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
 
   danger_publisher_ = this->create_publisher<std_msgs::msg::String>("rubis_danger", 10);
   danger_publisher_debug_ = this->create_publisher<MarkerArray>("rubis_danger_debug", 10);
-  // Create a tf interface to perform transforms on obstacle bounding boxes
-//   m_tf_buffer = std::make_shared<tf2_ros::Buffer>(this->get_clock());
-//   m_tf_listener = std::make_shared<tf2_ros::TransformListener>(
-//     *m_tf_buffer,
-//     std::shared_ptr<rclcpp::Node>(this, [](auto) {}), false);
+
+  // timer
+  auto period = static_cast<float32_t>(declare_parameter(
+    "rubis.sched_info.period").get<float32_t>());  // should use this.
+  danger_timer_ = this->create_wall_timer(
+    1000ms, std::bind(&RubisDetectNode::danger_timer_callback, this));
 }
 
 void RubisDetectNode::init_vehicle(const VehicleConfig & _vehicle_param)
@@ -161,11 +162,24 @@ void RubisDetectNode::save_state(const State & state)
 void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)
 {
   if(!has_received_state) {
-      RCLCPP_WARN(get_logger(), "RubisDetectNode::on_bounding_box: did not receive state yet");
+    RCLCPP_WARN(get_logger(), "RubisDetectNode::on_bounding_box: did not receive state yet.");
     return;
   }
-  const auto danger{compute_danger(*msg)};
+  has_received_bounding_box = true;
+  last_bboxes = msg;
+  return;
+}
+
+void RubisDetectNode::danger_timer_callback()
+{
+  if(!has_received_bounding_box) {
+    RCLCPP_WARN(get_logger(), "RubisDetectNode::danger_timer_callback: did not receive bbox yet.");
+    return;
+  }
+  // has_received_bounding_box = false;
+  const auto danger{compute_danger(*last_bboxes)};
   danger_publisher_->publish(danger);
+  return;
 }
 
 std_msgs::msg::String RubisDetectNode::compute_danger(const BoundingBoxArray & msg)
