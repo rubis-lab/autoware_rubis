@@ -22,7 +22,7 @@
     lookahead_boxes: 30
     rubis:
       sched_info:
-        task_id: 1.00002
+        task_id: 1
         name: "rubis_detect"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 10.0

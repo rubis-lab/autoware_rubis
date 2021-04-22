@@ -25,6 +25,26 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
 :  Node("rubis_drive", options),
   verbose(true)
 {
+  // sched_log params
+  auto timestamp = (int32_t) std::time(nullptr);
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
+  sched_info si {
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.period").get<float32_t>()), // period
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+  };
+  __slog = SchedLog(si);
+  __iter = 0;
+
   // params
   target_vel = static_cast<float32_t>(declare_parameter(
     "target_vel").get<float32_t>());
@@ -108,6 +128,15 @@ Command RubisDriveNode::compute_command(float32_t dist)
   ret.front_wheel_angle_rad = Real{};  // zero initialization etc.
   ret.rear_wheel_angle_rad = Real{};
   ret.long_accel_mps2 = accel;
+
+  // log
+  sched_data sd {
+    ++__iter,  // iter
+    0.0,  // response_time
+    0.0,  // start_time
+    0.0  // end_time
+  };
+  __slog.add_entry(sd);
   return ret;
 }
 

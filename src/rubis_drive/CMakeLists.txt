@@ -41,6 +41,7 @@ autoware_set_compile_options(${PROJECT_NAME})
 
 set(RUBIS_DRIVE_NODE_SRC
   src/rubis_drive_node.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
 )
 
 set(RUBIS_DRIVE_NODE_HEADERS
@@ -58,18 +59,9 @@ rclcpp_components_register_node(${PROJECT_NAME}_node
   EXECUTABLE ${PROJECT_NAME}_node_exe
 )
 
-# Testing
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-
-  # Unit tests
-  set(TEST_SOURCES test/test_rubis_drive.cpp)
-  set(TEST_RUBIS_DRIVE_EXE test_rubis_drive)
-  ament_add_gtest(${TEST_RUBIS_DRIVE_EXE} ${TEST_SOURCES})
-  autoware_set_compile_options(${TEST_RUBIS_DRIVE_EXE})
-  target_link_libraries(${TEST_RUBIS_DRIVE_EXE} ${PROJECT_NAME})
-endif()
+target_include_directories(${PROJECT_NAME}_node PUBLIC
+  /home/rubis/AutowareAuto/src/rubis_rt/include/
+)
 
 # ament package generation and installing
 ament_auto_package(INSTALL_TO_SHARE

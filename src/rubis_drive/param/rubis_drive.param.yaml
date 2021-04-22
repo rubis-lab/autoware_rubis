@@ -6,3 +6,11 @@
     cur2tar: 1.0
     safe_dist: 30.0
     danger_scale: 20
+    rubis:
+      sched_info:
+        task_id: 2
+        name: "rubis_drive"
+        log_dir: "/home/rubis/rubis_log/"
+        exec_time: 10.0
+        period: 20.0
+        deadline: 30.0

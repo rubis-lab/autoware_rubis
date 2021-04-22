@@ -36,6 +36,9 @@
 #include <limits>
 #include <utility>
 
+#include "rubis_rt/sched_log.hpp"
+#include <ctime>
+
 namespace autoware
 {
 namespace rubis_drive
@@ -51,6 +54,9 @@ using autoware::common::types::float32_t;
 using std::placeholders::_1;
 using SubAllocT = rclcpp::SubscriptionOptionsWithAllocator<std::allocator<void>>;
 
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
 
 /// \class RubisDriveNode
 /// \brief ROS 2 Node for hello world.
@@ -62,6 +68,9 @@ public:
   explicit RubisDriveNode(const rclcpp::NodeOptions & options);
 
 private:
+  SchedLog __slog;
+  int32_t __iter;
+
   bool verbose;  ///< whether to use verbose output or not.
   float32_t cur_vel;
   float32_t cur_acc;
