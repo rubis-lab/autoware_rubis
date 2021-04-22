@@ -42,9 +42,7 @@
 #include <list>
 #include <chrono>
 #include <time_utils/time_utils.hpp>
-
-#include <spdlog/spdlog.h>
-
+#include <ctime>
 #include <omp.h>
 
 namespace autoware

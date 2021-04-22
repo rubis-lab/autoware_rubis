@@ -20,3 +20,11 @@
     staleness_threshold_ms: 500
     target_frame_id: "map"
     lookahead_boxes: 30
+    rubis:
+      sched_info:
+        task_id: 1.00002
+        name: "rubis_detect"
+        log_dir: "/home/rubis/rubis_log/"
+        exec_time: 10.0
+        period: 20.0
+        deadline: 30.0

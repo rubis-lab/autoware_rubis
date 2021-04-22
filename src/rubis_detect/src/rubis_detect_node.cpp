@@ -24,13 +24,21 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
   verbose(true)
 {
   // sched_log params
+  auto timestamp = (int32_t) std::time(nullptr);
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
   sched_info si {
-    1,
-    "rubis_detect",
-    "/home/rubis/AutowareAuto/src/rubis_detect/log.txt",
-    10.0,
-    20.0,
-    30.0
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.period").get<float32_t>()), // period
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<float32_t>()) // deadline
   };
   __slog = SchedLog(si);
   __iter = 0;
@@ -327,10 +335,10 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
 
   // log
   sched_data sd {
-    ++__iter,
-    response_time,
-    0.0,
-    0.0
+    ++__iter,  // iter
+    response_time,  // response_time
+    0.0,  // start_time
+    0.0  // end_time
   };
   __slog.add_entry(sd);
 
