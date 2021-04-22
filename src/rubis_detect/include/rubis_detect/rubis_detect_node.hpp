@@ -70,6 +70,7 @@ using time_utils::to_message;
 using time_utils::from_message;
 using TimeStamp = builtin_interfaces::msg::Time;
 using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
 using rubis::sched_log::sched_data;
 
 /// \class RubisDetectNode
@@ -86,11 +87,8 @@ public:
   int32_t print_hello() const;
 
 private:
-  SchedLog _slog;
-  int32_t _task_id;
-  int32_t _iter;
-  float32_t _period;
-  float32_t _deadline;
+  SchedLog __slog;
+  int32_t __iter;
 
   float32_t safety_factor;
   float32_t stop_margin;
