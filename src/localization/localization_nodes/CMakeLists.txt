@@ -6,6 +6,9 @@ project(localization_nodes)
 
 #dependencies
 find_package(ament_cmake_auto REQUIRED)
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
 ament_auto_find_build_dependencies()
 
 # includes
@@ -24,6 +27,9 @@ target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${tf2_INCLUDE_DIRS})
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-sign-conversion -Wno-conversion -Wno-old-style-cast
   -Wno-useless-cast -Wno-double-promotion -Wno-nonnull-compare -Wuseless-cast)
 
+target_link_libraries(${PROJECT_NAME}
+  ${OpenMP_LIBS}
+)
 target_include_directories(${PROJECT_NAME} PUBLIC
   /home/rubis/AutowareAuto/src/rubis_rt/include/
 )

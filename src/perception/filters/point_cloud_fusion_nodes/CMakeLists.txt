@@ -23,6 +23,10 @@ project(point_cloud_fusion_nodes)
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
+
 set(PC_FUSION_LIB pointcloud_fusion_node)
 ament_auto_add_library(${PC_FUSION_LIB} SHARED
   include/point_cloud_fusion_nodes/point_cloud_fusion_node.hpp
@@ -34,6 +38,10 @@ autoware_set_compile_options(${PC_FUSION_LIB})
 rclcpp_components_register_node(${PC_FUSION_LIB}
   PLUGIN "autoware::perception::filters::point_cloud_fusion_nodes::PointCloudFusionNode"
   EXECUTABLE ${PC_FUSION_LIB}_exe
+)
+
+target_link_libraries(${PC_FUSION_LIB}
+  ${OpenMP_LIBS}
 )
 
 if(BUILD_TESTING)

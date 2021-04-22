@@ -8,6 +8,9 @@ find_package(yaml-cpp REQUIRED)
 find_package(ament_cmake_auto REQUIRED)
 
 find_package(PCL 1.8 REQUIRED COMPONENTS io)
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
 
 ament_auto_find_build_dependencies()
 include_directories(SYSTEM ${PCL_INCLUDE_DIRS})
@@ -37,6 +40,7 @@ rclcpp_components_register_node(${NDT_MAP_PUBLISHER_NODE_LIB}
 
 set(P2D_NDT_LOCALIZER_NODE_LIB_SRC
   src/p2d_ndt_localizer.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
 )
 
 set(P2D_NDT_LOCALIZER_NODE_LIB_HEADERS
@@ -51,7 +55,9 @@ ament_auto_add_library(${P2D_NDT_LOCALIZER_NODE_LIB} SHARED
 autoware_set_compile_options(${P2D_NDT_LOCALIZER_NODE_LIB})
 
 target_link_libraries(${P2D_NDT_LOCALIZER_NODE_LIB}
-  ${PCL_LIBRARIES})
+  ${PCL_LIBRARIES}
+  ${OpenMP_LIBS}
+)
 
 rclcpp_components_register_node(${P2D_NDT_LOCALIZER_NODE_LIB}
   PLUGIN "autoware::localization::ndt_nodes::P2DNDTLocalizerNodeComponent"
@@ -95,7 +101,10 @@ target_include_directories(${NDT_MAP_PUBLISHER_NODE_LIB} SYSTEM PUBLIC ${tf2_INC
 target_compile_options(${NDT_MAP_PUBLISHER_NODE_LIB} PRIVATE -Wno-sign-conversion -Wno-conversion -Wno-old-style-cast
         -Wno-useless-cast -Wno-double-promotion -Wno-nonnull-compare -Wuseless-cast)
 
-target_include_directories(${P2D_NDT_LOCALIZER_NODE_LIB} SYSTEM PUBLIC ${tf2_INCLUDE_DIRS})
+target_include_directories(${P2D_NDT_LOCALIZER_NODE_LIB} SYSTEM PUBLIC
+    ${tf2_INCLUDE_DIRS}
+    /home/rubis/AutowareAuto/src/rubis_rt/include/
+)
 target_compile_options(${P2D_NDT_LOCALIZER_NODE_LIB} PRIVATE -Wno-sign-conversion -Wno-conversion -Wno-old-style-cast
         -Wno-useless-cast -Wno-double-promotion -Wno-nonnull-compare -Wuseless-cast)
 

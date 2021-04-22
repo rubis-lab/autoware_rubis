@@ -22,6 +22,10 @@ project(voxel_grid_nodes)
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
+
 ### build node as library
 set(VOXEL_GRID_NODE_LIB voxel_grid_node)
 ament_auto_add_library(${VOXEL_GRID_NODE_LIB} SHARED
@@ -45,6 +49,10 @@ rclcpp_components_register_node(${VOXEL_GRID_NODE_LIB}
 
 target_include_directories(${VOXEL_GRID_NODE_LIB} PUBLIC
   /home/rubis/AutowareAuto/src/rubis_rt/include/
+)
+
+target_link_libraries(${VOXEL_GRID_NODE_LIB}
+  ${OpenMP_LIBS}
 )
 
 if(BUILD_TESTING)

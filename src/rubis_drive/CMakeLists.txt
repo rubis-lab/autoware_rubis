@@ -22,6 +22,9 @@ ament_auto_find_build_dependencies(REQUIRED
   ${${PROJECT_NAME}_BUILD_DEPENDS}
   ${${PROJECT_NAME}_BUILDTOOL_DEPENDS}
 )
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
 
 set(RUBIS_DRIVE_LIB_SRC
   src/rubis_drive.cpp
@@ -58,7 +61,9 @@ rclcpp_components_register_node(${PROJECT_NAME}_node
   PLUGIN "autoware::rubis_drive::RubisDriveNode"
   EXECUTABLE ${PROJECT_NAME}_node_exe
 )
-
+target_link_libraries(${PROJECT_NAME}_node
+  ${OpenMP_LIBS}
+)
 target_include_directories(${PROJECT_NAME}_node PUBLIC
   /home/rubis/AutowareAuto/src/rubis_rt/include/
 )

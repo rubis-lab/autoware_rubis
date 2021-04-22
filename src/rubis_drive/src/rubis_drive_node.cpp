@@ -98,6 +98,8 @@ void RubisDriveNode::on_danger(const std_msgs::msg::String::SharedPtr & msg)
 
 Command RubisDriveNode::compute_command(float32_t dist)
 {
+  omp_set_dynamic(0);
+  auto start_time = omp_get_wtime();
   cur_vel = last_cbd_msg.speed_mps;
   std::cout << "current_velocity = " << cur_vel << std::endl;
   std::cout << "dist/safe_dist = " << dist << "/" << safe_dist << std::endl;
@@ -130,11 +132,13 @@ Command RubisDriveNode::compute_command(float32_t dist)
   ret.long_accel_mps2 = accel;
 
   // log
+  auto end_time = omp_get_wtime();
+  auto response_time = (end_time - start_time) * 1e3;
   sched_data sd {
     ++__iter,  // iter
-    0.0,  // response_time
-    0.0,  // start_time
-    0.0  // end_time
+    response_time,  // response_time
+    start_time,  // start_time
+    end_time  // end_time
   };
   __slog.add_entry(sd);
   return ret;

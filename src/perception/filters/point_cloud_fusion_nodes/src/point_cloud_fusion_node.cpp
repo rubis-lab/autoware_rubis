@@ -156,6 +156,9 @@ PointCloudFusionNode::pointcloud_callback(
   const PointCloudMsgT::ConstSharedPtr & msg5, const PointCloudMsgT::ConstSharedPtr & msg6,
   const PointCloudMsgT::ConstSharedPtr & msg7, const PointCloudMsgT::ConstSharedPtr & msg8)
 {
+  omp_set_dynamic(0);
+  auto start_time = omp_get_wtime();
+
   std::array<PointCloudMsgT::ConstSharedPtr, 8> msgs{msg1, msg2, msg3, msg4, msg5, msg6, msg7,
     msg8};
 
@@ -204,12 +207,14 @@ PointCloudFusionNode::pointcloud_callback(
     m_cloud_concatenated.header.stamp = latest_stamp;
     m_cloud_publisher->publish(m_cloud_concatenated);
   }
-
+  auto end_time = omp_get_wtime();
+  auto response_time = (end_time - start_time) * 1e3;
+  
   sched_data sd {
     ++__iter,  // iter
-    0.0,  // response_time
-    0.0,  // start_time
-    0.0  // end_time
+    response_time,  // response_time
+    start_time,  // start_time
+    end_time  // end_time
   };
   __slog.add_entry(sd);
 

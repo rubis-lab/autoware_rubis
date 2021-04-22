@@ -29,7 +29,7 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <ctime>
 #include "rubis_rt/sched_log.hpp"
-
+#include <omp.h>
 
 #include <memory>
 #include <string>

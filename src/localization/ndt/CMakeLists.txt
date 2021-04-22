@@ -22,6 +22,7 @@ set(NDT_NODES_LIB_SRC
     src/ndt_map_publisher.cpp
     src/ndt_voxel.cpp
     src/ndt_voxel_view.cpp
+    /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
 )
 
 set(NDT_NODES_LIB_HEADERS
@@ -44,7 +45,10 @@ target_link_libraries(${PROJECT_NAME}
   ${YAML_CPP_LIBRARIES}
   ${PCL_LIBRARIES})
 # turn off warnings to be able to successfully compile upstream ros packages
-target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${tf2_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+    ${tf2_INCLUDE_DIRS}
+    /home/rubis/AutowareAuto/src/rubis_rt/include/
+)
 set(ROS_NO_WARN_LIST
         -Wno-sign-conversion
         -Wno-conversion

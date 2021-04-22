@@ -33,6 +33,7 @@
 
 #include "rubis_rt/sched_log.hpp"
 #include <ctime>
+#include <omp.h>
 
 using autoware::common::types::bool8_t;
 

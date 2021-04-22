@@ -80,7 +80,7 @@ m_use_lfit{declare_parameter("use_lfit").get<bool8_t>()},
 m_use_z{declare_parameter("use_z").get<bool8_t>()}
 {
   // sched_log params
-  auto timestamp = (int32_t) std::time(nullptr);
+  auto timestamp = static_cast<int32_t>(std::time(nullptr));
   auto f_timestamp = (timestamp + 50) / 100 * 100;
   sched_info si {
     static_cast<int32_t>(declare_parameter(
@@ -171,7 +171,7 @@ m_use_lfit{declare_parameter("use_lfit").get<bool8_t>()},
 m_use_z{declare_parameter("use_z").get<bool8_t>()}
 {
   // sched_log params
-  auto timestamp = (int32_t) std::time(nullptr);
+  auto timestamp = static_cast<int32_t>(std::time(nullptr));
   auto f_timestamp = (timestamp + 50) / 100 * 100;
   sched_info si {
     static_cast<int32_t>(declare_parameter(
@@ -334,6 +334,8 @@ void EuclideanClusterNode::handle_clusters(
 ////////////////////////////////////////////////////////////////////////////////
 void EuclideanClusterNode::handle(const PointCloud2::SharedPtr msg_ptr)
 {
+  omp_set_dynamic(0);
+  auto start_time = omp_get_wtime();
   try {
     try {
       insert(*msg_ptr);
@@ -351,11 +353,13 @@ void EuclideanClusterNode::handle(const PointCloud2::SharedPtr msg_ptr)
     RCLCPP_FATAL(get_logger(), "EuclideanClusterNode: Unexpected error occurred!");
     throw;
   }
+  auto end_time = omp_get_wtime();
+  auto response_time = (end_time - start_time) * 1e3;
   sched_data sd {
     ++__iter,  // iter
-    0.0,  // response_time
-    0.0,  // start_time
-    0.0  // end_time
+    response_time,  // response_time
+    start_time,  // start_time
+    end_time  // end_time
   };
   __slog.add_entry(sd);
 }

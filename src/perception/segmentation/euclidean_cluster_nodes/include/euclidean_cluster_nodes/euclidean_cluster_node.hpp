@@ -32,6 +32,7 @@
 
 #include "rubis_rt/sched_log.hpp"
 #include <ctime>
+#include <omp.h>
 
 namespace autoware
 {

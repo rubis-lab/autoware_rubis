@@ -68,7 +68,7 @@ VoxelCloudNode::VoxelCloudNode(
   m_has_failed{false}
 {
   // sched_log params
-  auto timestamp = (int32_t) std::time(nullptr);
+  auto timestamp = static_cast<int32_t>( std::time(nullptr));
   auto f_timestamp = (timestamp + 50) / 100 * 100;
   sched_info si {
     static_cast<int32_t>(declare_parameter(
@@ -135,7 +135,7 @@ VoxelCloudNode::VoxelCloudNode(
   m_has_failed{false}
 {
   // sched_log params
-  auto timestamp = (int32_t) std::time(nullptr);
+  auto timestamp = static_cast<int32_t>( std::time(nullptr));
   auto f_timestamp = (timestamp + 50) / 100 * 100;
   sched_info si {
     static_cast<int32_t>(declare_parameter(
@@ -176,6 +176,9 @@ VoxelCloudNode::VoxelCloudNode(
 ////////////////////////////////////////////////////////////////////////////////
 void VoxelCloudNode::callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
 {
+  omp_set_dynamic(0);
+  auto start_time = omp_get_wtime();
+
   try {
     m_voxelgrid_ptr->insert(*msg);
     m_pub_ptr->publish(m_voxelgrid_ptr->get());
@@ -190,11 +193,14 @@ void VoxelCloudNode::callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg
     RCLCPP_ERROR(this->get_logger(), err_msg.c_str());
     throw;
   }
+  auto end_time = omp_get_wtime();
+  auto response_time = (end_time - start_time) * 1e3;
+  
   sched_data sd {
     ++__iter,  // iter
-    0.0,  // response_time
-    0.0,  // start_time
-    0.0  // end_time
+    response_time,  // response_time
+    start_time,  // start_time
+    end_time  // end_time
   };
   __slog.add_entry(sd);
 }

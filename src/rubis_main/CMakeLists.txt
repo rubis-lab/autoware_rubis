@@ -5,6 +5,9 @@ project(rubis_main)
 
 # require that dependencies from package.xml be available
 find_package(ament_cmake_auto REQUIRED)
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
 
 ament_auto_find_build_dependencies(REQUIRED
   ${${PROJECT_NAME}_BUILD_DEPENDS}
@@ -36,6 +39,9 @@ add_executable(rubis_main_runner
 target_include_directories(rubis_main_runner PUBLIC include
   /home/rubis/AutowareAuto/src/rubis_main/include/
   /home/rubis/AutowareAuto/src/rubis_rt/include/
+)
+target_link_libraries(rubis_main_runner
+  ${OpenMP_LIBS}
 )
 
 # add package.xml dependencies here.

@@ -21,6 +21,10 @@ project(euclidean_cluster_nodes)
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
+
 # Library
 set(CLUSTER_NODE_LIB euclidean_cluster_node)
 ament_auto_add_library(${CLUSTER_NODE_LIB} SHARED
@@ -38,6 +42,10 @@ rclcpp_components_register_node(${CLUSTER_NODE_LIB}
 
 target_include_directories(${CLUSTER_NODE_LIB} PUBLIC
   /home/rubis/AutowareAuto/src/rubis_rt/include/
+)
+
+target_link_libraries(${CLUSTER_NODE_LIB}
+  ${OpenMP_LIBS}
 )
 
 ## Testing

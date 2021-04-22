@@ -21,6 +21,9 @@ project(point_cloud_filter_transform_nodes)
 ## dependencies
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
 
 ### build node as library
 set(FILTER_NODE_LIB point_cloud_filter_transform_node)
@@ -38,6 +41,9 @@ rclcpp_components_register_node(${FILTER_NODE_LIB}
   EXECUTABLE ${FILTER_NODE_LIB}_exe
 )
 
+target_link_libraries(${FILTER_NODE_LIB}
+  ${OpenMP_LIBS}
+)
 target_include_directories(${FILTER_NODE_LIB} PUBLIC
   /home/rubis/AutowareAuto/src/rubis_rt/include/
 )

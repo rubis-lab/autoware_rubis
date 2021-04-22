@@ -33,8 +33,10 @@
 #include <string>
 #include <tuple>
 #include <utility>
+
 #include "rubis_rt/sched_log.hpp"
 #include <ctime>
+#include "omp.h"
 
 namespace autoware
 {
@@ -461,6 +463,8 @@ private:
 //rubis constructor
 void observation_callback_rubis(typename ObservationMsgT::ConstSharedPtr msg_ptr)
   {
+    omp_set_dynamic(0);
+    auto start_time = omp_get_wtime();
     // Check to ensure the pointers are initialized.
     assert_ptr_not_null(m_localizer_ptr, "localizer");
     assert_ptr_not_null(m_map_ptr, "map");
@@ -522,11 +526,13 @@ void observation_callback_rubis(typename ObservationMsgT::ConstSharedPtr msg_ptr
       }
       on_bad_registration(std::current_exception());
     }
+    auto end_time = omp_get_wtime();
+    auto response_time = (end_time - start_time) * 1e3;
     sched_data sd {
-      ++__iter,  // iter
-      0.0,  // response_time
-      0.0,  // start_time
-      0.0  // end_time
+        ++__iter,  // iter
+        response_time,  // response_time
+        start_time,  // start_time
+        end_time  // end_time
     };
     __slog.add_entry(sd);
   }

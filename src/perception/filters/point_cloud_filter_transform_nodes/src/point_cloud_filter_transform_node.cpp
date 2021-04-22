@@ -309,13 +309,19 @@ void
 PointCloud2FilterTransformNode::process_filtered_transformed_message(
   const PointCloud2::SharedPtr msg)
 {
+  omp_set_dynamic(0);
+  auto start_time = omp_get_wtime();
+
   const auto filtered_transformed_msg = filter_and_transform(*msg);
   m_pub_ptr->publish(filtered_transformed_msg);
+
+  auto end_time = omp_get_wtime();
+  auto response_time = (end_time - start_time) * 1e3;
   sched_data sd {
     ++__iter,  // iter
-    0.0,  // response_time
-    0.0,  // start_time
-    0.0  // end_time
+    response_time,  // response_time
+    start_time,  // start_time
+    end_time  // end_time
   };
   __slog.add_entry(sd);
 }

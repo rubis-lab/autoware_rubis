@@ -23,10 +23,6 @@
 #include <limits>
 #include <string>
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 namespace autoware
 {
 namespace perception
@@ -205,10 +201,12 @@ RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(
 void
 RayGroundClassifierCloudNode::callback(const PointCloud2::SharedPtr msg)
 {
+  omp_set_dynamic(0);
+  auto start_time = omp_get_wtime();
+
   PointXYZIF pt_tmp;
   pt_tmp.id = static_cast<uint16_t>(PointXYZIF::END_OF_SCAN_ID);
   const ray_ground_classifier::PointXYZIFR eos_pt{&pt_tmp};
-  auto start_time = static_cast<int32_t>( std::time(nullptr));
   try {
     // Reset messages and aggregator to ensure they are in a good state
     reset();
@@ -409,12 +407,13 @@ RayGroundClassifierCloudNode::callback(const PointCloud2::SharedPtr msg)
       "RayGroundClassifierCloudNode has encountered an unknown failure");
     throw;
   }
-  auto end_time = static_cast<int32_t>( std::time(nullptr));
+  auto end_time = omp_get_wtime();
+  auto response_time = (end_time - start_time) * 1e3;
   sched_data sd {
     ++__iter,  // iter
-    end_time-start_time,  // response_time
-    0.0,  // start_time
-    0.0  // end_time
+    response_time,  // response_time
+    start_time,  // start_time
+    end_time  // end_time
   };
   __slog.add_entry(sd);
 }
