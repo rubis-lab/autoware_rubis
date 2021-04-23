@@ -107,8 +107,7 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
   danger_publisher_debug_ = this->create_publisher<MarkerArray>("rubis_danger_debug", 10);
 
   // timer
-  auto period = static_cast<float32_t>(declare_parameter(
-    "rubis.sched_info.period").get<float32_t>());  // should use this.
+  auto period = si.period;
   danger_timer_ = this->create_wall_timer(
     1000ms, std::bind(&RubisDetectNode::danger_timer_callback, this));
 }
