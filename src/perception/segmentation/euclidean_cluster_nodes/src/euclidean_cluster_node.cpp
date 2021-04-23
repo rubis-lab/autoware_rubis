@@ -99,6 +99,12 @@ m_use_z{declare_parameter("use_z").get<bool8_t>()}
   __slog = SchedLog(si);
   __iter = 0;
 
+  // timer
+  auto period = si.period;
+  __tmr = this->create_wall_timer(
+    1000ms, std::bind(&EuclideanClusterNode::handle_timer_callback, this));
+
+
   init(m_cluster_alg.get_config());
   // Initialize voxel grid
   if (declare_parameter("downsample").get<bool8_t>()) {
@@ -190,6 +196,11 @@ m_use_z{declare_parameter("use_z").get<bool8_t>()}
   __slog = SchedLog(si);
   __iter = 0;
 
+  // timer
+  auto period = si.period;
+  __tmr = this->create_wall_timer(
+    1000ms, std::bind(&EuclideanClusterNode::handle_timer_callback, this));
+
   init(m_cluster_alg.get_config());
   // Initialize voxel grid
   if (declare_parameter("downsample").get<bool8_t>()) {
@@ -270,7 +281,10 @@ void EuclideanClusterNode::publish_clusters(
   }
   m_cluster_pub_ptr->publish(clusters);
 }
+
 ////////////////////////////////////////////////////////////////////////////////
+
+
 void EuclideanClusterNode::handle_clusters(
   Clusters & clusters,
   const std_msgs::msg::Header & header)
@@ -334,6 +348,23 @@ void EuclideanClusterNode::handle_clusters(
 ////////////////////////////////////////////////////////////////////////////////
 void EuclideanClusterNode::handle(const PointCloud2::SharedPtr msg_ptr)
 {
+  has_received_point_cloud = true;
+  last_point_cloud = msg_ptr;
+  return;
+}
+
+void EuclideanClusterNode::handle_timer_callback()
+{
+  if(!has_received_point_cloud) {
+    RCLCPP_WARN(get_logger(), "EuclideanClusterNode::handle_timer_callback: did not receive point_cloud yet.");
+    return;
+  }
+  handle_periodic(last_point_cloud);
+  return;
+}
+
+void EuclideanClusterNode::handle_periodic(const PointCloud2::SharedPtr msg_ptr)
+{
   omp_set_dynamic(0);
   auto start_time = omp_get_wtime();
   try {
@@ -345,6 +376,7 @@ void EuclideanClusterNode::handle(const PointCloud2::SharedPtr msg_ptr)
     }
     m_cluster_alg.cluster(m_clusters);
     //lint -e{523} NOLINT empty functions to make this modular
+    // handle_clusters(m_clusters, msg_ptr->header);
     handle_clusters(m_clusters, msg_ptr->header);
     m_cluster_alg.cleanup(m_clusters);
   } catch (const std::exception & e) {

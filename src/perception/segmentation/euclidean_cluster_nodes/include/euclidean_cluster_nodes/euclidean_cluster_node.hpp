@@ -33,6 +33,7 @@
 #include "rubis_rt/sched_log.hpp"
 #include <ctime>
 #include <omp.h>
+#include <chrono>
 
 namespace autoware
 {
@@ -52,6 +53,7 @@ using BoundingBoxArray = autoware_auto_msgs::msg::BoundingBoxArray;
 using rubis::sched_log::SchedLog;
 using rubis::sched_log::sched_info;
 using rubis::sched_log::sched_data;
+using namespace std::chrono_literals;
 
 /// \brief Combined object detection node, primarily does clustering, can also do in-place
 ///        downsampling and bounding box formation
@@ -85,6 +87,14 @@ private:
   void EUCLIDEAN_CLUSTER_NODES_LOCAL publish_clusters(
     Clusters & clusters,
     const std_msgs::msg::Header & header);
+
+  // defined by rubis
+  bool8_t has_received_point_cloud = false;
+  PointCloud2::SharedPtr last_point_cloud;
+  rclcpp::TimerBase::SharedPtr __tmr;
+  void handle_timer_callback();
+  void EUCLIDEAN_CLUSTER_NODES_LOCAL handle_periodic(const PointCloud2::SharedPtr msg_ptr);
+
   /// \brief Dispatch to publishing and/or bounding box computation based on configuration
   void EUCLIDEAN_CLUSTER_NODES_LOCAL handle_clusters(
     Clusters & clusters,
