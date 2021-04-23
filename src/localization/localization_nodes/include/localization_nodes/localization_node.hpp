@@ -37,6 +37,7 @@
 #include "rubis_rt/sched_log.hpp"
 #include <ctime>
 #include "omp.h"
+#include <chrono>
 
 namespace autoware
 {
@@ -50,6 +51,8 @@ using rubis::sched_log::SchedLog;
 using rubis::sched_log::sched_info;
 using rubis::sched_log::sched_data;
 using autoware::common::types::float32_t;
+using autoware::common::types::bool8_t;
+using namespace std::chrono_literals;
 
 /// Helper struct that groups topic name and QoS setting for a publisher or subscription
 struct TopicQoS
@@ -223,6 +226,9 @@ public:
     };
     __slog = SchedLog(si);
     __iter = 0;
+    auto period = si.period;
+    __tmr = this->create_wall_timer(
+        1000ms, std::bind(&handle_timer_callback, this));
 
     init();
   }
@@ -349,6 +355,9 @@ protected:
 private:
   SchedLog __slog;
   int32_t __iter;
+  bool8_t has_received_observation = false;
+  typename ObservationMsgT::ConstSharedPtr last_observation;
+  rclcpp::TimerBase::SharedPtr __tmr;
   /// Check the pointer and throw if null.
   template<typename PtrT>
   void assert_ptr_not_null(const PtrT & ptr, const std::string & name) const
@@ -396,6 +405,21 @@ private:
   /// Callback that registers each received observation and outputs the result.
   /// \param msg_ptr Pointer to the observation message.
   void observation_callback(typename ObservationMsgT::ConstSharedPtr msg_ptr)
+  {
+    has_received_observation = true;
+    last_observation = msg_ptr;
+  }
+
+  void handle_timer_callback()
+  {
+    if(!has_received_observation) {
+      RCLCPP_WARN(get_logger(), "LocalizationNodes::handle_timer_callback: did not receive observation yet.");
+      return;
+    }
+    handle_periodic(last_observation);
+  }
+
+  void handle_periodic(typename ObservationMsgT::ConstSharedPtr msg_ptr)
   {
     // Check to ensure the pointers are initialized.
     assert_ptr_not_null(m_localizer_ptr, "localizer");
