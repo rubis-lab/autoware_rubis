@@ -34,6 +34,7 @@
 #include "rubis_rt/sched_log.hpp"
 #include <ctime>
 #include <omp.h>
+#include <chrono>
 
 using autoware::common::types::bool8_t;
 
@@ -49,6 +50,7 @@ namespace point_cloud_fusion_nodes
 using rubis::sched_log::SchedLog;
 using rubis::sched_log::sched_info;
 using rubis::sched_log::sched_data;
+using namespace std::chrono_literals;
 
 /// \brief Class that fuses multiple point clouds from different sources into one by concatanating
 /// them.
@@ -65,12 +67,35 @@ public:
 private:
   SchedLog __slog;
   int32_t __iter;
+
   using PointT = common::types::PointXYZIF;
   using PointCloudMsgT = sensor_msgs::msg::PointCloud2;
   using PointCloudT = sensor_msgs::msg::PointCloud2;
   using SyncPolicyT = message_filters::sync_policies::ApproximateTime<PointCloudMsgT,
       PointCloudMsgT, PointCloudMsgT, PointCloudMsgT, PointCloudMsgT, PointCloudMsgT,
       PointCloudMsgT, PointCloudMsgT>;
+
+  bool8_t has_received_point_cloud = false;
+  PointCloudMsgT::ConstSharedPtr last_point_cloud_1;
+  PointCloudMsgT::ConstSharedPtr last_point_cloud_2;
+  PointCloudMsgT::ConstSharedPtr last_point_cloud_3;
+  PointCloudMsgT::ConstSharedPtr last_point_cloud_4;
+  PointCloudMsgT::ConstSharedPtr last_point_cloud_5;
+  PointCloudMsgT::ConstSharedPtr last_point_cloud_6;
+  PointCloudMsgT::ConstSharedPtr last_point_cloud_7;
+  PointCloudMsgT::ConstSharedPtr last_point_cloud_8;
+  
+  rclcpp::TimerBase::SharedPtr __tmr;
+  void handle_timer_callback();
+  void handle_periodic(
+    const PointCloudMsgT::ConstSharedPtr & msg1,
+    const PointCloudMsgT::ConstSharedPtr & msg2,
+    const PointCloudMsgT::ConstSharedPtr & msg3,
+    const PointCloudMsgT::ConstSharedPtr & msg4,
+    const PointCloudMsgT::ConstSharedPtr & msg5,
+    const PointCloudMsgT::ConstSharedPtr & msg6,
+    const PointCloudMsgT::ConstSharedPtr & msg7,
+    const PointCloudMsgT::ConstSharedPtr & msg8);
 
   void init();
 

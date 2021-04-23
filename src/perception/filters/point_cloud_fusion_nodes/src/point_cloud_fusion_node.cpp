@@ -64,6 +64,10 @@ PointCloudFusionNode::PointCloudFusionNode(
   __slog = SchedLog(si);
   __iter = 0;
 
+  auto period = si.period;
+  __tmr = this->create_wall_timer(
+    1000ms, std::bind(&PointCloudFusionNode::handle_timer_callback, this));
+
   for (size_t i = 0; i < m_input_topics.size(); ++i) {
     m_input_topics[i] = "input_topic" + std::to_string(i + 1);
   }
@@ -155,6 +159,35 @@ PointCloudFusionNode::pointcloud_callback(
   const PointCloudMsgT::ConstSharedPtr & msg3, const PointCloudMsgT::ConstSharedPtr & msg4,
   const PointCloudMsgT::ConstSharedPtr & msg5, const PointCloudMsgT::ConstSharedPtr & msg6,
   const PointCloudMsgT::ConstSharedPtr & msg7, const PointCloudMsgT::ConstSharedPtr & msg8)
+{
+  has_received_point_cloud = true;
+  last_point_cloud_1 = msg1;
+  last_point_cloud_2 = msg2;
+  last_point_cloud_3 = msg3;
+  last_point_cloud_4 = msg4;
+  last_point_cloud_5 = msg5;
+  last_point_cloud_6 = msg6;
+  last_point_cloud_7 = msg7;
+  last_point_cloud_8 = msg8;
+  return;
+}
+
+void PointCloudFusionNode::handle_timer_callback()
+{
+  if(!has_received_point_cloud) {
+    RCLCPP_WARN(get_logger(), "PointCloudFusionNode::handle_timer_callback: did not receive point_cloud yet.");
+    return;
+  }
+  handle_periodic(last_point_cloud_1, last_point_cloud_2, last_point_cloud_3, last_point_cloud_4, last_point_cloud_5, last_point_cloud_6, last_point_cloud_7, last_point_cloud_8);
+  return;
+}
+
+void PointCloudFusionNode::handle_periodic(
+  const PointCloudMsgT::ConstSharedPtr & msg1, const PointCloudMsgT::ConstSharedPtr & msg2,
+  const PointCloudMsgT::ConstSharedPtr & msg3, const PointCloudMsgT::ConstSharedPtr & msg4,
+  const PointCloudMsgT::ConstSharedPtr & msg5, const PointCloudMsgT::ConstSharedPtr & msg6,
+  const PointCloudMsgT::ConstSharedPtr & msg7, const PointCloudMsgT::ConstSharedPtr & msg8
+)
 {
   omp_set_dynamic(0);
   auto start_time = omp_get_wtime();
