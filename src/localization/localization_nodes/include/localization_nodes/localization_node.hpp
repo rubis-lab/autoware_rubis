@@ -228,7 +228,7 @@ public:
     __iter = 0;
     auto period = si.period;
     __tmr = this->create_wall_timer(
-        1000ms, std::bind(&handle_timer_callback, this));
+        1000ms, std::bind(&RelativeLocalizerNode::handle_timer_callback, this));
 
     init();
   }

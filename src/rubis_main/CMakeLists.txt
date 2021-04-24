@@ -30,6 +30,8 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
 )
 autoware_set_compile_options(${PROJECT_NAME})
 
+
+##### rubis_runner
 add_executable(rubis_main_runner
   include/rubis_main/rubis_main_parsed.hpp
   src/rubis_main_runner.cpp
@@ -61,6 +63,41 @@ ament_target_dependencies(
 
 install(
   TARGETS rubis_main_runner
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+##### rubis_runner_dev
+add_executable(rubis_main_runner_dev
+  include/rubis_main/rubis_main_parsed.hpp
+  src/rubis_main_runner_dev.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
+)
+
+target_include_directories(rubis_main_runner_dev PUBLIC include
+  /home/rubis/AutowareAuto/src/rubis_main/include/
+  /home/rubis/AutowareAuto/src/rubis_rt/include/
+)
+target_link_libraries(rubis_main_runner_dev
+  ${OpenMP_LIBS}
+)
+
+# add package.xml dependencies here.
+ament_target_dependencies(
+  rubis_main_runner_dev
+  rclcpp
+
+  point_cloud_filter_transform_nodes
+  point_cloud_fusion_nodes
+  ray_ground_classifier_nodes
+  euclidean_cluster_nodes
+  ndt_nodes
+
+  rubis_drive
+  rubis_detect
+)
+
+install(
+  TARGETS rubis_main_runner_dev
   DESTINATION lib/${PROJECT_NAME}
 )
 
