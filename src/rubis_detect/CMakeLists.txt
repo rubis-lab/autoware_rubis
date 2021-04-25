@@ -43,7 +43,7 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
   ${RUBIS_DETECT_LIB_SRC}
   ${RUBIS_DETECT_LIB_HEADERS}
 )
-autoware_set_compile_options(${PROJECT_NAME})
+autoware_set_compile_options(${PROJECT_NAME} -fopenmp)
 
 set(RUBIS_DETECT_NODE_SRC
   src/rubis_detect_node.cpp
@@ -61,6 +61,11 @@ ament_auto_add_library(${PROJECT_NAME}_node SHARED
   ${RUBIS_DETECT_NODE_HEADERS}
 )
 autoware_set_compile_options(${PROJECT_NAME}_node)
+target_compile_options(${PROJECT_NAME}_node PRIVATE
+  "-fopenmp"
+)
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fopenmp")
+# set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-error=Wold-style-cast -fopenmp")
 rclcpp_components_register_node(${PROJECT_NAME}_node
   PLUGIN "autoware::rubis_detect::RubisDetectNode"
   EXECUTABLE ${PROJECT_NAME}_node_exe

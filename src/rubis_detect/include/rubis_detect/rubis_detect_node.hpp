@@ -92,7 +92,7 @@ private:
   int32_t __iter;
 
   // rt
-  bool8_t __rt_configured = false;
+  std::vector<bool8_t> __rt_configured;
 
   float32_t safety_factor;
   float32_t stop_margin;
@@ -130,8 +130,8 @@ private:
 
   BoundingBox point_to_box(const Point32 _p, const Complex32 _heading);
   BoundingBox point_to_box_alt(const Point32 _p, const Complex32 _heading);
-  std::list<Point32> get_expected_trajectory();
-  std::list<Point32> get_expected_trajectory_alt(const Point32 _p, const Complex32 _heading);
+  std::vector<Point32> get_expected_trajectory();
+  std::vector<Point32> get_expected_trajectory_alt(const Point32 _p, const Complex32 _heading);
   int32_t detect_collision(const Point32 _p, const Complex32 _heading, const BoundingBoxArray & obstacles);
   bool8_t is_too_far_away(const Point32 _p, const BoundingBox obstacle_bbox, const float32_t distance_threshold);
   float32_t calc_collision_distance(int32_t collision_index);

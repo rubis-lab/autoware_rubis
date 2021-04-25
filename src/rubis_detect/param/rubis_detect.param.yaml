@@ -3,8 +3,8 @@
 /**:
   ros__parameters:
     vehicle:
-      cg_to_front_m: 1.00001
-      cg_to_rear_m: 1.00001
+      cg_to_front_m: 1.0
+      cg_to_rear_m: 1.0
       front_corner_stiffness: 0.1
       rear_corner_stiffness: 0.1
       mass_kg: 1500.0
@@ -23,6 +23,7 @@
     rubis:
       sched_info:
         task_id: 1
+        max_opt: 4
         name: "rubis_detect"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 100000000  # 0.1s

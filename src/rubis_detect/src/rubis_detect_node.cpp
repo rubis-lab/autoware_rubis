@@ -29,6 +29,8 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
   __si = {
     static_cast<int32_t>(declare_parameter(
       "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.max_opt").get<int32_t>()), // max_opt
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.name").get<std::string>()), // name
     static_cast<std::string>(declare_parameter(
@@ -42,6 +44,10 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
   };
   __slog = SchedLog(__si);
   __iter = 0;
+
+  for(int i = 0; i < __si.max_option; i++) {
+    __rt_configured.push_back(false);
+  }
 
   // config
   const auto vehicle_param = VehicleConfig{
@@ -175,13 +181,7 @@ void RubisDetectNode::danger_timer_callback()
     RCLCPP_WARN(get_logger(), "RubisDetectNode::danger_timer_callback: did not receive bbox yet.");
     return;
   }
-  // rubis_rt
-  if(!__rt_configured) {
-    auto tid = gettid();
-    std::cout << "[RubisDetectNode] (" << tid << "): __rt_configured (" << __si.exec_time << ", " << __si.deadline << ", " << __si.period << ")" << std::endl;
-    rubis::sched::set_sched_deadline(tid, __si.exec_time, __si.deadline, __si.period);
-    __rt_configured = true;
-  }
+
   // has_received_bounding_box = false;
   const auto danger{compute_danger(*last_bboxes)};
   danger_publisher_->publish(danger);
@@ -273,14 +273,14 @@ BoundingBox RubisDetectNode::point_to_box_alt(const Point32 _p, const Complex32 
   return minimum_perimeter_bounding_box(corners);
 }
 
-std::list<Point32> RubisDetectNode::get_expected_trajectory_alt(const Point32 _p, const Complex32 _heading)
+std::vector<Point32> RubisDetectNode::get_expected_trajectory_alt(const Point32 _p, const Complex32 _heading)
 {
   // Shorthands to keep the formulas sane
   float32_t angle = to_angle(_heading);
   float32_t ch = std::cos(angle);
   float32_t sh = std::sin(angle);
 
-  std::list<Point32> expected_trajectory;
+  std::vector<Point32> expected_trajectory;
   for(int32_t i = 0; i < lookahead_boxes; i++) {
     auto p = Point32{};
     p.x = _p.x + i * ((lf + lr) * ch);
@@ -291,13 +291,13 @@ std::list<Point32> RubisDetectNode::get_expected_trajectory_alt(const Point32 _p
   return expected_trajectory;
 }
 
-std::list<Point32> RubisDetectNode::get_expected_trajectory()
+std::vector<Point32> RubisDetectNode::get_expected_trajectory()
 {
   auto origin = Point32{};
   origin.x = 0;
   origin.y = 0;
 
-  std::list<Point32> expected_trajectory;
+  std::vector<Point32> expected_trajectory;
   for(int32_t i = 0; i < lookahead_boxes; i++) {
     auto p = Point32{};
     // p.x = origin.x + i * (lf + lr);
@@ -323,45 +323,75 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
   bboxes_debug.header.frame_id = "base_link";
   int32_t t_idx = 0;
   omp_set_dynamic(0);
-  auto start_time = omp_get_wtime();
   
-  for(auto const& p : expected_trajectory) {
-    auto heading_straight = from_angle(0.0F);
-    // const auto p_box = point_to_box(p, _heading);
-    const auto p_box = point_to_box(p, heading_straight);
-    bboxes_debug.boxes.push_back(p_box);
+  
+  #pragma omp parallel num_threads(__si.max_option)
+  {
+    // configure rt
+    auto thr_id = omp_get_thread_num();
 
-    int32_t o_idx = 0;
-    for(const auto & obstacle_bbox : obstacles.boxes) {
-      if(!is_too_far_away(p, obstacle_bbox, distance_threshold)) {
-        if(autoware::common::geometry::intersect(
-          p_box.corners.begin(), p_box.corners.end(),
-          obstacle_bbox.corners.begin(), obstacle_bbox.corners.end())) {
+    if(!__rt_configured[thr_id]) {
+      auto tid = gettid();
+      std::cout << "[RubisDetectNode] (" << tid << "): __rt_configured (" << __si.exec_time << ", " << __si.deadline << ", " << __si.period << ")" << std::endl;
+      rubis::sched::set_sched_deadline(tid, __si.exec_time, __si.deadline, __si.period);
+      __rt_configured[thr_id] = true;
+    }
 
-          // Collision detected
-          if(collision_index == -1) {
-            collision_index = t_idx;
-            RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: collision: " + std::to_string(collision_index));
+    #pragma omp barrier
+
+    // workload start
+    auto start_time = omp_get_wtime();
+
+    #pragma omp for schedule(dynamic) nowait
+    for(size_t i = 0; i < expected_trajectory.size(); i++) {
+    // for(auto const& p : expected_trajectory) {
+        auto heading_straight = from_angle(0.0F);
+        // const auto p_box = point_to_box(p, _heading);
+        const auto p_box = point_to_box(expected_trajectory[i], heading_straight);
+        #pragma omp critical
+        {
+          bboxes_debug.boxes.push_back(p_box);
+        }
+
+        for(const auto & obstacle_bbox : obstacles.boxes) {
+          if(!is_too_far_away(expected_trajectory[i], obstacle_bbox, distance_threshold)) {
+            if(autoware::common::geometry::intersect(
+              p_box.corners.begin(), p_box.corners.end(),
+              obstacle_bbox.corners.begin(), obstacle_bbox.corners.end())) {
+
+              // Collision detected
+              if(collision_index == -1) {
+                collision_index = t_idx;
+                RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: collision: " + std::to_string(collision_index));
+              }
+            }
           }
         }
-      }
-      o_idx++;
+        t_idx++;
     }
-    t_idx++;
-  }
-  auto end_time = omp_get_wtime();
-  auto response_time = (end_time - start_time) * 1e3;
-  RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: response_time(ms): \n" + std::to_string(response_time));
 
-  // log
-  sched_data sd {
-    ++__iter,  // iter
-    response_time,  // response_time
-    0.0,  // start_time
-    0.0  // end_time
-  };
-  __slog.add_entry(sd);
+    // workload end
+    auto end_time = omp_get_wtime();
+    auto response_time = (end_time - start_time) * 1e3;
+    
+    
+    // log
+    sched_data sd {
+      thr_id, // thr_id
+      __iter,  // iter
+      start_time,  // start_time
+      end_time,  // end_time
+      response_time  // response_time
+    };
+    #pragma omp critical
+    {
+      __slog.add_entry(sd);
+    }
+    sched_yield();
 
+  }  // prama omp parallel
+
+  ++__iter;
   if(collision_index == -1) {
     RCLCPP_WARN(get_logger(), "RubisDetectNode::detect_collision: No collision");
     collision_index = lookahead_boxes;

@@ -13,6 +13,7 @@ namespace sched_log {
 
 struct sched_info {
   int task_id;
+  int max_option;
   std::string name;
   std::string file;
   double exec_time;
@@ -21,6 +22,7 @@ struct sched_info {
 };
 
 struct sched_data {
+  int thread_id;
   int iter;
   double start_time;
   double end_time;
@@ -62,10 +64,12 @@ SchedLog::SchedLog(sched_info _si) {
 std::string SchedLog::generate_header() {
   std::string h_str;
   h_str += "tid\t";
+  h_str += "thr_id\t";
+  h_str += "max_opt\t";
   h_str += "iter\t";
   h_str += "exec_t\t";
-  h_str += "period\t";
   h_str += "dead\t";
+  h_str += "period\t";
   h_str += "start_t\t";
   h_str += "end_t\t";
   h_str += "resp_t\t";
@@ -76,10 +80,12 @@ std::string SchedLog::generate_header() {
 void SchedLog::add_entry(sched_data _sd) {
   std::string e_str = "";
   e_str += std::to_string(__si.task_id) + "\t";
+  e_str += std::to_string(_sd.thread_id) + "\t";
+  e_str += std::to_string(__si.max_option) + "\t";
   e_str += std::to_string(_sd.iter) + "\t";
   e_str += std::to_string(__si.exec_time) + "\t";  // exec_time
-  e_str += std::to_string(__si.period) + "\t";
   e_str += std::to_string(__si.deadline) + "\t";
+  e_str += std::to_string(__si.period) + "\t";
   e_str += std::to_string(_sd.start_time) + "\t";  // start_time
   e_str += std::to_string(_sd.end_time) + "\t";  // end_time
   e_str += std::to_string(_sd.resp_time) + "\t";
