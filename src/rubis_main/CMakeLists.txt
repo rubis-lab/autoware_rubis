@@ -70,6 +70,7 @@ install(
 add_executable(rubis_main_runner_dev
   include/rubis_main/rubis_main_parsed.hpp
   src/rubis_main_runner_dev.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched.hpp
   /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
 )
 

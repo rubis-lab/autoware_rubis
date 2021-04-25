@@ -9,6 +9,9 @@
 
 #define gettid() syscall(__NR_gettid)
 
+namespace rubis {
+namespace sched {
+
 // contains thread-specific arguments
 struct thr_arg {
     int thr_id;
@@ -52,8 +55,6 @@ struct sched_attr {
 //     unsigned int size,
 //     unsigned int flags);
 
-// #include "sched_core.hpp"
-
 /* XXX use the proper syscall numbers */
 #ifdef __x86_64__
 #define __NR_sched_setattr		314
@@ -70,8 +71,8 @@ struct sched_attr {
 #define __NR_sched_getattr		381
 #endif
 
-#define BUFFER_SIZE 5000
-#define MAX_TOKEN_COUNT 128
+// #define BUFFER_SIZE 5000
+// #define MAX_TOKEN_COUNT 128
 
 // system call hook to call SCHED_DEADLINE
 int sched_setattr(pid_t pid,
@@ -106,12 +107,16 @@ bool set_sched_deadline(int _tid, int _exec_time, int _deadline, int _period) {
 
     int ret = sched_setattr(_tid, &attr, attr.sched_flags);
     if(ret < 0) {
-        std::cerr << "[ERROR] sched_setattr failed." << std::endl;
+        std::cerr << "[ERROR] sched_setattr failed. Are you root?" << std::endl;
         perror("sched_setattr");
         exit(-1);
         return false;
+    } else {
+        std::cerr << "[SCHED_DEADLINE] (" << _tid << ") exec_time: " << _exec_time << " _deadline: " << _deadline << " _period: " << _period << std::endl;
     }
     return true;
 }
 
+} // namespace sched
+} // namespace rubis
 #endif
