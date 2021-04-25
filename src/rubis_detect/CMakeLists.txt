@@ -47,6 +47,7 @@ autoware_set_compile_options(${PROJECT_NAME})
 
 set(RUBIS_DETECT_NODE_SRC
   src/rubis_detect_node.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched.hpp
   /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
 )
 

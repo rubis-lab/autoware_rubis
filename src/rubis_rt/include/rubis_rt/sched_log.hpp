@@ -16,8 +16,8 @@ struct sched_info {
   std::string name;
   std::string file;
   double exec_time;
-  double period;
   double deadline;
+  double period;
 };
 
 struct sched_data {

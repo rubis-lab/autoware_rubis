@@ -19,10 +19,6 @@
 #ifndef RUBIS_DETECT__RUBIS_DETECT_NODE_HPP_
 #define RUBIS_DETECT__RUBIS_DETECT_NODE_HPP_
 
-#include "rubis_rt/sched_log.hpp"
-
-#include <rubis_detect/rubis_detect.hpp>
-
 #include <rclcpp/rclcpp.hpp>
 #include <builtin_interfaces/msg/time.hpp>
 #include "std_msgs/msg/string.hpp"
@@ -44,6 +40,11 @@
 #include <time_utils/time_utils.hpp>
 #include <ctime>
 #include <omp.h>
+
+#include <rubis_detect/rubis_detect.hpp>
+#include "rubis_rt/sched.hpp"
+#include "rubis_rt/sched_log.hpp"
+
 
 namespace autoware
 {
@@ -87,7 +88,11 @@ public:
 
 private:
   SchedLog __slog;
+  sched_info __si;
   int32_t __iter;
+
+  // rt
+  bool8_t __rt_configured = false;
 
   float32_t safety_factor;
   float32_t stop_margin;

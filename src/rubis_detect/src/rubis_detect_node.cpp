@@ -26,21 +26,21 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
   // sched_log params
   auto timestamp = (int32_t) std::time(nullptr);
   auto f_timestamp = (timestamp + 50) / 100 * 100;
-  sched_info si {
+  __si = {
     static_cast<int32_t>(declare_parameter(
       "rubis.sched_info.task_id").get<int32_t>()), // task_id
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.name").get<std::string>()), // name
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.period").get<float32_t>()), // period
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<uint64_t>()), // exec_time
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<uint64_t>()), // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.period").get<uint64_t>()) // period
   };
-  __slog = SchedLog(si);
+  __slog = SchedLog(__si);
   __iter = 0;
 
   // config
@@ -107,7 +107,7 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
   danger_publisher_debug_ = this->create_publisher<MarkerArray>("rubis_danger_debug", 10);
 
   // timer
-  auto period = si.period;
+  auto period = __si.period;
   danger_timer_ = this->create_wall_timer(
     1000ms, std::bind(&RubisDetectNode::danger_timer_callback, this));
 }
@@ -174,6 +174,13 @@ void RubisDetectNode::danger_timer_callback()
   if(!has_received_bounding_box) {
     RCLCPP_WARN(get_logger(), "RubisDetectNode::danger_timer_callback: did not receive bbox yet.");
     return;
+  }
+  // rubis_rt
+  if(!__rt_configured) {
+    auto tid = gettid();
+    std::cout << "[RubisDetectNode] (" << tid << "): __rt_configured (" << __si.exec_time << ", " << __si.deadline << ", " << __si.period << ")" << std::endl;
+    rubis::sched::set_sched_deadline(tid, __si.exec_time, __si.deadline, __si.period);
+    __rt_configured = true;
   }
   // has_received_bounding_box = false;
   const auto danger{compute_danger(*last_bboxes)};

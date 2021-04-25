@@ -93,7 +93,7 @@ int sched_getattr(pid_t pid,
 #define SCHED_DEADLINE	6
 #include <iostream>
 
-bool set_sched_deadline(int _tid, int _exec_time, int _deadline, int _period) {
+bool set_sched_deadline(int _tid, __u64 _exec_time, __u64 _deadline, __u64 _period) {
     struct sched_attr attr;
     attr.size = sizeof(attr);
     attr.sched_flags = 0;
@@ -107,7 +107,7 @@ bool set_sched_deadline(int _tid, int _exec_time, int _deadline, int _period) {
 
     int ret = sched_setattr(_tid, &attr, attr.sched_flags);
     if(ret < 0) {
-        std::cerr << "[ERROR] sched_setattr failed. Are you root?" << std::endl;
+        std::cerr << "[ERROR] sched_setattr failed. Are you root? (" << ret << ")" << std::endl;
         perror("sched_setattr");
         exit(-1);
         return false;
