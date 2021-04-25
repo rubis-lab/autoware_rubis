@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.5)
 ### Export headers
 project(ray_ground_classifier_nodes)
 
-set(use_OMP FALSE)
+set(use_OMP TRUE)
 if(use_OMP)
   find_package(OpenMP REQUIRED)
   set(OpenMP_LIBS gomp)
