@@ -160,6 +160,7 @@ PointCloudFusionNode::pointcloud_callback(
   const PointCloudMsgT::ConstSharedPtr & msg5, const PointCloudMsgT::ConstSharedPtr & msg6,
   const PointCloudMsgT::ConstSharedPtr & msg7, const PointCloudMsgT::ConstSharedPtr & msg8)
 {
+  std::cout << "pointcloud!!" << std::endl;
   has_received_point_cloud = true;
   last_point_cloud_1 = msg1;
   last_point_cloud_2 = msg2;

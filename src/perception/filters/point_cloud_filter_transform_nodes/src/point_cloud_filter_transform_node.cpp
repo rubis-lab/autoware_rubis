@@ -84,6 +84,27 @@ PointCloud2FilterTransformNode::PointCloud2FilterTransformNode(
     static_cast<size_t>(declare_parameter("expected_num_subscribers").get<int32_t>())},
   m_pcl_size{static_cast<size_t>(declare_parameter("pcl_size").get<int32_t>())}
 {  /// Declare transform parameters with the namespace
+
+  // sched_log params
+  auto timestamp = static_cast<int32_t>( std::time(nullptr));
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
+  sched_info si {
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.period").get<float32_t>()), // period
+    static_cast<float32_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+  };
+  __slog = SchedLog(si);
+  __iter = 0;
+
   this->declare_parameter("static_transformer.quaternion.x");
   this->declare_parameter("static_transformer.quaternion.y");
   this->declare_parameter("static_transformer.quaternion.z");
@@ -199,7 +220,6 @@ PointCloud2FilterTransformNode::PointCloud2FilterTransformNode(
   this->declare_parameter("static_transformer.translation.x");
   this->declare_parameter("static_transformer.translation.y");
   this->declare_parameter("static_transformer.translation.z");
-
   /// Declare objects to hold transform parameters
   rclcpp::Parameter quat_x_param;
   rclcpp::Parameter quat_y_param;

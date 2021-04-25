@@ -87,13 +87,13 @@ def generate_launch_description():
     #     ])
 
     ######## point_cloud_transform (lidar)
-    pc_filter_transform_param_file = os.path.join(
+    pc_filter_transform_lidar_front_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
-        'param/pc_filter_transform.param.yaml')
+        'param/pc_filter_transform_lidar_front.param.yaml')
 
-    pc_filter_transform_param = DeclareLaunchArgument(
-        'pc_filter_transform_param_file',
-        default_value=pc_filter_transform_param_file,
+    pc_filter_transform_lidar_front_param = DeclareLaunchArgument(
+        'pc_filter_transform_lidar_front_param_file',
+        default_value=pc_filter_transform_lidar_front_param_file,
         description='Path to config file for Point Cloud Filter/Transform Nodes'
     )
 
@@ -102,15 +102,25 @@ def generate_launch_description():
         executable='point_cloud_filter_transform_node_exe',
         name='filter_transform_vlp16_front',
         namespace='lidar_front',
-        parameters=[LaunchConfiguration('pc_filter_transform_param_file')],
+        parameters=[LaunchConfiguration('pc_filter_transform_lidar_front_param_file')],
         remappings=[("points_in", "points_raw")]
+    )
+
+    pc_filter_transform_lidar_rear_param_file = os.path.join(
+        get_package_share_directory('rubis_base'),
+        'param/pc_filter_transform_lidar_rear.param.yaml')
+
+    pc_filter_transform_lidar_rear_param = DeclareLaunchArgument(
+        'pc_filter_transform_lidar_rear_param_file',
+        default_value=pc_filter_transform_lidar_rear_param_file,
+        description='Path to config file for Point Cloud Filter/Transform Nodes'
     )
     filter_transform_vlp16_rear = Node(
         package='point_cloud_filter_transform_nodes',
         executable='point_cloud_filter_transform_node_exe',
         name='filter_transform_vlp16_rear',
         namespace='lidar_rear',
-        parameters=[LaunchConfiguration('pc_filter_transform_param_file')],
+        parameters=[LaunchConfiguration('pc_filter_transform_lidar_rear_param_file')],
         remappings=[("points_in", "points_raw")]
     )
 
@@ -345,8 +355,9 @@ def generate_launch_description():
         lanelet2_map_visualizer,
 
         # point_cloud_transform (lidar)
-        pc_filter_transform_param,
+        pc_filter_transform_lidar_front_param,
         filter_transform_vlp16_front,
+        pc_filter_transform_lidar_rear_param,
         filter_transform_vlp16_rear,
 
         # point_cloud_fusion (lidar)

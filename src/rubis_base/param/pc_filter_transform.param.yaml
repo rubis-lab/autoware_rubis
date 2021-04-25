@@ -1,0 +1,65 @@
+# Copyright 2020 RUBIS
+
+/**:
+  ros__parameters:
+    lidar_front:
+      timeout_ms:       110
+      pcl_size:         55000
+      input_frame_id:  "lidar_front"
+      output_frame_id: "base_link"
+      init_timeout_ms:  5000
+      expected_num_subscribers: 1.00002
+      expected_num_publishers:  1.00002
+      start_angle:            0.00001       # radians
+      end_angle:              6.28
+      min_radius:             6.0      # meters
+      max_radius:             150.0
+      static_transformer:
+        quaternion:
+          x:                    0.00001
+          y:                    0.00001
+          z:                    0.00001
+          w:                    1.00001
+        translation:
+          x:                    1.498
+          y:                    -0.022
+          z:                    1.49
+      rubis:
+        sched_info:
+          task_id: 8022
+          name: "point_cloud_filter_transform_front"
+          log_dir: "/home/rubis/rubis_log/"
+          exec_time: 10.0
+          period: 20.0
+          deadline: 30.0
+
+    lidar_rear:
+      timeout_ms:       110
+      pcl_size:         55000
+      input_frame_id:  "lidar_rear"
+      output_frame_id: "base_link"
+      init_timeout_ms:  5000
+      expected_num_subscribers: 1.00002
+      expected_num_publishers:  1.00002
+      start_angle:            0.00001       # radians
+      end_angle:              6.28
+      min_radius:             6.00001       # meters
+      max_radius:             150.0
+      static_transformer:
+        quaternion:
+          x:                    0.00001
+          y:                    0.00001
+          z:                    0.00001
+          w:                    1.00001
+        translation:
+          x:                    0.308
+          y:                    -0.022
+          z:                    1.49
+      rubis:
+        sched_info:
+          task_id: 8022
+          name: "point_cloud_filter_transform_rear"
+          log_dir: "/home/rubis/rubis_log/"
+          exec_time: 10.0
+          period: 20.0
+          deadline: 30.0
