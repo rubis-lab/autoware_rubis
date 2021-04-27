@@ -29,6 +29,7 @@
 #include <string>
 #include <memory>
 #include <limits>
+#include "omp.h"
 
 using autoware::common::types::float32_t;
 using autoware::common::types::float64_t;
@@ -83,21 +84,6 @@ public:
     const std::string & name_space,
     const PoseInitializerT & pose_initializer)
   : ParentT(node_name, name_space, pose_initializer),
-    m_predict_translation_threshold{
-      this->declare_parameter("predict_pose_threshold.translation").template get<double>()},
-    m_predict_rotation_threshold{
-      this->declare_parameter("predict_pose_threshold.rotation").template get<double>()}
-  {
-    init();
-  }
-
-  //rubis constructor
-  P2DNDTLocalizerNode(
-    const std::string & node_name,
-    const std::string & node_ns,
-    const rclcpp::NodeOptions & node_options,
-    const PoseInitializerT & pose_initializer)
-  : ParentT(node_name, node_ns, node_options, pose_initializer),
     m_predict_translation_threshold{
       this->declare_parameter("predict_pose_threshold.translation").template get<double>()},
     m_predict_rotation_threshold{

@@ -104,8 +104,6 @@ PointCloud2FilterTransformNode::PointCloud2FilterTransformNode(
     static_cast<uint64_t>(declare_parameter(
       "rubis.sched_info.period").get<uint64_t>()) // period
   };
-  // RCLCPP_INFO("init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!");
-  // RCLCPP_INFO(get_logger(), "(" + std::to_string(tid) + "): init (" + std::to_string(__si.exec_time) + ", " + std::to_string(__si.deadline) + ", " + std::to_string(__si.period) + ")");
   __slog = SchedLog(__si);
   __iter = 0;
 

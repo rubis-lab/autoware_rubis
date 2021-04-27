@@ -32,14 +32,6 @@ struct P2DNDTLocalizerNodeComponent
       autoware::localization::ndt_nodes::PoseInitializer_{})
   {
   }
-  //rubis constructor
-  explicit P2DNDTLocalizerNodeComponent(
-    const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options)
-  : autoware::localization::ndt_nodes::P2DNDTLocalizerNode<>(
-      node_name, node_ns, node_options,
-      autoware::localization::ndt_nodes::PoseInitializer_{})
-  {
-  }
 };
 }  // namespace ndt_nodes
 }  // namespace localization

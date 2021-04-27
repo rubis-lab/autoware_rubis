@@ -33,11 +33,12 @@
 #include <string>
 #include <tuple>
 #include <utility>
-
-#include "rubis_rt/sched_log.hpp"
+#include <chrono>
 #include <ctime>
 #include "omp.h"
-#include <chrono>
+
+#include "rubis_rt/sched.hpp"
+#include "rubis_rt/sched_log.hpp"
 
 namespace autoware
 {
@@ -130,6 +131,8 @@ public:
     if (publish_tf == LocalizerPublishMode::PUBLISH_TF) {
       m_tf_publisher = create_publisher<tf2_msgs::msg::TFMessage>("/tf", pose_pub_config.qos);
     }
+    RCLCPP_WARN(
+      get_logger(), "########1st constructor");
   }
 
   // Constructor for ros2 components
@@ -169,68 +172,32 @@ public:
         }))
   {
     init();
-  }
 
-//rubis constructor
-  RelativeLocalizerNode(
-    const std::string & node_name,
-    const std::string & node_ns,
-    const rclcpp::NodeOptions & options,
-    const PoseInitializerT & pose_initializer)
-  : Node(node_name, node_ns, options),
-    m_pose_initializer(pose_initializer),
-    m_tf_listener(m_tf_buffer, std::shared_ptr<rclcpp::Node>(this, [](auto) {}), false),
-    m_observation_sub(create_subscription<ObservationMsgT>(
-      "/lidars/points_fused_downsampled",
-        rclcpp::QoS{rclcpp::KeepLast{
-            static_cast<size_t>(declare_parameter("observation_sub.history_depth").template
-            get<size_t>())}},
-        [this](typename ObservationMsgT::ConstSharedPtr msg) {observation_callback_rubis(msg);})),
-    m_map_sub(
-      create_subscription<MapMsgT>(
-        "ndt_map",
-        rclcpp::QoS{rclcpp::KeepLast{
-            static_cast<size_t>(declare_parameter("map_sub.history_depth").
-            template get<size_t>())}}.transient_local(),
-        [this](typename MapMsgT::ConstSharedPtr msg) {map_callback(msg);})),
-    m_pose_publisher(
-      create_publisher<PoseWithCovarianceStamped>(
-        "ndt_pose",
-        rclcpp::QoS{rclcpp::KeepLast{
-            static_cast<size_t>(declare_parameter(
-              "pose_pub.history_depth").template get<size_t>())}})),
-    m_initial_pose_sub(
-      create_subscription<PoseWithCovarianceStamped>(
-        "initialpose",
-        rclcpp::QoS{rclcpp::KeepLast{10}},
-        [this](const typename PoseWithCovarianceStamped::ConstSharedPtr msg) {
-          initial_pose_callback(msg);
-        }))
-  {
     // sched_log params
-    auto timestamp = (int32_t) std::time(nullptr);
+    auto timestamp = static_cast<int32_t>( std::time(nullptr));
     auto f_timestamp = (timestamp + 50) / 100 * 100;
-    sched_info si {
+    __si = {
       static_cast<int32_t>(declare_parameter(
-        "rubis.sched_info.task_id").get<int32_t>()), // task_id
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+      static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.max_opt").get<int32_t>()), // max_opt
       static_cast<std::string>(declare_parameter(
-        "rubis.sched_info.name").get<std::string>()), // name
+      "rubis.sched_info.name").get<std::string>()), // name
       static_cast<std::string>(declare_parameter(
-        "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
-      static_cast<float32_t>(declare_parameter(
-        "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
-      static_cast<float32_t>(declare_parameter(
-        "rubis.sched_info.period").get<float32_t>()), // period
-      static_cast<float32_t>(declare_parameter(
-        "rubis.sched_info.deadline").get<float32_t>()) // deadline
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+      static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<uint64_t>()), // exec_time
+      static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<uint64_t>()), // deadline
+      static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.period").get<uint64_t>()) // period
     };
-    __slog = SchedLog(si);
+    __slog = SchedLog(__si);
     __iter = 0;
-    auto period = si.period;
-    __tmr = this->create_wall_timer(
-        1000ms, std::bind(&RelativeLocalizerNode::handle_timer_callback, this));
 
-    init();
+  for(int i = 0; i < __si.max_option; i++) {
+    __rt_configured.push_back(false);
+  }
   }
 
   /// Constructor using ros parameters
@@ -271,6 +238,8 @@ public:
         }))
   {
     init();
+    RCLCPP_WARN(
+      get_logger(), "########3rd constructor");
   }
 
   /// Get a const pointer of the output publisher. Can be used for matching against subscriptions.
@@ -353,8 +322,11 @@ protected:
   }
 
 private:
+  sched_info __si;
   SchedLog __slog;
+  std::vector<bool8_t> __rt_configured;
   int32_t __iter;
+
   bool8_t has_received_observation = false;
   typename ObservationMsgT::ConstSharedPtr last_observation;
   rclcpp::TimerBase::SharedPtr __tmr;
@@ -552,13 +524,17 @@ void observation_callback_rubis(typename ObservationMsgT::ConstSharedPtr msg_ptr
     }
     auto end_time = omp_get_wtime();
     auto response_time = (end_time - start_time) * 1e3;
+    auto thr_id = 0;
     sched_data sd {
-        ++__iter,  // iter
-        response_time,  // response_time
-        start_time,  // start_time
-        end_time  // end_time
+      thr_id, // thr_id
+      __iter,  // iter
+      start_time,  // start_time
+      end_time,  // end_time
+      response_time  // response_time
     };
     __slog.add_entry(sd);
+
+    ++__iter;
   }
 
   /// Callback that updates the map.

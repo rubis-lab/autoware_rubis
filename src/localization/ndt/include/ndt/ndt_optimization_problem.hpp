@@ -142,7 +142,7 @@ public:
 
     Hessian hessian;
     std::experimental::optional<HessianAngleParameters> hessian_params;
-
+    std::cout<<"running evaluate"<<std::endl;
     {
       // Angle parameters to be used by all elements (eq. 6.12) [Magnusson 2009]
       const AngleParameters angle_params{x};

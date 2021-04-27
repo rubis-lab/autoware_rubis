@@ -109,95 +109,35 @@ RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(
   // initialize messages
   init_pcl_msg(m_ground_msg, m_frame_id.c_str(), m_pcl_size);
   init_pcl_msg(m_nonground_msg, m_frame_id.c_str(), m_pcl_size);
-}
-////////////////////////////////////////////////////////////////////////////////
-//rubis constructor
-RayGroundClassifierCloudNode::RayGroundClassifierCloudNode(
-  const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options)
-: Node(node_name, node_ns, node_options),
-#ifdef _OPENMP
-  m_classifiers(omp_get_max_threads(), ray_ground_classifier::RayGroundClassifier(
-      ray_ground_classifier::Config {
-          static_cast<float32_t>(declare_parameter("classifier.sensor_height_m").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.max_local_slope_deg").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.max_global_slope_deg").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.nonground_retro_thresh_deg").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.min_height_thresh_m").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.max_global_height_thresh_m").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.max_last_local_ground_thresh_m").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.max_provisional_ground_distance_m").get<float32_t>())
-        })),
-#else
-  m_classifier(ray_ground_classifier::Config{
-          static_cast<float32_t>(declare_parameter("classifier.sensor_height_m").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.max_local_slope_deg").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.max_global_slope_deg").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.nonground_retro_thresh_deg").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.min_height_thresh_m").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.max_global_height_thresh_m").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.max_last_local_ground_thresh_m").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "classifier.max_provisional_ground_distance_m").get<float32_t>())
-        }),
-#endif
-  m_aggregator(ray_ground_classifier::RayAggregator::Config{
-          static_cast<float32_t>(declare_parameter(
-            "aggregator.min_ray_angle_rad").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter(
-            "aggregator.max_ray_angle_rad").get<float32_t>()),
-          static_cast<float32_t>(declare_parameter("aggregator.ray_width_rad").get<float32_t>()),
-          static_cast<std::size_t>(
-            declare_parameter("aggregator.max_ray_points").get<std::size_t>())
-        }),
-  m_pcl_size(static_cast<std::size_t>(declare_parameter("pcl_size").get<std::size_t>())),
-  m_frame_id(declare_parameter("frame_id").get<std::string>().c_str()),
-  m_has_failed(false),
-  m_timeout(std::chrono::milliseconds{declare_parameter("cloud_timeout_ms").get<uint16_t>()}),
-  m_raw_sub_ptr(create_subscription<PointCloud2>(
-      "/lidars/points_fused",
-      rclcpp::QoS(10), std::bind(&RayGroundClassifierCloudNode::callback, this, _1))),
-  m_ground_pub_ptr(create_publisher<PointCloud2>(
-      "points_ground", rclcpp::QoS(10))),
-  m_nonground_pub_ptr(create_publisher<PointCloud2>(
-      "points_nonground", rclcpp::QoS(10))),
-  m_ground_pc_idx{0},
-  m_nonground_pc_idx{0}
-{
+
+  // sched_log params
   auto timestamp = static_cast<int32_t>( std::time(nullptr));
   auto f_timestamp = (timestamp + 50) / 100 * 100;
-  sched_info si {
+  __si = {
     static_cast<int32_t>(declare_parameter(
       "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.max_opt").get<int32_t>()), // max_opt
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.name").get<std::string>()), // name
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.period").get<float32_t>()), // period
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<uint64_t>()), // exec_time
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<uint64_t>()), // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.period").get<uint64_t>()) // period
   };
-  __slog = SchedLog(si);
+  __slog = SchedLog(__si);
   __iter = 0;
-  // initialize messages
-  init_pcl_msg(m_ground_msg, m_frame_id.c_str(), m_pcl_size);
-  init_pcl_msg(m_nonground_msg, m_frame_id.c_str(), m_pcl_size);
+
+  for(int i = 0; i < __si.max_option; i++) {
+    __rt_configured.push_back(false);
+  }
+  return;
 }
+
 void
 RayGroundClassifierCloudNode::callback(const PointCloud2::SharedPtr msg)
 {

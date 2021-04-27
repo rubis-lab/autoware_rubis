@@ -28,12 +28,15 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <ctime>
-#include "rubis_rt/sched_log.hpp"
-#include <omp.h>
 
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "rubis_rt/sched_log.hpp"
+#include "rubis_rt/sched.hpp"
+#include <ctime>
+#include <omp.h>
 
 using autoware::common::types::bool8_t;
 using autoware::common::types::char8_t;
@@ -62,12 +65,13 @@ public:
   /// \param[in] options an rclcpp::NodeOptions object to configure the node
   /// \throw std::runtime_error if configuration fails
   explicit RayGroundClassifierCloudNode(const rclcpp::NodeOptions & options);
-  explicit RayGroundClassifierCloudNode(
-    const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & options);
 
 private:
   SchedLog __slog;
+  sched_info __si;
+  std::vector<bool8_t> __rt_configured;
   int32_t __iter;
+
   /// \brief Resets state of ray aggregator and messages
   RAY_GROUND_CLASSIFIER_NODES_LOCAL void reset();
   // Algorithmic core

@@ -27,6 +27,7 @@
 #include <string>
 
 #include "rubis_rt/sched_log.hpp"
+#include "rubis_rt/sched.hpp"
 #include <ctime>
 #include <omp.h>
 
@@ -57,8 +58,6 @@ public:
   /// \param node_options Additional options to control creation of the node.
   VoxelCloudNode(
     const rclcpp::NodeOptions & node_options);
-  VoxelCloudNode(
-    const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options);
   /// \brief Core run loop
   void callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
 
@@ -67,6 +66,8 @@ private:
   /// \param[in] cfg Configuration object for voxel grid
   /// \param[in] is_approximate whether to instantiate an approximate or centroid voxel grid
   SchedLog __slog;
+  sched_info __si;
+  std::vector<bool8_t> __rt_configured;
   int32_t __iter;
 
   void VOXEL_GRID_NODES_LOCAL init(const voxel_grid::Config & cfg, const bool8_t is_approximate);
