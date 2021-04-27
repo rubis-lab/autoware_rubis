@@ -51,29 +51,17 @@ uint32_t PointCloudFusion::fuse_pc_msgs(
 {
   uint32_t pc_concat_idx = 0;
 
-  for (size_t i = 0; i < m_input_topics_size; ++i) {
-    concatenate_pointcloud(*msgs[i], cloud_concatenated, pc_concat_idx);
-  }
-  return pc_concat_idx;
-}
-
-uint32_t PointCloudFusion::fuse_pc_msgs_rubis(
-  const std::array<PointCloudMsgT::ConstSharedPtr, 8> & msgs,
-  PointCloudMsgT & cloud_concatenated, sched_info _si)
-{
-  uint32_t pc_concat_idx = 0;
-
   omp_set_dynamic(0);
 
-  #pragma omp parallel num_threads(_si.max_option)
+  #pragma omp parallel num_threads(__si.max_option)
   {
     // configure rt
     auto thr_id = omp_get_thread_num();
 
     if(!__rt_configured[thr_id]) {
       auto tid = gettid();
-      std::cout << "[PointCloudFusion] (" << tid << "): __rt_configured (" << _si.exec_time << ", " << _si.deadline << ", " << _si.period << ")" << std::endl;
-      rubis::sched::set_sched_deadline(tid, _si.exec_time, _si.deadline, _si.period);
+      std::cout << "[PointCloudFusion] (" << tid << "): __rt_configured (" << __si.exec_time << ", " << __si.deadline << ", " << __si.period << ")" << std::endl;
+      rubis::sched::set_sched_deadline(tid, __si.exec_time, __si.deadline, __si.period);
       __rt_configured[thr_id] = true;
     }
 

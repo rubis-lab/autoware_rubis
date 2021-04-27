@@ -70,9 +70,6 @@ public:
     const std::array<PointCloudMsgT::ConstSharedPtr, 8> & msgs,
     PointCloudMsgT & cloud_concatenated);
 
-  uint32_t fuse_pc_msgs_rubis(
-    const std::array<PointCloudMsgT::ConstSharedPtr, 8> & msgs,
-    PointCloudMsgT & cloud_concatenated, sched_info _si);
   void init_rubis(sched_info _si);
 
 private:
