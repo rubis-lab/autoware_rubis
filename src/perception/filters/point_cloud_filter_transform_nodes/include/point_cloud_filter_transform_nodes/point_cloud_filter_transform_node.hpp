@@ -22,16 +22,16 @@
 #include <lidar_utils/point_cloud_utils.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 
-#include "rubis_rt/sched_log.hpp"
-#include <ctime>
-#include <omp.h>
-
 #include <memory>
 #include <string>
 
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
+#include "rubis_rt/sched_log.hpp"
+#include "rubis_rt/sched.hpp"
+#include <ctime>
+#include <omp.h>
 namespace autoware
 {
 namespace perception
@@ -68,7 +68,6 @@ public:
   /// \brief Parameter constructor
   /// \param node_options Additional options to control creation of the node.
   explicit PointCloud2FilterTransformNode(const rclcpp::NodeOptions & node_options);
-  explicit PointCloud2FilterTransformNode(const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options);
 
 protected:
   /// \brief Call distance & angle filter and then static transformer for all the points
@@ -105,7 +104,10 @@ protected:
 
 private:
   SchedLog __slog;
+  sched_info __si;
+  std::vector<bool8_t> __rt_configured;
   int32_t __iter;
+
   using AngleFilter = autoware::common::lidar_utils::AngleFilter;
   using DistanceFilter = autoware::common::lidar_utils::DistanceFilter;
   using StaticTransformer = autoware::common::lidar_utils::StaticTransformer;

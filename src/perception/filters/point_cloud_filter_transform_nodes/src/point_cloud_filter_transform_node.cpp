@@ -88,130 +88,30 @@ PointCloud2FilterTransformNode::PointCloud2FilterTransformNode(
   // sched_log params
   auto timestamp = static_cast<int32_t>( std::time(nullptr));
   auto f_timestamp = (timestamp + 50) / 100 * 100;
-  sched_info si {
+  __si = {
     static_cast<int32_t>(declare_parameter(
       "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.max_opt").get<int32_t>()), // max_opt
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.name").get<std::string>()), // name
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.period").get<float32_t>()), // period
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<uint64_t>()), // exec_time
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<uint64_t>()), // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.period").get<uint64_t>()) // period
   };
-  __slog = SchedLog(si);
+  // RCLCPP_INFO("init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!init!!!!!!");
+  // RCLCPP_INFO(get_logger(), "(" + std::to_string(tid) + "): init (" + std::to_string(__si.exec_time) + ", " + std::to_string(__si.deadline) + ", " + std::to_string(__si.period) + ")");
+  __slog = SchedLog(__si);
   __iter = 0;
 
-  this->declare_parameter("static_transformer.quaternion.x");
-  this->declare_parameter("static_transformer.quaternion.y");
-  this->declare_parameter("static_transformer.quaternion.z");
-  this->declare_parameter("static_transformer.quaternion.w");
-  this->declare_parameter("static_transformer.translation.x");
-  this->declare_parameter("static_transformer.translation.y");
-  this->declare_parameter("static_transformer.translation.z");
-
-  /// Declare objects to hold transform parameters
-  rclcpp::Parameter quat_x_param;
-  rclcpp::Parameter quat_y_param;
-  rclcpp::Parameter quat_z_param;
-  rclcpp::Parameter quat_w_param;
-  rclcpp::Parameter trans_x_param;
-  rclcpp::Parameter trans_y_param;
-  rclcpp::Parameter trans_z_param;
-
-
-  /// If transform parameters exist in the param file use them
-  if (this->get_parameter("static_transformer.quaternion.x", quat_x_param) &&
-    this->get_parameter("static_transformer.quaternion.y", quat_y_param) &&
-    this->get_parameter("static_transformer.quaternion.z", quat_z_param) &&
-    this->get_parameter("static_transformer.quaternion.w", quat_w_param) &&
-    this->get_parameter("static_transformer.translation.x", trans_x_param) &&
-    this->get_parameter("static_transformer.translation.y", trans_y_param) &&
-    this->get_parameter("static_transformer.translation.z", trans_z_param))
-  {
-    RCLCPP_WARN(get_logger(), "Using transform from file.");
-    m_static_transformer = std::make_unique<StaticTransformer>(
-      get_transform(
-        m_input_frame_id, m_output_frame_id,
-        quat_x_param.as_double(),
-        quat_y_param.as_double(),
-        quat_z_param.as_double(),
-        quat_w_param.as_double(),
-        trans_x_param.as_double(),
-        trans_y_param.as_double(),
-        trans_z_param.as_double()).transform);
-  } else {  /// Else lookup transform being published on /tf or /static_tf topics
-    /// TF buffer
-    tf2_ros::Buffer tf2_buffer(this->get_clock());
-    /// TF listener
-    tf2_ros::TransformListener tf2_listener(tf2_buffer);
-    while (rclcpp::ok()) {
-      try {
-        RCLCPP_INFO(get_logger(), "Looking up the transform.");
-        m_static_transformer = std::make_unique<StaticTransformer>(
-          tf2_buffer.lookupTransform(
-            m_output_frame_id, m_input_frame_id,
-            tf2::TimePointZero).transform);
-        break;
-      } catch (const std::exception & transform_exception) {
-        RCLCPP_INFO(get_logger(), "No transform was available. Retrying after 100 ms.");
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        continue;
-      }
-    }
+  for(int i = 0; i < __si.max_option; i++) {
+    __rt_configured.push_back(false);
   }
-  common::lidar_utils::init_pcl_msg(
-    m_filtered_transformed_msg,
-    m_output_frame_id.c_str(), m_pcl_size);
-}
-
-//rubis constructor
-PointCloud2FilterTransformNode::PointCloud2FilterTransformNode(
-  const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options)
-: Node(node_name, node_ns, node_options),
-  m_angle_filter{
-    static_cast<float32_t>(declare_parameter("start_angle").get<float64_t>()),
-    static_cast<float32_t>(declare_parameter("end_angle").get<float64_t>())},
-  m_distance_filter{
-    static_cast<float32_t>(declare_parameter("min_radius").get<float64_t>()),
-    static_cast<float32_t>(declare_parameter("max_radius").get<float64_t>())},
-  m_input_frame_id{declare_parameter("input_frame_id").get<std::string>()},
-  m_output_frame_id{declare_parameter("output_frame_id").get<std::string>()},
-  m_init_timeout{std::chrono::milliseconds{declare_parameter("init_timeout_ms").get<int32_t>()}},
-  m_timeout{std::chrono::milliseconds{declare_parameter("timeout_ms").get<int32_t>()}},
-  m_sub_ptr{create_subscription<PointCloud2>(
-      "points_raw", rclcpp::QoS{10},
-      std::bind(
-        &PointCloud2FilterTransformNode::process_filtered_transformed_message, this, _1))},
-  m_pub_ptr{create_publisher<PointCloud2>("points_filtered", rclcpp::QoS{10})},
-  m_expected_num_publishers{
-    static_cast<size_t>(declare_parameter("expected_num_publishers").get<int32_t>())},
-  m_expected_num_subscribers{
-    static_cast<size_t>(declare_parameter("expected_num_subscribers").get<int32_t>())},
-  m_pcl_size{static_cast<size_t>(declare_parameter("pcl_size").get<int32_t>())}
-{  /// Declare transform parameters with the namespace
-  // sched_log params
-  auto timestamp = static_cast<int32_t>( std::time(nullptr));
-  auto f_timestamp = (timestamp + 50) / 100 * 100;
-  sched_info si {
-    static_cast<int32_t>(declare_parameter(
-      "rubis.sched_info.task_id").get<int32_t>()), // task_id
-    static_cast<std::string>(declare_parameter(
-      "rubis.sched_info.name").get<std::string>()), // name
-    static_cast<std::string>(declare_parameter(
-      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.period").get<float32_t>()), // period
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.deadline").get<float32_t>()) // deadline
-  };
-  __slog = SchedLog(si);
-  __iter = 0;
 
   this->declare_parameter("static_transformer.quaternion.x");
   this->declare_parameter("static_transformer.quaternion.y");
@@ -220,6 +120,7 @@ PointCloud2FilterTransformNode::PointCloud2FilterTransformNode(
   this->declare_parameter("static_transformer.translation.x");
   this->declare_parameter("static_transformer.translation.y");
   this->declare_parameter("static_transformer.translation.z");
+
   /// Declare objects to hold transform parameters
   rclcpp::Parameter quat_x_param;
   rclcpp::Parameter quat_y_param;
@@ -294,34 +195,69 @@ const PointCloud2 & PointCloud2FilterTransformNode::filter_and_transform(const P
   reset_pcl_msg(m_filtered_transformed_msg, m_pcl_size, point_cloud_idx);
   m_filtered_transformed_msg.header.stamp = msg.header.stamp;
 
-  for (size_t it = 0; it < (msg.data.size() / 16); it++) {
-    PointXYZIF pt;
-    pt.x = *x_it;
-    pt.y = *y_it;
-    pt.z = *z_it;
-    intensity_it.get_current_value(pt.intensity);
+  omp_set_dynamic(0);
+  #pragma omp parallel num_threads(__si.max_option)
+  {
+    // configure rt
+    auto thr_id = omp_get_thread_num();
 
-    if (point_not_filtered(pt)) {
-      auto transformed_point = transform_point(pt);
-      transformed_point.intensity = pt.intensity;
-      if (!add_point_to_cloud(
-          m_filtered_transformed_msg, transformed_point, point_cloud_idx))
-      {
-        throw std::runtime_error(
-                "Overran cloud msg point capacity");
+    if(!__rt_configured[thr_id]) {
+      auto tid = gettid();
+      RCLCPP_INFO(get_logger(), "(" + std::to_string(tid) + "): __rt_configured (" + std::to_string(__si.exec_time) + ", " + std::to_string(__si.deadline) + ", " + std::to_string(__si.period) + ")");
+      rubis::sched::set_sched_deadline(tid, __si.exec_time, __si.deadline, __si.period);
+      __rt_configured[thr_id] = true;
+    }
+
+    #pragma omp barrier
+
+    // workload start
+    auto start_time = omp_get_wtime();
+
+    #pragma omp for schedule(dynamic) nowait
+    for (size_t it = 0; it < (msg.data.size() / 16); it++) {
+      if (!intensity_it.eof()) {
+        PointXYZIF pt;
+        pt.x = *x_it;
+        pt.y = *y_it;
+        pt.z = *z_it;
+        intensity_it.get_current_value(pt.intensity);
+
+        if (point_not_filtered(pt)) {
+        auto transformed_point = transform_point(pt);
+        transformed_point.intensity = pt.intensity;
+            if (!add_point_to_cloud(m_filtered_transformed_msg, transformed_point, point_cloud_idx))
+            {
+            throw std::runtime_error("Overran cloud msg point capacity");
+            }
+        }
+
+        ++x_it;
+        ++y_it;
+        ++z_it;
+        intensity_it.next();
       }
+      
     }
-
-    ++x_it;
-    ++y_it;
-    ++z_it;
-    intensity_it.next();
-
-    if (intensity_it.eof()) {
-      break;
+    // workload end
+    auto end_time = omp_get_wtime();
+    auto response_time = (end_time - start_time) * 1e3;
+    sched_data sd {
+        thr_id, // thr_id
+        __iter,  // iter
+        start_time,  // start_time
+        end_time,  // end_time
+        response_time  // response_time
+    };
+    #pragma omp critical
+    {
+      __slog.add_entry(sd);
     }
-  }
+    sched_yield();
+  }  // prama omp parallel
+  ++__iter;
+
   resize_pcl_msg(m_filtered_transformed_msg, point_cloud_idx);
+  
   return m_filtered_transformed_msg;
 }
 
