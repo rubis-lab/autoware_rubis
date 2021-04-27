@@ -234,6 +234,7 @@ BoundingBox RubisDetectNode::point_to_box(const Point32 _p, const Complex32 _hea
     p.y = _p.y - (0.5 * sh) + (1 * ch);
     corners.push_back(p);
   }
+
   return minimum_perimeter_bounding_box(corners);
 }
 

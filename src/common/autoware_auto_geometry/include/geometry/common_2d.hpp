@@ -322,8 +322,10 @@ inline T closest_line_point_2d(const T & p, const T & q, const T & r)
     const float32_t t = dot_2d(minus_2d(r, p), qp) / len2;
     ret = plus_2d(p, times_2d(qp, t));
   } else {
-    throw std::runtime_error(
-            "closet_line_point_2d: line ill-defined because given points coincide");
+    // throw std::runtime_error(
+    //         "closet_line_point_2d: line ill-defined because given points coincide");
+    std::cout << "closest_line_point_2d_rubis: line ill-defined because given points coincide" << std::endl;
+    ret = p;
   }
   return ret;
 }

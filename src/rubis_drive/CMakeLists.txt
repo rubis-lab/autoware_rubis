@@ -40,10 +40,11 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
   ${RUBIS_DRIVE_LIB_SRC}
   ${RUBIS_DRIVE_LIB_HEADERS}
 )
-autoware_set_compile_options(${PROJECT_NAME})
+autoware_set_compile_options(${PROJECT_NAME} -fopenmp)
 
 set(RUBIS_DRIVE_NODE_SRC
   src/rubis_drive_node.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched.hpp
   /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
 )
 
@@ -57,6 +58,10 @@ ament_auto_add_library(${PROJECT_NAME}_node SHARED
   ${RUBIS_DRIVE_NODE_HEADERS}
 )
 autoware_set_compile_options(${PROJECT_NAME}_node)
+target_compile_options(${PROJECT_NAME}_node PRIVATE
+  "-fopenmp"
+)
+
 rclcpp_components_register_node(${PROJECT_NAME}_node
   PLUGIN "autoware::rubis_drive::RubisDriveNode"
   EXECUTABLE ${PROJECT_NAME}_node_exe

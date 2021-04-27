@@ -25,26 +25,6 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
 :  Node("rubis_drive", options),
   verbose(true)
 {
-  // sched_log params
-  auto timestamp = (int32_t) std::time(nullptr);
-  auto f_timestamp = (timestamp + 50) / 100 * 100;
-  sched_info si {
-    static_cast<int32_t>(declare_parameter(
-      "rubis.sched_info.task_id").get<int32_t>()), // task_id
-    static_cast<std::string>(declare_parameter(
-      "rubis.sched_info.name").get<std::string>()), // name
-    static_cast<std::string>(declare_parameter(
-      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.period").get<float32_t>()), // period
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.deadline").get<float32_t>()) // deadline
-  };
-  __slog = SchedLog(si);
-  __iter = 0;
-
   // params
   target_vel = static_cast<float32_t>(declare_parameter(
     "target_vel").get<float32_t>());
@@ -71,6 +51,33 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
   danger_subscriber_ = create_subscription<std_msgs::msg::String>(
     "rubis_danger", 10,
     [this](const std_msgs::msg::String::SharedPtr msg) {on_danger(msg);}, SubAllocT{});
+  
+  // sched_log params
+  auto timestamp = (int32_t) std::time(nullptr);
+  auto f_timestamp = (timestamp + 50) / 100 * 100;
+  __si = {
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.max_opt").get<int32_t>()), // max_opt
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.name").get<std::string>()), // name
+    static_cast<std::string>(declare_parameter(
+      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<uint64_t>()), // exec_time
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<uint64_t>()), // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.period").get<uint64_t>()) // period
+  };
+  __slog = SchedLog(__si);
+  __iter = 0;
+
+  for(int i = 0; i < __si.max_option; i++) {
+    __rt_configured.push_back(false);
+  }
+  return;
 }
 
 // void RubisDriveNode::command_timer_callback()

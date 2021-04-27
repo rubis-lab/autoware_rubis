@@ -37,8 +37,15 @@
 #include <utility>
 
 #include "rubis_rt/sched_log.hpp"
+#include "rubis_rt/sched.hpp"
 #include <ctime>
 #include <omp.h>
+
+using autoware::common::types::bool8_t;
+using autoware::common::types::char8_t;
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
 
 namespace autoware
 {
@@ -70,6 +77,8 @@ public:
 
 private:
   SchedLog __slog;
+  sched_info __si;
+  std::vector<bool8_t> __rt_configured;
   int32_t __iter;
 
   bool verbose;  ///< whether to use verbose output or not.
