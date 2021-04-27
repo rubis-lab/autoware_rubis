@@ -47,22 +47,23 @@ PointCloudFusionNode::PointCloudFusionNode(
   // sched_log params
   auto timestamp = (int32_t) std::time(nullptr);
   auto f_timestamp = (timestamp + 50) / 100 * 100;
-  sched_info si {
+
+  sched_info si = {
     static_cast<int32_t>(declare_parameter(
       "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.max_opt").get<int32_t>()), // max_opt
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.name").get<std::string>()), // name
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.period").get<float32_t>()), // period
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<uint64_t>()), // exec_time
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<uint64_t>()), // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.period").get<uint64_t>()) // period
   };
-  __slog = SchedLog(si);
-  __iter = 0;
 
   auto period = si.period;
   __tmr = this->create_wall_timer(
@@ -72,43 +73,8 @@ PointCloudFusionNode::PointCloudFusionNode(
     m_input_topics[i] = "input_topic" + std::to_string(i + 1);
   }
   init();
-}
 
-//rubis constructor
-PointCloudFusionNode::PointCloudFusionNode(
-  const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options)
-: Node(node_name, node_ns, node_options),
-  m_cloud_publisher(create_publisher<PointCloudMsgT>("points_fused", rclcpp::QoS(10))),
-  m_input_topics(declare_parameter("number_of_sources").get<std::size_t>()),
-  m_output_frame_id(declare_parameter("output_frame_id").get<std::string>()),
-  m_cloud_capacity(declare_parameter("cloud_size").get<uint32_t>())
-{
-  // sched_log params
-  auto timestamp = (int32_t) std::time(nullptr);
-  auto f_timestamp = (timestamp + 50) / 100 * 100;
-  sched_info si {
-    static_cast<int32_t>(declare_parameter(
-      "rubis.sched_info.task_id").get<int32_t>()), // task_id
-    static_cast<std::string>(declare_parameter(
-      "rubis.sched_info.name").get<std::string>()), // name
-    static_cast<std::string>(declare_parameter(
-      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.period").get<float32_t>()), // period
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.deadline").get<float32_t>()) // deadline
-  };
-  __slog = SchedLog(si);
-  __iter = 0;
-
-  m_input_topics[0] = "/lidar_front/points_filtered";
-  m_input_topics[1] = "/lidar_rear/points_filtered";
-  for (size_t i = 2; i < m_input_topics.size(); ++i) {
-    m_input_topics[i] = "input_topic" + std::to_string(i + 1);
-  }
-  init();
+  m_core->init_rubis(si);
 }
 
 void PointCloudFusionNode::init()
@@ -190,9 +156,6 @@ void PointCloudFusionNode::handle_periodic(
   const PointCloudMsgT::ConstSharedPtr & msg7, const PointCloudMsgT::ConstSharedPtr & msg8
 )
 {
-  omp_set_dynamic(0);
-  auto start_time = omp_get_wtime();
-
   std::array<PointCloudMsgT::ConstSharedPtr, 8> msgs{msg1, msg2, msg3, msg4, msg5, msg6, msg7,
     msg8};
 
@@ -222,6 +185,7 @@ void PointCloudFusionNode::handle_periodic(
 
   // Go through all the messages and fuse them.
   uint32_t fused_cloud_size = 0;
+  // rubis: actual workload (fuse_pc_msgs)
   try {
     fused_cloud_size = m_core->fuse_pc_msgs(msgs, m_cloud_concatenated);
   } catch (point_cloud_fusion::PointCloudFusion::Error fuse_error) {
@@ -241,17 +205,6 @@ void PointCloudFusionNode::handle_periodic(
     m_cloud_concatenated.header.stamp = latest_stamp;
     m_cloud_publisher->publish(m_cloud_concatenated);
   }
-  auto end_time = omp_get_wtime();
-  auto response_time = (end_time - start_time) * 1e3;
-  
-  sched_data sd {
-    ++__iter,  // iter
-    response_time,  // response_time
-    start_time,  // start_time
-    end_time  // end_time
-  };
-  __slog.add_entry(sd);
-
 }
 }  // namespace point_cloud_fusion_nodes
 }  // namespace filters

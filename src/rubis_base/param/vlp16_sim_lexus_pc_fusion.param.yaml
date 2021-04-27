@@ -7,9 +7,10 @@
     cloud_size:       55000
     rubis:
       sched_info:
-        task_id: 7
-        name: "point_cloud_fusion"
+        task_id: 1
+        max_opt: 4
+        name: "rubis_detect"
         log_dir: "/home/rubis/rubis_log/"
-        exec_time: 10.0
-        period: 20.0
-        deadline: 30.0
+        exec_time: 100000000  # 0.1s
+        deadline: 200000000  # 0.2s
+        period: 300000000  # 0.3s

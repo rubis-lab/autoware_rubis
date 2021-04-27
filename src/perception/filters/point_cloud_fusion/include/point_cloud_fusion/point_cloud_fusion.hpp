@@ -23,6 +23,10 @@
 #include <lidar_utils/point_cloud_utils.hpp>
 #include <vector>
 
+#include "rubis_rt/sched_log.hpp"
+#include "rubis_rt/sched.hpp"
+#include <omp.h>
+
 namespace autoware
 {
 namespace perception
@@ -31,8 +35,14 @@ namespace filters
 {
 namespace point_cloud_fusion
 {
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
+using namespace std::chrono_literals;
+
 class POINT_CLOUD_FUSION_PUBLIC PointCloudFusion
 {
+
 public:
   enum class Error : uint8_t
   {
@@ -60,7 +70,16 @@ public:
     const std::array<PointCloudMsgT::ConstSharedPtr, 8> & msgs,
     PointCloudMsgT & cloud_concatenated);
 
+  uint32_t fuse_pc_msgs_rubis(
+    const std::array<PointCloudMsgT::ConstSharedPtr, 8> & msgs,
+    PointCloudMsgT & cloud_concatenated, sched_info _si);
+  void init_rubis(sched_info _si);
+
 private:
+  SchedLog __slog;
+  sched_info __si;
+  std::vector<bool8_t> __rt_configured;
+  int32_t __iter;
   void concatenate_pointcloud(
     const PointCloudMsgT & pc_in, PointCloudMsgT & pc_out,
     uint32_t & concat_idx) const;

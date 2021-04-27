@@ -30,11 +30,13 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <ctime>
+#include <chrono>
+#include <omp.h>
 
 #include "rubis_rt/sched_log.hpp"
-#include <ctime>
-#include <omp.h>
-#include <chrono>
+#include "rubis_rt/sched.hpp"
+
 
 using autoware::common::types::bool8_t;
 
@@ -61,13 +63,8 @@ public:
   /// \param[in] node_options An rclcpp::NodeOptions object
   explicit PointCloudFusionNode(
     const rclcpp::NodeOptions & node_options);
-  explicit PointCloudFusionNode(
-    const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options);
 
 private:
-  SchedLog __slog;
-  int32_t __iter;
-
   using PointT = common::types::PointXYZIF;
   using PointCloudMsgT = sensor_msgs::msg::PointCloud2;
   using PointCloudT = sensor_msgs::msg::PointCloud2;

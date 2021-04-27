@@ -28,12 +28,19 @@ set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
 set(OpenMP_LIBS gomp)
 
 set(PC_FUSION_LIB pointcloud_fusion_node)
+
 ament_auto_add_library(${PC_FUSION_LIB} SHARED
   include/point_cloud_fusion_nodes/point_cloud_fusion_node.hpp
   src/point_cloud_fusion_node.cpp
   include/point_cloud_fusion_nodes/visibility_control.hpp
-  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp)
-autoware_set_compile_options(${PC_FUSION_LIB})
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched.hpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
+)
+
+autoware_set_compile_options(${PC_FUSION_LIB} -fopenmp)
+target_compile_options(${PC_FUSION_LIB} PRIVATE
+  "-fopenmp"
+)
 
 rclcpp_components_register_node(${PC_FUSION_LIB}
   PLUGIN "autoware::perception::filters::point_cloud_fusion_nodes::PointCloudFusionNode"

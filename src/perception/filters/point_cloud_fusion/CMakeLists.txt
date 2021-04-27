@@ -23,11 +23,18 @@ project(point_cloud_fusion)
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
+
 ament_auto_add_library(${PROJECT_NAME} SHARED
   include/point_cloud_fusion/point_cloud_fusion.hpp
   src/point_cloud_fusion.cpp
-  include/point_cloud_fusion/visibility_control.hpp)
-autoware_set_compile_options(${PROJECT_NAME})
+  include/point_cloud_fusion/visibility_control.hpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched.hpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
+)
+autoware_set_compile_options(${PROJECT_NAME} -fopenmp)
 
 if(BUILD_TESTING)
   # run linters
@@ -37,7 +44,11 @@ endif()
 
 # required by tf2, message_filters
 target_compile_options(${PROJECT_NAME} PRIVATE -Wno-sign-conversion -Wno-conversion
-    -Wno-old-style-cast -Wno-useless-cast -Wno-double-promotion -Wno-nonnull-compare)
+    -Wno-old-style-cast -Wno-useless-cast -Wno-double-promotion -Wno-nonnull-compare "-fopenmp")
+
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+  /home/rubis/AutowareAuto/src/rubis_rt/include/)
+
 
 # Ament Exporting
 ament_auto_package()
