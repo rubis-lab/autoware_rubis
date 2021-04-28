@@ -231,6 +231,10 @@ private:
 /// \brief Common euclidean cluster functions not intended for external use
 namespace details
 {
+EUCLIDEAN_CLUSTER_PUBLIC std::pair<const PointXYZI *, const PointXYZI *> point_struct_iterators(const euclidean_cluster::Cluster & cls);
+
+EUCLIDEAN_CLUSTER_PUBLIC  std::pair<PointXYZI *, PointXYZI *> point_struct_iterators(euclidean_cluster::Cluster & cls);
+
 using BoundingBox = autoware_auto_msgs::msg::BoundingBox;
 using BoundingBoxArray = autoware_auto_msgs::msg::BoundingBoxArray;
 /// \brief Compute lfit bounding box from individual cluster

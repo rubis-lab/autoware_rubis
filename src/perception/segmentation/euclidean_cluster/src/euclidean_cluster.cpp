@@ -256,12 +256,14 @@ EuclideanCluster::PointXY EuclideanCluster::get_point(const Cluster & cls, const
 namespace details
 {
 
-namespace
-{
-using euclidean_cluster::PointXYZI;
+// namespace
+// {
+
+
 std::pair<const PointXYZI *, const PointXYZI *> point_struct_iterators(
   const euclidean_cluster::Cluster & cls)
 {
+  using euclidean_cluster::PointXYZI;
   if (cls.data.empty()) {
     throw std::runtime_error("PointCloud2 data is empty");
   }
@@ -286,13 +288,14 @@ std::pair<const PointXYZI *, const PointXYZI *> point_struct_iterators(
 
 std::pair<PointXYZI *, PointXYZI *> point_struct_iterators(euclidean_cluster::Cluster & cls)
 {
+  using euclidean_cluster::PointXYZI;
   auto iterators = point_struct_iterators(const_cast<const euclidean_cluster::Cluster &>(cls));
   return std::make_pair(
     const_cast<PointXYZI *>(iterators.first),
     const_cast<PointXYZI *>(iterators.second));
 }
 
-}  // namespace
+// }  // namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 BoundingBox compute_eigenbox(const euclidean_cluster::Cluster & cls)

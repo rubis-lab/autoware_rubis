@@ -80,126 +80,36 @@ m_use_lfit{declare_parameter("use_lfit").get<bool8_t>()},
 m_use_z{declare_parameter("use_z").get<bool8_t>()}
 {
   // sched_log params
-  auto timestamp = static_cast<int32_t>(std::time(nullptr));
+  auto timestamp = (int32_t) std::time(nullptr);
   auto f_timestamp = (timestamp + 50) / 100 * 100;
-  sched_info si {
+  __si = {
     static_cast<int32_t>(declare_parameter(
       "rubis.sched_info.task_id").get<int32_t>()), // task_id
+    static_cast<int32_t>(declare_parameter(
+      "rubis.sched_info.max_opt").get<int32_t>()), // max_opt
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.name").get<std::string>()), // name
     static_cast<std::string>(declare_parameter(
       "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.period").get<float32_t>()), // period
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.deadline").get<float32_t>()) // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.exec_time").get<uint64_t>()), // exec_time
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.deadline").get<uint64_t>()), // deadline
+    static_cast<uint64_t>(declare_parameter(
+      "rubis.sched_info.period").get<uint64_t>()) // period
   };
-  __slog = SchedLog(si);
+  __slog = SchedLog(__si);
   __iter = 0;
 
+  for(int i = 0; i < __si.max_option; i++) {
+    __rt_configured.push_back(false);
+  }
+
   // timer
-  auto period = si.period;
+  auto period = __si.period;
   __tmr = this->create_wall_timer(
     1000ms, std::bind(&EuclideanClusterNode::handle_timer_callback, this));
 
-
-  init(m_cluster_alg.get_config());
-  // Initialize voxel grid
-  if (declare_parameter("downsample").get<bool8_t>()) {
-    filters::voxel_grid::PointXYZ min_point;
-    filters::voxel_grid::PointXYZ max_point;
-    filters::voxel_grid::PointXYZ voxel_size;
-    min_point.x = static_cast<float32_t>(declare_parameter("voxel.min_point.x").get<float32_t>());
-    min_point.y = static_cast<float32_t>(declare_parameter("voxel.min_point.y").get<float32_t>());
-    min_point.z = static_cast<float32_t>(declare_parameter("voxel.min_point.z").get<float32_t>());
-    max_point.x = static_cast<float32_t>(declare_parameter("voxel.max_point.x").get<float32_t>());
-    max_point.y = static_cast<float32_t>(declare_parameter("voxel.max_point.y").get<float32_t>());
-    max_point.z = static_cast<float32_t>(declare_parameter("voxel.max_point.z").get<float32_t>());
-    voxel_size.x = static_cast<float32_t>(declare_parameter("voxel.voxel_size.x").get<float32_t>());
-    voxel_size.y = static_cast<float32_t>(declare_parameter("voxel.voxel_size.y").get<float32_t>());
-    voxel_size.z = static_cast<float32_t>(declare_parameter("voxel.voxel_size.z").get<float32_t>());
-    // Aggressive downsampling if not using z
-    if (!m_use_z) {
-      voxel_size.z = (max_point.z - min_point.z) + 1.0F;
-      // Info
-      RCLCPP_INFO(get_logger(), "z is not used, height aspect is fully downsampled away");
-    }
-    m_voxel_ptr = std::make_unique<VoxelAlgorithm>(
-      filters::voxel_grid::Config{
-              min_point,
-              max_point,
-              voxel_size,
-              static_cast<std::size_t>(get_parameter("max_cloud_size").as_int())
-            });
-  }
-}
-//rubis constructor
-EuclideanClusterNode::EuclideanClusterNode(
-  const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options)
-: Node(node_name, node_ns, node_options),
-  m_cloud_sub_ptr{create_subscription<PointCloud2>(
-      "points_nonground",
-      rclcpp::QoS(10),
-      [this](const PointCloud2::SharedPtr msg) {handle(msg);})},
-  m_cluster_pub_ptr{declare_parameter("use_cluster").get<bool8_t>() ?
-  create_publisher<Clusters>(
-    "points_clustered",
-    rclcpp::QoS(10)) : nullptr},
-m_box_pub_ptr{declare_parameter("use_box").get<bool8_t>() ?
-  create_publisher<BoundingBoxArray>(
-    "lidar_bounding_boxes", rclcpp::QoS{10}) :
-  nullptr},
-m_marker_pub_ptr{get_parameter("use_box").as_bool() ?
-  create_publisher<MarkerArray>(
-    "lidar_bounding_boxes_viz", rclcpp::QoS{10}) :
-  nullptr},
-m_cluster_alg{
-  euclidean_cluster::Config{
-    declare_parameter("cluster.frame_id").get<std::string>().c_str(),
-    static_cast<std::size_t>(declare_parameter("cluster.min_cluster_size").get<std::size_t>()),
-    static_cast<std::size_t>(declare_parameter("cluster.max_num_clusters").get<std::size_t>())
-  },
-  euclidean_cluster::HashConfig{
-    static_cast<float32_t>(declare_parameter("hash.min_x").get<float32_t>()),
-    static_cast<float32_t>(declare_parameter("hash.max_x").get<float32_t>()),
-    static_cast<float32_t>(declare_parameter("hash.min_y").get<float32_t>()),
-    static_cast<float32_t>(declare_parameter("hash.max_y").get<float32_t>()),
-    static_cast<float32_t>(declare_parameter("hash.side_length").get<float32_t>()),
-    static_cast<std::size_t>(declare_parameter("max_cloud_size").get<std::size_t>())
-  }
-},
-m_clusters{},
-m_boxes{},
-m_voxel_ptr{nullptr},  // Because voxel config's Point types don't accept positional arguments
-m_use_lfit{declare_parameter("use_lfit").get<bool8_t>()},
-m_use_z{declare_parameter("use_z").get<bool8_t>()}
-{
-  // sched_log params
-  auto timestamp = static_cast<int32_t>(std::time(nullptr));
-  auto f_timestamp = (timestamp + 50) / 100 * 100;
-  sched_info si {
-    static_cast<int32_t>(declare_parameter(
-      "rubis.sched_info.task_id").get<int32_t>()), // task_id
-    static_cast<std::string>(declare_parameter(
-      "rubis.sched_info.name").get<std::string>()), // name
-    static_cast<std::string>(declare_parameter(
-      "rubis.sched_info.log_dir").get<std::string>()) + std::to_string(f_timestamp) + ".log", // file
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.exec_time").get<float32_t>()), // exec_time
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.period").get<float32_t>()), // period
-    static_cast<float32_t>(declare_parameter(
-      "rubis.sched_info.deadline").get<float32_t>()) // deadline
-  };
-  __slog = SchedLog(si);
-  __iter = 0;
-
-  // timer
-  auto period = si.period;
-  __tmr = this->create_wall_timer(
-    1000ms, std::bind(&EuclideanClusterNode::handle_timer_callback, this));
 
   init(m_cluster_alg.get_config());
   // Initialize voxel grid
@@ -282,9 +192,70 @@ void EuclideanClusterNode::publish_clusters(
   m_cluster_pub_ptr->publish(clusters);
 }
 
+
+// rubis: copied from euclidean_cluster.cpp
 ////////////////////////////////////////////////////////////////////////////////
+void EuclideanClusterNode::compute_eigenboxes_with_z_rubis(const Clusters & clusters, BoundingBoxArray & boxes)
+{
+  boxes.boxes.clear();
+
+  omp_set_dynamic(0);
+  #pragma omp parallel num_threads(__si.max_option)
+  {
+    // configure rt
+    auto thr_id = omp_get_thread_num();
+
+    if(!__rt_configured[thr_id]) {
+      auto tid = gettid();
+      std::cout << "[RubisDetectNode] (" << tid << "): __rt_configured (" << __si.exec_time << ", " << __si.deadline << ", " << __si.period << ")" << std::endl;
+      rubis::sched::set_sched_deadline(tid, __si.exec_time, __si.deadline, __si.period);
+      __rt_configured[thr_id] = true;
+    }
+
+    #pragma omp barrier
+
+    // workload start
+    auto start_time = omp_get_wtime();
+
+    #pragma omp for schedule(dynamic) nowait
+    for(size_t c_idx = 0; c_idx < clusters.clusters.size(); ++c_idx) {
+      // for (auto & cls : clusters.clusters) {
+      try {
+        const auto iterators = euclidean_cluster::details::point_struct_iterators(clusters.clusters[c_idx]);
+        auto box = autoware::common::geometry::bounding_box::eigenbox_2d(iterators.first, iterators.second);
+        autoware::common::geometry::bounding_box::compute_height(iterators.first, iterators.second, box);
+        #pragma omp critical
+        {
+          boxes.boxes.push_back(box);
+        }
+      } catch (const std::exception & e) {
+        std::cerr << e.what() << "\n";
+      }
+    }
+
+    // workload end
+    auto end_time = omp_get_wtime();
+    auto response_time = (end_time - start_time) * 1e3;
+
+    // log
+    sched_data sd {
+      thr_id, // thr_id
+      __iter,  // iter
+      start_time,  // start_time
+      end_time,  // end_time
+      response_time  // response_time
+    };
+    #pragma omp critical
+    {
+      __slog.add_entry(sd);
+    }
+    sched_yield();
+
+  }  // prama omp parallel
+}
 
 
+////////////////////////////////////////////////////////////////////////////////
 void EuclideanClusterNode::handle_clusters(
   Clusters & clusters,
   const std_msgs::msg::Header & header)
@@ -295,7 +266,8 @@ void EuclideanClusterNode::handle_clusters(
   if (m_box_pub_ptr) {
     if (m_use_lfit) {
       if (m_use_z) {
-        euclidean_cluster::details::compute_eigenboxes_with_z(clusters, m_boxes);
+        // euclidean_cluster::details::compute_eigenboxes_with_z(clusters, m_boxes);
+        compute_eigenboxes_with_z_rubis(clusters, m_boxes);
       } else {
         euclidean_cluster::details::compute_eigenboxes(clusters, m_boxes);
       }
@@ -365,8 +337,6 @@ void EuclideanClusterNode::handle_timer_callback()
 
 void EuclideanClusterNode::handle_periodic(const PointCloud2::SharedPtr msg_ptr)
 {
-  omp_set_dynamic(0);
-  auto start_time = omp_get_wtime();
   try {
     try {
       insert(*msg_ptr);
@@ -385,15 +355,6 @@ void EuclideanClusterNode::handle_periodic(const PointCloud2::SharedPtr msg_ptr)
     RCLCPP_FATAL(get_logger(), "EuclideanClusterNode: Unexpected error occurred!");
     throw;
   }
-  auto end_time = omp_get_wtime();
-  auto response_time = (end_time - start_time) * 1e3;
-  sched_data sd {
-    ++__iter,  // iter
-    response_time,  // response_time
-    start_time,  // start_time
-    end_time  // end_time
-  };
-  __slog.add_entry(sd);
 }
 }  // namespace euclidean_cluster_nodes
 }  // namespace segmentation

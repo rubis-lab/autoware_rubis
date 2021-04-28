@@ -24,16 +24,21 @@
 #include <euclidean_cluster_nodes/visibility_control.hpp>
 #include <autoware_auto_msgs/msg/bounding_box_array.hpp>
 #include <euclidean_cluster/euclidean_cluster.hpp>
+#include <autoware_auto_msgs/msg/bounding_box_array.hpp>
+#include <geometry/spatial_hash.hpp>
+#include <geometry/bounding_box_2d.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <voxel_grid_nodes/algorithm/voxel_cloud_approximate.hpp>
 #include <common/types.hpp>
 #include <memory>
 #include <string>
 
-#include "rubis_rt/sched_log.hpp"
 #include <ctime>
 #include <omp.h>
 #include <chrono>
+#include "rubis_rt/sched.hpp"
+#include "rubis_rt/sched_log.hpp"
+
 
 namespace autoware
 {
@@ -67,12 +72,15 @@ public:
   /// \param node_options Additional options to control creation of the node.
   explicit EuclideanClusterNode(
     const rclcpp::NodeOptions & node_options);
-  explicit EuclideanClusterNode(
-    const std::string & node_name, const std::string & node_ns, const rclcpp::NodeOptions & node_options);    
 
 private:
+  // rubis
   SchedLog __slog;
+  sched_info __si;
   int32_t __iter;
+  std::vector<bool8_t> __rt_configured;
+
+
   /// \brief Main callback function
   void EUCLIDEAN_CLUSTER_NODES_LOCAL handle(const PointCloud2::SharedPtr msg_ptr);
   /// \brief Initialization function
@@ -94,6 +102,9 @@ private:
   rclcpp::TimerBase::SharedPtr __tmr;
   void handle_timer_callback();
   void EUCLIDEAN_CLUSTER_NODES_LOCAL handle_periodic(const PointCloud2::SharedPtr msg_ptr);
+
+  // rubis: copied from euclidean_cluster.cpp
+  void compute_eigenboxes_with_z_rubis(const Clusters & clusters, BoundingBoxArray & boxes);
 
   /// \brief Dispatch to publishing and/or bounding box computation based on configuration
   void EUCLIDEAN_CLUSTER_NODES_LOCAL handle_clusters(

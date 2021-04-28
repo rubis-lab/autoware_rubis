@@ -31,9 +31,9 @@ ament_auto_add_library(${CLUSTER_NODE_LIB} SHARED
   include/euclidean_cluster_nodes/euclidean_cluster_node.hpp
   src/euclidean_cluster_node.cpp
   /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp)
-autoware_set_compile_options(${CLUSTER_NODE_LIB})
+autoware_set_compile_options(${CLUSTER_NODE_LIB} -fopenmp)
 target_compile_options(
-  ${CLUSTER_NODE_LIB} PUBLIC "-Wno-sign-conversion" "-Wno-conversion")
+  ${CLUSTER_NODE_LIB} PUBLIC "-Wno-sign-conversion" "-Wno-conversion" "-fopenmp")
 
 rclcpp_components_register_node(${CLUSTER_NODE_LIB}
   PLUGIN "autoware::perception::segmentation::euclidean_cluster_nodes::EuclideanClusterNode"
@@ -48,25 +48,6 @@ target_link_libraries(${CLUSTER_NODE_LIB}
   ${OpenMP_LIBS}
 )
 
-## Testing
-if(BUILD_TESTING)
-  # Static checking only if built via ament
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-
-  add_ros_test(
-    test/euclidean_cluster_node_launch.test.py
-    TIMEOUT "30"
-  )
-
-  # gtest
-  set(CLUSTER_NODE_GTEST eucliden_cluster_nodes_gtest)
-  ament_add_gtest(${CLUSTER_NODE_GTEST} test/test_euclidean_cluster_nodes.cpp)
-  autoware_set_compile_options(${CLUSTER_NODE_GTEST})
-  target_link_libraries(${CLUSTER_NODE_GTEST} ${CLUSTER_NODE_LIB})
-  target_include_directories(${CLUSTER_NODE_GTEST} PRIVATE "test/include" "include")
-  ament_target_dependencies(${CLUSTER_NODE_GTEST} "rclcpp")
-endif()
 # Ament Exporting
 ament_auto_package(INSTALL_TO_SHARE
   launch
