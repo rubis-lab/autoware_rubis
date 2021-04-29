@@ -59,7 +59,6 @@ def generate_launch_description():
         scan_downsampler_param,
         scan_downsampler,
 
-
         # ndt_localizer
         ndt_localizer_param,
         ndt_localizer,

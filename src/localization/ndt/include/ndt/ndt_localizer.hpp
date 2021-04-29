@@ -18,6 +18,7 @@
 #define NDT__NDT_LOCALIZER_HPP_
 
 #include <localization_common/optimized_registration_summary.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <geometry_msgs/msg/transform.hpp>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
@@ -94,7 +95,6 @@ public:
     const MapT & map,
     Summary * const summary = nullptr)
   {
-    auto t0 = omp_get_wtime();
     PoseWithCovarianceStamped pose_out{};
     validate_msg(msg, map);
     validate_guess(msg, transform_initial);
@@ -110,36 +110,26 @@ public:
     m_scan.clear();
     m_scan.insert(msg);
 
-    auto t1 = omp_get_wtime();
     // Define and solve the problem.
     NDTOptimizationProblemT problem(m_scan, map, m_optimization_problem_config);
 
-    auto t2 = omp_get_wtime();
     const auto opt_summary = m_optimizer.solve(problem, eig_pose_initial, eig_pose_result);
-
-    auto t3 = omp_get_wtime();
     if (opt_summary.termination_type() == common::optimization::TerminationType::FAILURE) {
       throw std::runtime_error(
               "NDT localizer has likely encountered a numerical "
               "error during optimization.");
     }
-
     // Convert eigen pose back to ros pose/transform
     transform_adapters::pose_to_transform(
       eig_pose_result,
       pose_out.pose.pose);
-
     pose_out.header.stamp = msg.header.stamp;
     pose_out.header.frame_id = map.frame_id();
-
-    auto t4 = omp_get_wtime();
     // Populate covariance information. It is implementation defined.
     set_covariance(problem, eig_pose_initial, eig_pose_result, pose_out);
     if (summary != nullptr) {
       *summary = localization_common::OptimizedRegistrationSummary{opt_summary};
     }
-    auto t5 = omp_get_wtime();
-    std::cout << "#####NDT_LOCALIZER: t1: " << t1 - t0 << " t2: " << t2 - t0 << " t3: " << t3 - t0 << " t4: " << t4 - t0 << std::endl;
     return pose_out;
   }
 

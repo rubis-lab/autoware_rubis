@@ -7,6 +7,9 @@ project(optimization)
 #dependencies
 find_package(ament_cmake_auto REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(OpenMP REQUIRED)
+set(OpenMP_FLAGS ${OpenMP_CXX_FLAGS})
+set(OpenMP_LIBS gomp)
 ament_auto_find_build_dependencies()
 
 # includes
@@ -34,26 +37,10 @@ ${PROJECT_NAME} SHARED
         ${OPTIMIZATION_LIB_HEADERS}
         ${OPTIMIZATION_LIB_SRC}
 )
-autoware_set_compile_options(${PROJECT_NAME})
-
-if(BUILD_TESTING)
-  # run linters
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-
-  # gtest
-  set(OPTIMIZATION_TEST optimization_gtest)
-
-  ament_add_gtest(${OPTIMIZATION_TEST}
-          test/test_cache_states.hpp
-          test/test_newton_optimization.hpp
-          test/test_cache_states.cpp
-          test/test_newton_optimization.cpp
-          test/test_more_thuente_line_search.cpp)
-  autoware_set_compile_options(${OPTIMIZATION_TEST})
-  target_compile_options(${OPTIMIZATION_TEST} PRIVATE -Wno-double-promotion -Wno-float-conversion)
-  target_link_libraries(${OPTIMIZATION_TEST} ${PROJECT_NAME})
-endif()
+autoware_set_compile_options(${PROJECT_NAME} -fopenmp)
+target_compile_options(${PROJECT_NAME} PRIVATE
+  "-fopenmp"
+)
 
 list(APPEND ${PROJECT_NAME}_CONFIG_EXTRAS "optimization-extras.cmake")
 ament_auto_package()

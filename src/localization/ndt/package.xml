@@ -20,6 +20,7 @@
     <depend>geometry_msgs</depend>
     <depend>lidar_utils</depend>
     <depend>localization_common</depend>
+    <depend>rclcpp</depend>
     <depend>optimization</depend>
     <depend>pcl_conversions</depend>
     <depend>sensor_msgs</depend>

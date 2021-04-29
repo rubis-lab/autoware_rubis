@@ -131,8 +131,6 @@ public:
     if (publish_tf == LocalizerPublishMode::PUBLISH_TF) {
       m_tf_publisher = create_publisher<tf2_msgs::msg::TFMessage>("/tf", pose_pub_config.qos);
     }
-    RCLCPP_WARN(
-      get_logger(), "########1st constructor");
   }
 
   // Constructor for ros2 components
@@ -172,11 +170,12 @@ public:
         }))
   {
     init();
+    // rubis: this constructor is used in launch files
 
     // sched_log params
     auto timestamp = static_cast<int32_t>( std::time(nullptr));
     auto f_timestamp = (timestamp + 50) / 100 * 100;
-    __si = {
+    sched_info si = {
       static_cast<int32_t>(declare_parameter(
       "rubis.sched_info.task_id").get<int32_t>()), // task_id
       static_cast<int32_t>(declare_parameter(
@@ -192,12 +191,12 @@ public:
       static_cast<uint64_t>(declare_parameter(
       "rubis.sched_info.period").get<uint64_t>()) // period
     };
-    __slog = SchedLog(__si);
-    __iter = 0;
 
-  for(int i = 0; i < __si.max_option; i++) {
-    __rt_configured.push_back(false);
-  }
+    // timer
+    auto period = si.period;
+    __tmr = this->create_wall_timer(
+        1000ms, std::bind(&RelativeLocalizerNode::handle_timer_callback, this));
+
   }
 
   /// Constructor using ros parameters
@@ -238,8 +237,6 @@ public:
         }))
   {
     init();
-    RCLCPP_WARN(
-      get_logger(), "########3rd constructor");
   }
 
   /// Get a const pointer of the output publisher. Can be used for matching against subscriptions.
@@ -322,11 +319,6 @@ protected:
   }
 
 private:
-  sched_info __si;
-  SchedLog __slog;
-  std::vector<bool8_t> __rt_configured;
-  int32_t __iter;
-
   bool8_t has_received_observation = false;
   typename ObservationMsgT::ConstSharedPtr last_observation;
   rclcpp::TimerBase::SharedPtr __tmr;
@@ -424,7 +416,6 @@ private:
         initial_guess =
           m_pose_initializer.guess(m_tf_buffer, observation_time, map_frame, observation_frame);
       }
-
       RegistrationSummary summary{};
       const auto pose_out =
         m_localizer_ptr->register_measurement(*msg_ptr, initial_guess, *m_map_ptr, &summary);
@@ -454,87 +445,6 @@ private:
       }
       on_bad_registration(std::current_exception());
     }
-  }
-
-//rubis constructor
-void observation_callback_rubis(typename ObservationMsgT::ConstSharedPtr msg_ptr)
-  {
-    omp_set_dynamic(0);
-    auto start_time = omp_get_wtime();
-    // Check to ensure the pointers are initialized.
-    assert_ptr_not_null(m_localizer_ptr, "localizer");
-    assert_ptr_not_null(m_map_ptr, "map");
-
-    if (!m_map_ptr->valid()) {
-      on_observation_with_invalid_map(msg_ptr);
-      return;
-    }
-
-    const auto observation_time = ::time_utils::from_message(get_stamp(*msg_ptr));
-    const auto & observation_frame = get_frame_id(*msg_ptr);
-    const auto & map_frame = m_map_ptr->frame_id();
-
-    try {
-      geometry_msgs::msg::TransformStamped initial_guess;
-      if (m_external_pose_available) {
-        // If someone set a transform and then requests a different transform, that's an error
-        if (m_external_pose.header.frame_id != map_frame ||
-          m_external_pose.child_frame_id != observation_frame)
-        {
-          throw std::runtime_error(
-                  "The pose initializer's set_external_pose() "
-                  "and guess() methods were called with different frames.");
-        }
-        m_external_pose_available = false;
-        initial_guess = m_external_pose;
-        initial_guess.header.stamp = get_stamp(*msg_ptr);
-      } else {
-        initial_guess =
-          m_pose_initializer.guess(m_tf_buffer, observation_time, map_frame, observation_frame);
-      }
-
-      RegistrationSummary summary{};
-      const auto pose_out =
-        m_localizer_ptr->register_measurement(*msg_ptr, initial_guess, *m_map_ptr, &summary);
-      if (validate_output(summary, pose_out, initial_guess)) {
-        m_pose_publisher->publish(pose_out);
-        // This is to be used when no state estimator or alternative source of
-        // localization is available.
-        if (m_tf_publisher) {
-          publish_tf(pose_out);
-          // republish point cloud so visualization has no issues with the timestamp
-          // being too new (no transform yet). Reset the timestamp to zero so visualization
-          // is not bothered if odom->base_link transformation is available
-          // only at different time stamps.
-          auto msg = *msg_ptr;
-          msg.header.stamp = time_utils::to_message(tf2::TimePointZero);
-          m_obs_republisher_rubis->publish(msg);
-        }
-
-        handle_registration_summary(summary);
-      } else {
-        on_invalid_output(pose_out);
-      }
-    } catch (...) {
-      // TODO(mitsudome-r) remove this hack in #458
-      if (m_tf_publisher && m_use_hack) {
-        republish_tf(get_stamp(*msg_ptr));
-      }
-      on_bad_registration(std::current_exception());
-    }
-    auto end_time = omp_get_wtime();
-    auto response_time = (end_time - start_time) * 1e3;
-    auto thr_id = 0;
-    sched_data sd {
-      thr_id, // thr_id
-      __iter,  // iter
-      start_time,  // start_time
-      end_time,  // end_time
-      response_time  // response_time
-    };
-    __slog.add_entry(sd);
-
-    ++__iter;
   }
 
   /// Callback that updates the map.

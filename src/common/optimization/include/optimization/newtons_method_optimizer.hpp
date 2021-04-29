@@ -21,10 +21,12 @@
 #include <optimization/optimization_problem.hpp>
 #include <optimization/optimizer_options.hpp>
 #include <optimization/line_search/line_search.hpp>
+#include <Eigen/Core>
 #include <Eigen/SVD>
 #include <limits>
 #include <memory>
 #include <cmath>
+#include <iostream>
 
 namespace autoware
 {
@@ -105,6 +107,19 @@ public:
         termination_type = TerminationType::FAILURE;
         break;
       }
+
+      // rubis
+      if(!para_init) {
+        Eigen::initParallel();
+        Eigen::setNbThreads(2);
+        para_init = true;
+      }
+      if(!rt_init) {
+
+      }
+      auto n = Eigen::nbThreads();
+      std::cerr << "Eigen nbThreads: " << n << std::endl;
+
       // Find decent direction using Newton's method
       EigenSolverT solver(hessian);
       opt_direction = solver.solve(-jacobian);
@@ -168,6 +183,8 @@ private:
   // initialize on construction
   LineSearchT m_line_searcher;
   OptimizationOptions m_options;
+  bool para_init = false;
+  bool rt_init = false;
 };
 }  // namespace optimization
 }  // namespace common

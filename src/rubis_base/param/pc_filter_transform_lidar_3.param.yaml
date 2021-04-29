@@ -4,7 +4,7 @@
   ros__parameters:
     timeout_ms:       110
     pcl_size:         55000
-    input_frame_id:  "lidar_rear"
+    input_frame_id:  "lidar_3"
     output_frame_id: "base_link"
     init_timeout_ms:  5000
     expected_num_subscribers: 1
@@ -27,7 +27,7 @@
       sched_info:
         task_id: 8022
         max_opt: 1
-        name: "point_cloud_filter_transform_rear"
+        name: "point_cloud_filter_transform_3"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 100000000  # 0.1s
         deadline: 200000000  # 0.2s

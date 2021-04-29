@@ -1,0 +1,34 @@
+# Copyright 2020 RUBIS
+
+/**:
+  ros__parameters:
+    timeout_ms:       110
+    pcl_size:         55000
+    input_frame_id:  "lidar_2"
+    output_frame_id: "base_link"
+    init_timeout_ms:  5000
+    expected_num_subscribers: 1
+    expected_num_publishers:  1
+    start_angle:            0.0       # radians
+    end_angle:              6.28
+    min_radius:             6.0      # meters
+    max_radius:             150.0
+    static_transformer:
+      quaternion:
+        x:                    0.0
+        y:                    0.0
+        z:                    0.0
+        w:                    1.0
+      translation:
+        x:                    1.498
+        y:                    -0.022
+        z:                    1.49
+    rubis:
+      sched_info:
+        task_id: 8022
+        max_opt: 1
+        name: "point_cloud_filter_transform_2"
+        log_dir: "/home/rubis/rubis_log/"
+        exec_time: 100000000  # 0.1s
+        deadline: 200000000  # 0.2s
+        period: 300000000  # 0.3s
