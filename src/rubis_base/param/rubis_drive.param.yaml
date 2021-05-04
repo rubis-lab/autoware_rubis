@@ -1,16 +1,15 @@
 # Copyright 2020 RUBIS
 ---
-
 /**:
   ros__parameters:
-    target_vel: 10.0
+    target_vel: 5.0
     cur2tar: 1.0
-    safe_dist: 30.0
+    safe_dist: 50.0
     danger_scale: 20
     rubis:
       sched_info:
         task_id: 1
-        max_opt: 4
+        max_opt: 1
         name: "rubis_drive"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 100000000  # 0.1s

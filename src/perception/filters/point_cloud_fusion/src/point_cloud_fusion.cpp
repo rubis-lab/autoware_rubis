@@ -80,15 +80,16 @@ uint32_t PointCloudFusion::fuse_pc_msgs(
     auto response_time = (end_time - start_time) * 1e3;
     
     sched_data sd {
-        thr_id, // thr_id
-        __iter,  // iter
-        start_time,  // start_time
-        end_time,  // end_time
-        response_time  // response_time
+      thr_id, // thr_id
+      __iter,  // iter
+      start_time,  // start_time
+      end_time,  // end_time
+      response_time  // response_time
     };
     #pragma omp critical
     {
       __slog.add_entry(sd);
+      std::cout << "point_cloud_fusion::fuse_pc_msgs log added" << std::endl;
     }
     sched_yield();
 

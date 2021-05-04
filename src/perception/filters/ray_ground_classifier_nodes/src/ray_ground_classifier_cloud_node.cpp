@@ -183,6 +183,7 @@ RayGroundClassifierCloudNode::callback(const PointCloud2::SharedPtr msg)
     bool8_t abort = false;
     #pragma omp parallel shared(m_aggregator, num_ready, has_encountered_unknown_exception, abort)
     {
+      auto thr_id = omp_get_thread_num();
       std::size_t point_step = msg->point_step;
       #pragma omp for schedule(dynamic, 50)
       for (std::size_t idx = 0U; idx < msg->data.size(); idx += point_step) {
@@ -314,6 +315,20 @@ RayGroundClassifierCloudNode::callback(const PointCloud2::SharedPtr msg)
         }
         // Implicit omp barrier here
       }
+      auto end_time = omp_get_wtime();
+      auto response_time = (end_time - start_time) * 1e3;
+      sched_data sd {
+        thr_id,
+        __iter,  // iter
+        response_time,  // response_time
+        start_time,  // start_time
+        end_time  // end_time
+      };
+      #pragma omp critical
+      {
+        __slog.add_entry(sd);
+      }
+      sched_yield();
     }
 
     if (has_encountered_unknown_exception) {
@@ -347,15 +362,6 @@ RayGroundClassifierCloudNode::callback(const PointCloud2::SharedPtr msg)
       "RayGroundClassifierCloudNode has encountered an unknown failure");
     throw;
   }
-  auto end_time = omp_get_wtime();
-  auto response_time = (end_time - start_time) * 1e3;
-  sched_data sd {
-    ++__iter,  // iter
-    response_time,  // response_time
-    start_time,  // start_time
-    end_time  // end_time
-  };
-  __slog.add_entry(sd);
 }
 ////////////////////////////////////////////////////////////////////////////////
 void RayGroundClassifierCloudNode::reset()

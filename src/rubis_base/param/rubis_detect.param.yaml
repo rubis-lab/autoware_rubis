@@ -22,6 +22,7 @@
     target_frame_id: "map"
     lookahead_boxes: 30
     rubis:
+      use_timer: true
       sched_info:
         task_id: 1
         max_opt: 1

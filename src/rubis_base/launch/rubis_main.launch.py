@@ -17,7 +17,7 @@ def generate_launch_description():
 
 
     ######## point_cloud_transform (lidar)
-    num_lidars = 4
+    num_lidars = 2
     pc_filter_param_files = [
         os.path.join(get_package_share_directory('rubis_base'),
             'param/pc_filter_transform_lidar_' + str(lidar_idx) + '.param.yaml')

@@ -81,7 +81,8 @@ private:
   PointCloudMsgT::ConstSharedPtr last_point_cloud_6;
   PointCloudMsgT::ConstSharedPtr last_point_cloud_7;
   PointCloudMsgT::ConstSharedPtr last_point_cloud_8;
-  
+  bool8_t __use_timer = false;
+
   rclcpp::TimerBase::SharedPtr __tmr;
   void handle_timer_callback();
   void handle_periodic(

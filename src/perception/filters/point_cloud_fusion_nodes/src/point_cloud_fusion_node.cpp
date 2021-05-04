@@ -65,12 +65,26 @@ PointCloudFusionNode::PointCloudFusionNode(
       "rubis.sched_info.period").get<uint64_t>()) // period
   };
 
-  auto period = si.period;
-  __tmr = this->create_wall_timer(
-    1000ms, std::bind(&PointCloudFusionNode::handle_timer_callback, this));
+  __use_timer = static_cast<bool8_t>(declare_parameter(
+      "rubis.use_timer").get<bool8_t>());
+
+  // std::chrono::nanoseconds{
+  //       static_cast<std::uint64_t>(std::floor(nanoseconds_in_second / publish_frequency))};
+
+  // timer
+  if(__use_timer) {
+    auto period = std::chrono::milliseconds{
+      static_cast<uint32_t>(si.period / 1000000)
+    };
+    // auto period = static_cast<std::chrono::milliseconds>(static_cast<float32_t>si.period/1000000)
+    __tmr = this->create_wall_timer(
+    period, std::bind(&PointCloudFusionNode::handle_timer_callback, this));
+  }
+
+  
 
   for (size_t i = 0; i < m_input_topics.size(); ++i) {
-    m_input_topics[i] = "input_topic" + std::to_string(i + 1);
+    m_input_topics[i] = "input_topic" + std::to_string(i);
   }
   init();
 
@@ -136,6 +150,10 @@ PointCloudFusionNode::pointcloud_callback(
   last_point_cloud_6 = msg6;
   last_point_cloud_7 = msg7;
   last_point_cloud_8 = msg8;
+
+  if(!__use_timer) {
+    handle_timer_callback();
+  }
   return;
 }
 

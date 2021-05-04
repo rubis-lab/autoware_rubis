@@ -19,6 +19,7 @@
 
 #include <point_cloud_fusion/visibility_control.hpp>
 
+#include <iostream>
 #include <common/types.hpp>
 #include <lidar_utils/point_cloud_utils.hpp>
 #include <vector>

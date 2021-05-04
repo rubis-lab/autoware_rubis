@@ -6,6 +6,7 @@
     output_frame_id:  "base_link"
     cloud_size:       55000
     rubis:
+      use_timer: true
       sched_info:
         task_id: 1
         max_opt: 1

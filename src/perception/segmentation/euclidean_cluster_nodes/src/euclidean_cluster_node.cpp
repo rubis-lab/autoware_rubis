@@ -252,6 +252,7 @@ void EuclideanClusterNode::compute_eigenboxes_with_z_rubis(const Clusters & clus
     sched_yield();
 
   }  // prama omp parallel
+  __iter++;
 }
 
 

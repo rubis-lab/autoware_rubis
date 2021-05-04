@@ -49,6 +49,9 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
     __rt_configured.push_back(false);
   }
 
+  __use_timer = static_cast<bool8_t>(declare_parameter(
+      "rubis.use_timer").get<bool8_t>());
+
   // config
   const auto vehicle_param = VehicleConfig{
     static_cast<Real>(declare_parameter(
@@ -113,9 +116,14 @@ RubisDetectNode::RubisDetectNode(const rclcpp::NodeOptions & options)
   danger_publisher_debug_ = this->create_publisher<MarkerArray>("rubis_danger_debug", 10);
 
   // timer
-  auto period = __si.period;
-  danger_timer_ = this->create_wall_timer(
-    1000ms, std::bind(&RubisDetectNode::danger_timer_callback, this));
+  if(__use_timer) {
+    auto period = std::chrono::milliseconds{
+      static_cast<uint32_t>(__si.period / 1000000)
+    };
+    // auto period = static_cast<std::chrono::milliseconds>(__si.period/1000000)
+    danger_timer_ = this->create_wall_timer(
+      period, std::bind(&RubisDetectNode::danger_timer_callback, this));
+  }
 }
 
 void RubisDetectNode::init_vehicle(const VehicleConfig & _vehicle_param)
@@ -150,6 +158,9 @@ void RubisDetectNode::on_state(const State::SharedPtr & msg)
 {
   has_received_state = true;
   save_state(*msg);
+  if(!__use_timer) {
+    danger_timer_callback();
+  }
   return;
 }
 

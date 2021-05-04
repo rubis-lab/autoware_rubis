@@ -90,6 +90,7 @@ private:
   SchedLog __slog;
   sched_info __si;
   int32_t __iter;
+  bool8_t __use_timer = false;
 
   // rt
   std::vector<bool8_t> __rt_configured;
