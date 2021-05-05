@@ -148,9 +148,9 @@ Command RubisDriveNode::compute_command(float32_t dist)
   sched_data sd {
     thr_id,
     __iter,  // iter
-    response_time,  // response_time
     start_time,  // start_time
-    end_time  // end_time
+    end_time,  // end_time
+    response_time   //response_time
   };
   __slog.add_entry(sd);
   __iter++;

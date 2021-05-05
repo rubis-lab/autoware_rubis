@@ -127,13 +127,13 @@ def generate_launch_description():
     # point cloud fusion
     point_cloud_fusion_node_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
-        'param/vlp16_sim_lexus_pc_fusion.param.yaml')
+        'param/point_cloud_fusion.param.yaml')
 
-    # point_cloud_fusion_node_param = DeclareLaunchArgument(
-    #     'point_cloud_fusion_node_param_file',
-    #     default_value=point_cloud_fusion_node_param_file,
-    #     description='Path to point_cloud_fusion_node_param_file'
-    # )
+    point_cloud_fusion_node_param = DeclareLaunchArgument(
+        'point_cloud_fusion_node_param_file',
+        default_value=point_cloud_fusion_node_param_file,
+        description='Path to point_cloud_fusion_node_param_file'
+    )
 
     point_cloud_fusion_node = Node(
         package='point_cloud_fusion_nodes',

@@ -17,7 +17,7 @@ def generate_launch_description():
 
 
     ######## point_cloud_transform (lidar)
-    num_lidars = 2
+    num_lidars = 4
     pc_filter_param_files = [
         os.path.join(get_package_share_directory('rubis_base'),
             'param/pc_filter_transform_lidar_' + str(lidar_idx) + '.param.yaml')
@@ -43,13 +43,13 @@ def generate_launch_description():
     # point cloud fusion
     point_cloud_fusion_node_param_file = os.path.join(
         get_package_share_directory('rubis_base'),
-        'param/vlp16_sim_lexus_pc_fusion.param.yaml')
+        'param/point_cloud_fusion.param.yaml')
 
-    # point_cloud_fusion_node_param = DeclareLaunchArgument(
-    #     'point_cloud_fusion_node_param_file',
-    #     default_value=point_cloud_fusion_node_param_file,
-    #     description='Path to point_cloud_fusion_node_param_file'
-    # )
+    point_cloud_fusion_node_param = DeclareLaunchArgument(
+        'point_cloud_fusion_node_param_file',
+        default_value=point_cloud_fusion_node_param_file,
+        description='Path to point_cloud_fusion_node_param_file'
+    )
 
     point_cloud_fusion_node = Node(
         package='point_cloud_fusion_nodes',
@@ -94,7 +94,7 @@ def generate_launch_description():
         namespace='perception',
         parameters=[LaunchConfiguration('euclidean_cluster_param_file')],
         remappings=[
-            ('points_in', 'points_nonground')
+            ('points_in', '/perception/points_nonground')
         ]
     )
 
@@ -157,6 +157,7 @@ def generate_launch_description():
         # filter_transform_vlp16_7,
 
         # point_cloud_fusion (lidar)
+        point_cloud_fusion_node_param,
         point_cloud_fusion_node,
 
         # ray ground classifier

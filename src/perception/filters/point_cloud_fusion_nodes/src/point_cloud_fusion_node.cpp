@@ -77,7 +77,6 @@ PointCloudFusionNode::PointCloudFusionNode(
       static_cast<uint32_t>(si.period / 1000000)
     };
     // auto period = static_cast<std::chrono::milliseconds>(static_cast<float32_t>si.period/1000000)
-    __tmr = this->create_wall_timer(
     period, std::bind(&PointCloudFusionNode::handle_timer_callback, this));
   }
 

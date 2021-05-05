@@ -194,7 +194,7 @@ const PointCloud2 & PointCloud2FilterTransformNode::filter_and_transform(const P
   m_filtered_transformed_msg.header.stamp = msg.header.stamp;
 
   omp_set_dynamic(0);
-  #pragma omp parallel num_threads(__si.max_option)
+  #pragma omp parallel num_threads(__si.max_option) shared(m_filtered_transformed_msg)
   {
     // configure rt
     auto thr_id = omp_get_thread_num();
@@ -223,9 +223,12 @@ const PointCloud2 & PointCloud2FilterTransformNode::filter_and_transform(const P
         if (point_not_filtered(pt)) {
         auto transformed_point = transform_point(pt);
         transformed_point.intensity = pt.intensity;
-            if (!add_point_to_cloud(m_filtered_transformed_msg, transformed_point, point_cloud_idx))
+            #pragma omp critical
             {
-            throw std::runtime_error("Overran cloud msg point capacity");
+              if (!add_point_to_cloud(m_filtered_transformed_msg, transformed_point, point_cloud_idx))
+              {
+                throw std::runtime_error("Overran cloud msg point capacity");
+              }
             }
         }
 
@@ -263,21 +266,8 @@ void
 PointCloud2FilterTransformNode::process_filtered_transformed_message(
   const PointCloud2::SharedPtr msg)
 {
-  omp_set_dynamic(0);
-  auto start_time = omp_get_wtime();
-
   const auto filtered_transformed_msg = filter_and_transform(*msg);
   m_pub_ptr->publish(filtered_transformed_msg);
-
-  auto end_time = omp_get_wtime();
-  auto response_time = (end_time - start_time) * 1e3;
-  sched_data sd {
-    ++__iter,  // iter
-    response_time,  // response_time
-    start_time,  // start_time
-    end_time  // end_time
-  };
-  __slog.add_entry(sd);
 }
 
 }  // namespace point_cloud_filter_transform_nodes

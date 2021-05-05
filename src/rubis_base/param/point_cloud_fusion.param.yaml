@@ -10,7 +10,7 @@
       sched_info:
         task_id: 1
         max_opt: 1
-        name: "rubis_detect"
+        name: "point_cloud_fusion"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 100000000  # 0.1s
         deadline: 200000000  # 0.2s
