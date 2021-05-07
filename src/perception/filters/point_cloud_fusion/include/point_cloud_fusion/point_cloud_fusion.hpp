@@ -81,7 +81,9 @@ private:
   void concatenate_pointcloud(
     const PointCloudMsgT & pc_in, PointCloudMsgT & pc_out,
     uint32_t & concat_idx) const;
-
+  void concatenate_pointcloud_raw(
+    const PointCloudMsgT & pc_in, PointCloudMsgT & pc_out,
+    uint32_t & concat_idx) const;
   uint32_t m_cloud_capacity;
   size_t m_input_topics_size;
 };

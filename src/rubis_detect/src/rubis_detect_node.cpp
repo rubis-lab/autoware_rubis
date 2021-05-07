@@ -188,6 +188,11 @@ void RubisDetectNode::on_bounding_box(const BoundingBoxArray::SharedPtr & msg)
 
 void RubisDetectNode::danger_timer_callback()
 {
+  // if(__use_timer) {
+  //   RCLCPP_WARN(get_logger(), "RubisDetectNode::timer callback called!");
+  // } else {
+  //   RCLCPP_WARN(get_logger(), "RubisDetectNode::data callback called!");
+  // }
   if(!has_received_bounding_box) {
     RCLCPP_WARN(get_logger(), "RubisDetectNode::danger_timer_callback: did not receive bbox yet.");
     return;

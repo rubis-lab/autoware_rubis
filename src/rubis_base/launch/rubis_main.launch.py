@@ -33,7 +33,7 @@ def generate_launch_description():
         Node(
             package='point_cloud_filter_transform_nodes',
             executable='point_cloud_filter_transform_node_exe',
-            name='filter_transform_vlp16_' + str(lidar_idx),
+            name='point_cloud_filter_transform_' + str(lidar_idx),
             namespace='lidar_' + str(lidar_idx),
             parameters=[LaunchConfiguration(
                 'pc_filter_transform_lidar_' + str(lidar_idx) + '_param_file')],

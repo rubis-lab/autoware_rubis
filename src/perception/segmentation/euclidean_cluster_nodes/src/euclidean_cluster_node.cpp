@@ -105,11 +105,17 @@ m_use_z{declare_parameter("use_z").get<bool8_t>()}
     __rt_configured.push_back(false);
   }
 
-  // timer
-  auto period = __si.period;
-  __tmr = this->create_wall_timer(
-    1000ms, std::bind(&EuclideanClusterNode::handle_timer_callback, this));
+  __use_timer = static_cast<bool8_t>(declare_parameter(
+      "rubis.use_timer").get<bool8_t>());
 
+  // timer
+  if(__use_timer) {
+    auto period = std::chrono::milliseconds{
+      static_cast<uint32_t>(__si.period / 1000000)
+    };
+    __tmr = this->create_wall_timer(
+      period, std::bind(&EuclideanClusterNode::handle_timer_callback, this));
+  }
 
   init(m_cluster_alg.get_config());
   // Initialize voxel grid
@@ -323,11 +329,19 @@ void EuclideanClusterNode::handle(const PointCloud2::SharedPtr msg_ptr)
 {
   has_received_point_cloud = true;
   last_point_cloud = msg_ptr;
+  if(!__use_timer) {
+    handle_timer_callback();
+  }
   return;
 }
 
 void EuclideanClusterNode::handle_timer_callback()
 {
+  // if(__use_timer) {
+  //   RCLCPP_WARN(get_logger(), "EuclideanClusterNode::timer callback called!");
+  // } else {
+  //   RCLCPP_WARN(get_logger(), "EuclideanClusterNode::data callback called!");
+  // }
   if(!has_received_point_cloud) {
     RCLCPP_WARN(get_logger(), "EuclideanClusterNode::handle_timer_callback: did not receive point_cloud yet.");
     return;

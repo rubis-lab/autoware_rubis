@@ -72,7 +72,10 @@ uint32_t PointCloudFusion::fuse_pc_msgs(
 
     #pragma omp for schedule(dynamic) nowait
     for (size_t i = 0; i < m_input_topics_size; ++i) {
-        concatenate_pointcloud(*msgs[i], cloud_concatenated, pc_concat_idx);
+        uint32_t local_pc_concat_idx;
+        #pragma omp atomic capture
+        local_pc_concat_idx = pc_concat_idx++;
+        concatenate_pointcloud_raw(*msgs[i], cloud_concatenated, local_pc_concat_idx);
     }
 
     // workload end
@@ -86,7 +89,7 @@ uint32_t PointCloudFusion::fuse_pc_msgs(
       end_time,  // end_time
       response_time  // response_time
     };
-    #pragma omp critical
+    #pragma omp critical (add_entry)
     {
       __slog.add_entry(sd);
       std::cout << "point_cloud_fusion::fuse_pc_msgs log added" << std::endl;
@@ -125,6 +128,44 @@ void PointCloudFusion::concatenate_pointcloud(
     pt.intensity = *intensity_it_in;
 
     if (common::lidar_utils::add_point_to_cloud(pc_out, pt, concat_idx)) {
+      ++x_it_in;
+      ++y_it_in;
+      ++z_it_in;
+      ++intensity_it_in;
+    } else {
+      // Somehow the point could be inserted to the concatenated cloud. Something regarding
+      // the cloud sizes must be off.
+      throw Error::INSERT_FAILED;
+    }
+  }
+}
+
+void PointCloudFusion::concatenate_pointcloud_raw(
+  const sensor_msgs::msg::PointCloud2 & pc_in,
+  sensor_msgs::msg::PointCloud2 & pc_out,
+  uint32_t & concat_idx) const
+{
+  if ((pc_in.width + concat_idx) > m_cloud_capacity) {
+    throw Error::TOO_LARGE;
+  }
+
+  sensor_msgs::PointCloud2ConstIterator<float32_t> x_it_in(pc_in, "x");
+  sensor_msgs::PointCloud2ConstIterator<float32_t> y_it_in(pc_in, "y");
+  sensor_msgs::PointCloud2ConstIterator<float32_t> z_it_in(pc_in, "z");
+  sensor_msgs::PointCloud2ConstIterator<float32_t> intensity_it_in(pc_in, "intensity");
+
+  while (x_it_in != x_it_in.end() &&
+    y_it_in != y_it_in.end() &&
+    z_it_in != z_it_in.end() &&
+    intensity_it_in != intensity_it_in.end())
+  {
+    common::types::PointXYZIF pt;
+    pt.x = *x_it_in;
+    pt.y = *y_it_in;
+    pt.z = *z_it_in;
+    pt.intensity = *intensity_it_in;
+
+    if (common::lidar_utils::add_point_to_cloud_raw(pc_out, pt, concat_idx)) {
       ++x_it_in;
       ++y_it_in;
       ++z_it_in;

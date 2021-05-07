@@ -32,6 +32,7 @@ namespace filters
 namespace point_cloud_filter_transform_nodes
 {
 using autoware::common::lidar_utils::add_point_to_cloud;
+using autoware::common::lidar_utils::add_point_to_cloud_raw;
 using autoware::common::lidar_utils::has_intensity_and_throw_if_no_xyz;
 using autoware::common::lidar_utils::reset_pcl_msg;
 using autoware::common::lidar_utils::resize_pcl_msg;
@@ -186,15 +187,22 @@ const PointCloud2 & PointCloud2FilterTransformNode::filter_and_transform(const P
   sensor_msgs::PointCloud2ConstIterator<float32_t> x_it(msg, "x");
   sensor_msgs::PointCloud2ConstIterator<float32_t> y_it(msg, "y");
   sensor_msgs::PointCloud2ConstIterator<float32_t> z_it(msg, "z");
-
   auto && intensity_it = autoware::common::lidar_utils::IntensityIteratorWrapper(msg);
+
+  auto && intensity_temp = autoware::common::lidar_utils::IntensityIteratorWrapper(msg);
+
+  size_t num_it = 0;
+  while(!intensity_temp.eof()) {
+    intensity_temp.next();
+    num_it++;
+  }
 
   auto point_cloud_idx = 0U;
   reset_pcl_msg(m_filtered_transformed_msg, m_pcl_size, point_cloud_idx);
   m_filtered_transformed_msg.header.stamp = msg.header.stamp;
 
   omp_set_dynamic(0);
-  #pragma omp parallel num_threads(__si.max_option) shared(m_filtered_transformed_msg)
+  #pragma omp parallel num_threads(__si.max_option)// shared(m_filtered_transformed_msg)
   {
     // configure rt
     auto thr_id = omp_get_thread_num();
@@ -206,14 +214,64 @@ const PointCloud2 & PointCloud2FilterTransformNode::filter_and_transform(const P
       __rt_configured[thr_id] = true;
     }
 
+    // RCLCPP_INFO(get_logger(), "omp start");
+
     #pragma omp barrier
 
     // workload start
     auto start_time = omp_get_wtime();
 
+    size_t forloopiteration = 0;
+    if(msg.data.size()/16 > num_it) {
+      forloopiteration = num_it;
+    } else {
+      forloopiteration = msg.data.size()/16;
+    }
+
     #pragma omp for schedule(dynamic) nowait
+    // for (size_t it = 0; it < forloopiteration; it++) {
+    //   PointXYZIF pt;
+
+    //   auto && intensity_it = autoware::common::lidar_utils::IntensityIteratorWrapper(msg);
+    //   sensor_msgs::PointCloud2ConstIterator<float32_t> x_it(msg, "x");
+    //   sensor_msgs::PointCloud2ConstIterator<float32_t> y_it(msg, "y");
+    //   sensor_msgs::PointCloud2ConstIterator<float32_t> z_it(msg, "z");
+      
+    //   intensity_it.get_current_value(pt.intensity);
+    //   pt.x = *x_it;
+    //   pt.y = *y_it;
+    //   pt.z = *z_it;
+
+    //   for(size_t j=0; j<it; j++) {
+    //     intensity_it.next();
+    //     ++x_it;
+    //     ++y_it;
+    //     ++z_it;
+    //   }
+      
+      
+    //   // RCLCPP_INFO(get_logger(), "it: " + it);
+    //   // RCLCPP_INFO(get_logger(), "size of intensity_it: " + sizeof(intensity_it));
+    //   // RCLCPP_INFO(get_logger(), "size of x_it: " + sizeof(x_it));
+
+    //   if (point_not_filtered(pt)) {
+    //     auto transformed_point = transform_point(pt);
+    //     transformed_point.intensity = pt.intensity; 
+
+    //     uint32_t local_point_cloud_idx;
+
+    //     #pragma omp atomic capture
+    //     local_point_cloud_idx = point_cloud_idx++;
+
+    //     //  RCLCPP_INFO(get_logger(), "for");
+    //     // if (!add_point_to_cloud_raw(m_filtered_transformed_msg, transformed_point, static_cast<uint32_t>(it) )) {
+    //     if (!add_point_to_cloud_raw(m_filtered_transformed_msg, transformed_point, local_point_cloud_idx )) {
+    //       throw std::runtime_error("Overran cloud msg point capacity");
+    //     }
+    //   }
+    // }
     for (size_t it = 0; it < (msg.data.size() / 16); it++) {
-      if (!intensity_it.eof()) {
+      if(!intensity_it.eof()) {
         PointXYZIF pt;
         pt.x = *x_it;
         pt.y = *y_it;
@@ -221,8 +279,8 @@ const PointCloud2 & PointCloud2FilterTransformNode::filter_and_transform(const P
         intensity_it.get_current_value(pt.intensity);
 
         if (point_not_filtered(pt)) {
-        auto transformed_point = transform_point(pt);
-        transformed_point.intensity = pt.intensity;
+          auto transformed_point = transform_point(pt);
+          transformed_point.intensity = pt.intensity;
             #pragma omp critical
             {
               if (!add_point_to_cloud(m_filtered_transformed_msg, transformed_point, point_cloud_idx))
@@ -237,8 +295,10 @@ const PointCloud2 & PointCloud2FilterTransformNode::filter_and_transform(const P
         ++z_it;
         intensity_it.next();
       }
-      
     }
+
+    // RCLCPP_INFO(get_logger(), "for end");
+    // #pragma omp flush (abort)
     // workload end
     auto end_time = omp_get_wtime();
     auto response_time = (end_time - start_time) * 1e3;
@@ -254,11 +314,11 @@ const PointCloud2 & PointCloud2FilterTransformNode::filter_and_transform(const P
       __slog.add_entry(sd);
     }
     sched_yield();
+    // RCLCPP_INFO(get_logger(), "omp end");
   }  // prama omp parallel
   ++__iter;
 
   resize_pcl_msg(m_filtered_transformed_msg, point_cloud_idx);
-  
   return m_filtered_transformed_msg;
 }
 
@@ -269,6 +329,7 @@ PointCloud2FilterTransformNode::process_filtered_transformed_message(
   const auto filtered_transformed_msg = filter_and_transform(*msg);
   m_pub_ptr->publish(filtered_transformed_msg);
 }
+
 
 }  // namespace point_cloud_filter_transform_nodes
 }  // namespace filters

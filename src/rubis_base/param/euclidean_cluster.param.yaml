@@ -33,6 +33,7 @@
         y: 0.2
         z: 0.2
     rubis:
+      use_timer: true
       sched_info:
         task_id: 2
         max_opt: 4

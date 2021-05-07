@@ -158,8 +158,13 @@ PointCloudFusionNode::pointcloud_callback(
 
 void PointCloudFusionNode::handle_timer_callback()
 {
+  // if(__use_timer) {
+  //   RCLCPP_WARN(get_logger(), "PointCloudFusionNode::timer callback called!");
+  // } else {
+  //   RCLCPP_WARN(get_logger(), "PointCloudFusionNode::data callback called!");
+  // }  
   if(!has_received_point_cloud) {
-    RCLCPP_WARN(get_logger(), "PointCloudFusionNode::handle_timer_callback: did not receive point_cloud yet.");
+    // RCLCPP_WARN(get_logger(), "PointCloudFusionNode::handle_timer_callback: did not receive point_cloud yet.");
     return;
   }
   handle_periodic(last_point_cloud_1, last_point_cloud_2, last_point_cloud_3, last_point_cloud_4, last_point_cloud_5, last_point_cloud_6, last_point_cloud_7, last_point_cloud_8);

@@ -78,8 +78,10 @@ private:
   SchedLog __slog;
   sched_info __si;
   int32_t __iter;
-  std::vector<bool8_t> __rt_configured;
+  bool8_t __use_timer = false;
 
+  // rt
+  std::vector<bool8_t> __rt_configured;
 
   /// \brief Main callback function
   void EUCLIDEAN_CLUSTER_NODES_LOCAL handle(const PointCloud2::SharedPtr msg_ptr);
