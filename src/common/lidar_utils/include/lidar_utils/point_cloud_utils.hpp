@@ -162,6 +162,13 @@ LIDAR_UTILS_PUBLIC void init_pcl_msg(
 ///                which means same fields and same endianness.
 ///              - The caller is responsible for incrementing point_cloud_idx between two calls.
 ///                This differs from add_point_to_cloud who increment point_cloud_idx by itself
+
+//rubis parallel
+LIDAR_UTILS_PUBLIC bool8_t add_point_to_cloud_parallel(
+  sensor_msgs::msg::PointCloud2 & cloud,
+  const autoware::common::types::PointXYZIF & pt,
+  uint32_t point_cloud_idx);
+
 LIDAR_UTILS_PUBLIC bool8_t add_point_to_cloud_raw(
   sensor_msgs::msg::PointCloud2 & cloud,
   const autoware::common::types::PointXYZIF & pt,
@@ -418,7 +425,7 @@ public:
   explicit IntensityIteratorWrapper(const PointCloud2 & msg);
 
   void next();
-
+  
   bool8_t eof();
 
   template<typename PointFieldValueT>
@@ -430,6 +437,21 @@ public:
         break;
       case sensor_msgs::msg::PointField::FLOAT32:
         point_field_value = *m_intensity_it_float32;
+        break;
+      default:
+        throw std::runtime_error("Intensity type not supported: " + m_intensity_datatype);
+    }
+  }
+
+  template<typename PointFieldValueT>
+  void get_nth_value(PointFieldValueT & point_field_value, uint32_t n)
+  {
+    switch (m_intensity_datatype) {
+      case sensor_msgs::msg::PointField::UINT8:
+        point_field_value = *(m_intensity_it_uint8 + n);
+        break;
+      case sensor_msgs::msg::PointField::FLOAT32:
+        point_field_value = *(m_intensity_it_float32 + n);
         break;
       default:
         throw std::runtime_error("Intensity type not supported: " + m_intensity_datatype);

@@ -150,6 +150,56 @@ void init_pcl_msg(
     "z", 1U, sensor_msgs::msg::PointField::FLOAT32,
     "intensity", 1U, sensor_msgs::msg::PointField::FLOAT32);
 }
+//rubis parallel
+//size check shou
+bool8_t add_point_to_cloud_parallel(
+  sensor_msgs::msg::PointCloud2 & cloud,
+  const autoware::common::types::PointXYZIF & pt,
+  uint32_t point_cloud_idx)
+{
+  bool8_t ret = false;
+
+  static_assert(
+  sizeof(autoware::common::types::PointXYZIF) >= ((4U * sizeof(float32_t)) + sizeof(uint16_t)),
+    "PointXYZF is not expected size: ");
+  static_assert(
+    std::is_trivially_copyable<autoware::common::types::PointXYZIF>::value,
+    "PointXYZF is not trivial, add_point_to_cloud instead of add_point_to_cloud_raw");
+
+  // const uint8_t * casted_point_ptr = reinterpret_cast<const uint8_t *>(&pt);  
+  // uint8_t * const cloud_insertion_slot = &cloud.data[cloud.point_step * point_cloud_idx];
+  // std::size_t copy_size = std::min(static_cast<std::size_t>(cloud.point_step), sizeof(pt));
+  sensor_msgs::PointCloud2Iterator<float32_t> x_it(cloud, "x");
+  sensor_msgs::PointCloud2Iterator<float32_t> y_it(cloud, "y");
+  sensor_msgs::PointCloud2Iterator<float32_t> z_it(cloud, "z");
+  sensor_msgs::PointCloud2Iterator<float32_t> intensity_it(cloud, "intensity");
+
+  x_it += point_cloud_idx;
+  y_it += point_cloud_idx;
+  z_it += point_cloud_idx;
+  intensity_it += point_cloud_idx;
+
+  // Actual size is 20 due to padding by compilers for the memory alignment boundary.
+  // This check is to make sure that when we do a insert of 16 bytes, we will not stride
+  // past the bounds of the structure.
+
+  if (x_it != x_it.end() &&
+    y_it != y_it.end() &&
+    z_it != z_it.end() &&
+    intensity_it != intensity_it.end())
+  {
+    // add the point data
+    *x_it = pt.x;
+    *y_it = pt.y;
+    *z_it = pt.z;
+    *intensity_it = pt.intensity;
+
+    // increment the index to keep track of the pointcloud's size
+    ret = true;
+  }
+  return ret;
+}
+
 
 bool8_t add_point_to_cloud_raw(
   sensor_msgs::msg::PointCloud2 & cloud,
@@ -267,7 +317,6 @@ bool8_t add_point_to_cloud(
   }
   return ret;
 }
-
 bool8_t add_point_to_cloud(
   sensor_msgs::msg::PointCloud2 & cloud,
   const autoware::common::types::PointXYZF & pt,

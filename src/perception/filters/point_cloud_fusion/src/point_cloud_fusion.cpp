@@ -72,10 +72,9 @@ uint32_t PointCloudFusion::fuse_pc_msgs(
 
     #pragma omp for schedule(dynamic) nowait
     for (size_t i = 0; i < m_input_topics_size; ++i) {
-        uint32_t local_pc_concat_idx;
-        #pragma omp atomic capture
-        local_pc_concat_idx = pc_concat_idx++;
-        concatenate_pointcloud_raw(*msgs[i], cloud_concatenated, local_pc_concat_idx);
+        uint32_t local_pc_concat_idx = static_cast<int32_t>(i);
+        // concatenate_pointcloud(*msgs[i], cloud_concatenated, local_pc_concat_idx);
+        concatenate_pointcloud(*msgs[i], cloud_concatenated, pc_concat_idx);
     }
 
     // workload end
@@ -92,7 +91,7 @@ uint32_t PointCloudFusion::fuse_pc_msgs(
     #pragma omp critical (add_entry)
     {
       __slog.add_entry(sd);
-      std::cout << "point_cloud_fusion::fuse_pc_msgs log added" << std::endl;
+    //   std::cerr << "point_cloud_fusion::fuse_pc_msgs log added" << std::endl;
     }
     sched_yield();
 
