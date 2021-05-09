@@ -239,8 +239,6 @@ const PointCloud2 & PointCloud2FilterTransformNode::filter_and_transform(const P
       pt.y = *(y_it+i);
       pt.z = *(z_it+i);
 
-      point_cloud_idx = 0U;
-
       // RCLCPP_INFO(get_logger(), "it: " + it);
       // RCLCPP_INFO(get_logger(), "size of intensity_it: " + sizeof(intensity_it));
       // RCLCPP_INFO(get_logger(), "size of x_it: " + sizeof(x_it));

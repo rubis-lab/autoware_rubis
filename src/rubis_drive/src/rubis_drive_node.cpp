@@ -39,6 +39,9 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
   danger_scale = static_cast<int32_t>(declare_parameter(
     "danger_scale").get<int32_t>());
 
+  lookahead = static_cast<uint32_t>(declare_parameter(
+    "lookahead").get<uint32_t>());
+
   command_publisher_ = this->create_publisher<Command>(
     "/vehicle/vehicle_command", 10);
 //   command_timer_ = this->create_wall_timer(
@@ -77,6 +80,10 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
   for(int i = 0; i < __si.max_option; i++) {
     __rt_configured.push_back(false);
   }
+
+  cur_vel = 0;
+  cur_acc = 0;
+
   return;
 }
 
@@ -91,6 +98,17 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
 void RubisDriveNode::on_state(const CBD::SharedPtr & msg)
 {
   last_cbd_msg = *msg;
+}
+
+bool RubisDriveNode::check_safe(float32_t dist, float32_t vel, float32_t acc) {
+  if(acc >= 0)
+    return false;
+  else{
+    if(dist > -1/2*vel*vel/acc)
+      return true;
+    else
+      return false;
+  }
 }
 
 void RubisDriveNode::on_danger(const std_msgs::msg::String::SharedPtr & msg)
@@ -115,46 +133,93 @@ Command RubisDriveNode::compute_command(float32_t dist)
   std::cout << "current_velocity = " << cur_vel << std::endl;
   std::cout << "dist/safe_dist = " << dist << "/" << safe_dist << std::endl;
 
-  // compute danger
-  float32_t danger;
-  if(dist >= safe_dist) {
-    danger = 0;
-  } else if((safe_dist - dist) * danger_scale < 100) {
-    danger = (safe_dist - dist) * danger_scale;
-  } else {
-    danger = 100;
-  }
-  std::cout << "danger: " << danger << std::endl;
+  #pragma omp parallel num_threads(__si.max_option)
+  {
+    auto thr_id = omp_get_thread_num();
+    if(!__rt_configured[thr_id]) {
+      auto tid = gettid();
+      std::cout << "[RubisDriveNode] (" << tid << "): __rt_configured (" << __si.exec_time << ", " << __si.deadline << ", " << __si.period << ")" << std::endl;
+      rubis::sched::set_sched_deadline(tid, __si.exec_time, __si.deadline, __si.period);
+      __rt_configured[thr_id] = true;
+    }
 
-  // determine accel
-  float32_t accel = static_cast<float32_t>(
-    (target_vel - cur_vel) / cur2tar - danger * danger / 100);
-  if(accel > 0.0) {
-    std::cout << "accel: " << accel << std::endl;
-  } else {
-    std::cout << "accel: " << accel << " (BRAKE)" << std::endl;
+    #pragma omp barrier
+
+    auto start_time = omp_get_wtime();
+
+    #pragma omp for schedule(dynamic) nowait
+    for(uint32_t i=0; i<lookahead; i++) {
+      float32_t danger;
+      float32_t time = static_cast<float32_t>(
+        static_cast<float32_t>(i)/lookahead);
+      
+      posarr[i] = cur_vel * time;
+      velarr[i] = cur_vel + cur_acc * time;
+
+      float32_t local_dist = dist - posarr[i]; //dist to object
+      float32_t local_vel = velarr[i];
+
+      if(local_dist >= safe_dist) {
+        danger = 0;
+      } else if((safe_dist-local_dist)*danger_scale < 100) {
+        danger = (safe_dist-local_dist) * danger_scale;
+      } else {
+        danger = 100;
+      }
+
+      accarr[i] = static_cast<float32_t>(
+        (target_vel - local_vel) / cur2tar - danger * danger / 100);
+      
+      float32_t local_acc = accarr[i];
+      checksafe[i] = check_safe(local_dist, local_vel, local_acc);
+      //Xarr[i] X after i/lookahead second
+    }
+
+        // log
+    auto end_time = omp_get_wtime();
+
+    auto response_time = (end_time - start_time) * 1e3;
+    sched_data sd {
+      thr_id,
+      __iter,  // iter
+      start_time,  // start_time
+      end_time,  // end_time
+      response_time   //response_time
+    };
+    __slog.add_entry(sd);
   }
+
+  cur_acc = accarr[0];
 
   // construct steering command
   Command ret{rosidl_runtime_cpp::MessageInitialization::ALL};
   ret.stamp = last_cbd_msg.header.stamp;
   ret.front_wheel_angle_rad = Real{};  // zero initialization etc.
   ret.rear_wheel_angle_rad = Real{};
-  ret.long_accel_mps2 = accel;
+  
+  ret.long_accel_mps2 = cur_acc;
 
-  // log
-  auto end_time = omp_get_wtime();
-  auto response_time = (end_time - start_time) * 1e3;
-  sched_data sd {
-    thr_id,
-    __iter,  // iter
-    start_time,  // start_time
-    end_time,  // end_time
-    response_time   //response_time
-  };
-  __slog.add_entry(sd);
   __iter++;
   return ret;
+  // // compute danger
+  // float32_t danger;
+  // if(dist >= safe_dist) {
+  //   danger = 0;
+  // } else if((safe_dist - dist) * danger_scale < 100) {
+  //   danger = (safe_dist - dist) * danger_scale;
+  // } else {
+  //   danger = 100;
+  // }
+  // std::cout << "danger: " << danger << std::endl;
+
+  // // determine accel
+  // float32_t accel = static_cast<float32_t>(
+  //   (target_vel - cur_vel) / cur2tar - danger * danger / 100);
+  // if(accel > 0.0) {
+  //   std::cout << "accel: " << accel << std::endl;
+  // } else {
+  //   std::cout << "accel: " << accel << " (BRAKE)" << std::endl;
+  // }
 }
 }  // namespace rubis_drive
 }  // namespace autoware

@@ -70,11 +70,47 @@ uint32_t PointCloudFusion::fuse_pc_msgs(
     // workload start
     auto start_time = omp_get_wtime();
 
-    #pragma omp for schedule(dynamic) nowait
+
+
     for (size_t i = 0; i < m_input_topics_size; ++i) {
-        uint32_t local_pc_concat_idx = static_cast<int32_t>(i);
+        // uint32_t local_pc_concat_idx = static_cast<int32_t>(i);
         // concatenate_pointcloud(*msgs[i], cloud_concatenated, local_pc_concat_idx);
-        concatenate_pointcloud(*msgs[i], cloud_concatenated, pc_concat_idx);
+        if (((*msgs[i]).width + pc_concat_idx) > m_cloud_capacity) {
+          throw Error::TOO_LARGE;
+        }
+
+        sensor_msgs::PointCloud2ConstIterator<float32_t> x_it_in(*msgs[i], "x");
+        sensor_msgs::PointCloud2ConstIterator<float32_t> y_it_in(*msgs[i], "y");
+        sensor_msgs::PointCloud2ConstIterator<float32_t> z_it_in(*msgs[i], "z");
+        sensor_msgs::PointCloud2ConstIterator<float32_t> intensity_it_in(*msgs[i], "intensity");
+        sensor_msgs::PointCloud2ConstIterator<float32_t> intensity_it_temp(*msgs[i], "intensity");
+
+        size_t num_it = 0;
+        while(intensity_it_temp != intensity_it_temp.end()) {
+          ++intensity_it_temp;  //++ pre define operator
+          num_it++;
+        }
+
+        #pragma omp for schedule(dynamic) nowait
+        for (size_t it = 0; it < num_it; it++) {
+          common::types::PointXYZIF pt;
+          uint32_t i = static_cast<uint32_t>(it);
+
+          pt.intensity = *(intensity_it_in+i);
+          pt.x = *(x_it_in+i);
+          pt.y = *(y_it_in+i);
+          pt.z = *(z_it_in+i);
+
+          uint32_t local_idx;
+          #pragma omp critical (idx_lock)
+          {
+            local_idx = pc_concat_idx;
+            pc_concat_idx += 1;
+          }
+          if(!common::lidar_utils::add_point_to_cloud_parallel(cloud_concatenated, pt, local_idx)) {
+            throw Error::INSERT_FAILED;
+          }
+        }
     }
 
     // workload end

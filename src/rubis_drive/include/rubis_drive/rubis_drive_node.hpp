@@ -35,6 +35,8 @@
 #include <algorithm>
 #include <limits>
 #include <utility>
+#include <math.h>
+#include <vector>
 
 #include "rubis_rt/sched_log.hpp"
 #include "rubis_rt/sched.hpp"
@@ -75,6 +77,7 @@ public:
   /// \throw runtime error if failed to start threads or configure driver
   explicit RubisDriveNode(const rclcpp::NodeOptions & options);
 
+
 private:
   SchedLog __slog;
   sched_info __si;
@@ -85,10 +88,20 @@ private:
   float32_t cur_vel;
   float32_t cur_acc;
 
+  uint32_t lookahead;
+  
+  float32_t velarr[1000000];
+  float32_t accarr[1000000];
+  float32_t posarr[1000000];
+  bool checksafe[1000000];
+
+  bool check_safe(float32_t dist, float32_t vel, float32_t acc);
+
   // drive param
   float32_t target_vel;
   float32_t cur2tar;
   float32_t safe_dist;
+  
   int32_t danger_scale;
 
   rclcpp::TimerBase::SharedPtr command_timer_;

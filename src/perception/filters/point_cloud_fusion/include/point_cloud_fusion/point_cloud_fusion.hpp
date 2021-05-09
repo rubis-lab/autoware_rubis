@@ -84,6 +84,11 @@ private:
   void concatenate_pointcloud_raw(
     const PointCloudMsgT & pc_in, PointCloudMsgT & pc_out,
     uint32_t & concat_idx) const;
+  
+  //rubis parallel
+  void concatenate_pointcloud_parallel(
+    const PointCloudMsgT & pc_in, PointCloudMsgT & pc_out,
+    uint32_t & concat_idx) const;
   uint32_t m_cloud_capacity;
   size_t m_input_topics_size;
 };

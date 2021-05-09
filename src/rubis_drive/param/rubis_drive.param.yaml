@@ -6,10 +6,11 @@
     cur2tar: 1.0
     safe_dist: 50.0
     danger_scale: 20
+    lookahead: 100000
     rubis:
       sched_info:
         task_id: 1
-        max_opt: 1
+        max_opt: 4
         name: "rubis_drive"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 100000000  # 0.1s
