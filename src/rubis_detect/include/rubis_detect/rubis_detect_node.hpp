@@ -36,6 +36,7 @@
 #include <tf2_ros/buffer.h>
 #include <common/types.hpp>
 #include <list>
+#include <vector>
 #include <chrono>
 #include <time_utils/time_utils.hpp>
 #include <ctime>
@@ -104,6 +105,7 @@ private:
   float32_t vehicle_width;
   float32_t vehicle_diagonal;
   float32_t distance_threshold;
+  float32_t box_ratio;
   int32_t lookahead_boxes;
   void init_vehicle(const VehicleConfig & _vehicle_param);
   bool verbose;  ///< whether to use verbose output or not.

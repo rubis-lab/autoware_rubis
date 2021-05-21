@@ -343,7 +343,7 @@ void EuclideanClusterNode::handle_timer_callback()
   //   RCLCPP_WARN(get_logger(), "EuclideanClusterNode::data callback called!");
   // }
   if(!has_received_point_cloud) {
-    RCLCPP_WARN(get_logger(), "EuclideanClusterNode::handle_timer_callback: did not receive point_cloud yet.");
+    // RCLCPP_WARN(get_logger(), "EuclideanClusterNode::handle_timer_callback: did not receive point_cloud yet.");
     return;
   }
   handle_periodic(last_point_cloud);

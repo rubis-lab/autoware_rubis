@@ -33,11 +33,14 @@ RubisDriveNode::RubisDriveNode(const rclcpp::NodeOptions & options)
   cur2tar = static_cast<float32_t>(declare_parameter(
     "cur2tar").get<float32_t>());
 
-  safe_dist = static_cast<float32_t>(declare_parameter(
-    "safe_dist").get<float32_t>());
-
-  danger_scale = static_cast<int32_t>(declare_parameter(
-    "danger_scale").get<int32_t>());
+  safe_dist0 = static_cast<float32_t>(declare_parameter(
+    "safe_dist0").get<float32_t>());
+  safe_dist1 = static_cast<float32_t>(declare_parameter(
+    "safe_dist1").get<float32_t>());
+  safe_dist2 = static_cast<float32_t>(declare_parameter(
+    "safe_dist2").get<float32_t>());
+  danger_scale = static_cast<float32_t>(declare_parameter(
+    "danger_scale").get<float32_t>());
 
   lookahead = static_cast<uint32_t>(declare_parameter(
     "lookahead").get<uint32_t>());
@@ -130,9 +133,7 @@ Command RubisDriveNode::compute_command(float32_t dist)
   auto thr_id = 0;
   auto start_time = omp_get_wtime();
   cur_vel = last_cbd_msg.speed_mps;
-  std::cout << "current_velocity = " << cur_vel << std::endl;
-  std::cout << "dist/safe_dist = " << dist << "/" << safe_dist << std::endl;
-
+  std::cout << "cur_vel/dist/safe_dist0 = " << cur_vel << "/" << dist << "/" << safe_dist0 << std::endl;
   #pragma omp parallel num_threads(__si.max_option)
   {
     auto thr_id = omp_get_thread_num();
@@ -150,34 +151,64 @@ Command RubisDriveNode::compute_command(float32_t dist)
     #pragma omp for schedule(dynamic) nowait
     for(uint32_t i=0; i<lookahead; i++) {
       float32_t danger;
-      float32_t time = static_cast<float32_t>(
-        static_cast<float32_t>(i)/lookahead);
-      
-      posarr[i] = cur_vel * time;
-      velarr[i] = cur_vel + cur_acc * time;
+      // float32_t time = static_cast<float32_t>(
+      //   static_cast<float32_t>(i)/lookahead*10);
+      float32_t time = 10.0/lookahead;
+      float32_t tempvel = cur_vel;
+      float32_t temppos = 0;
+      float32_t tempacc = 0;
+      float32_t tempsafe = 100;
 
-      float32_t local_dist = dist - posarr[i]; //dist to object
-      float32_t local_vel = velarr[i];
-
-      if(local_dist >= safe_dist) {
-        danger = 0;
-      } else if((safe_dist-local_dist)*danger_scale < 100) {
-        danger = (safe_dist-local_dist) * danger_scale;
+      if(tempvel < target_vel/3) {
+        tempsafe = safe_dist0;
+      } else if(tempvel < target_vel) {
+        tempsafe = safe_dist1;
       } else {
-        danger = 100;
+        tempsafe = safe_dist2;
       }
 
-      accarr[i] = static_cast<float32_t>(
-        (target_vel - local_vel) / cur2tar - danger * danger / 100);
+      float32_t local_dist = dist - temppos;
       
-      float32_t local_acc = accarr[i];
-      checksafe[i] = check_safe(local_dist, local_vel, local_acc);
+      if(local_dist >= tempsafe) {
+        danger = 0.0;
+      } else if( (tempsafe - local_dist) * danger_scale < 100.0) {
+        danger = (tempsafe - local_dist) * danger_scale;
+      } else {
+        danger = 100.0;
+      }
+      
+      tempacc = static_cast<float32_t>(
+        (target_vel - tempvel) / cur2tar - danger * danger / 100);
+      
+
+      for(uint32_t j=1; j<i; j++) {
+        temppos = temppos + tempvel * time;
+        tempvel = tempvel + tempacc * time;
+        
+        local_dist = dist - temppos;
+        if(local_dist >= tempsafe) {
+          danger = 0.0;
+        } else if( (tempsafe - local_dist) * danger_scale < 100.0) {
+          danger = (tempsafe - local_dist) * danger_scale;
+        } else {
+          danger = 100.0;
+        }
+        
+        tempacc = static_cast<float32_t>(
+          (target_vel - tempvel) / cur2tar - danger * danger / 100);
+      }
+      
+      
+      dngarr[i] = danger;
+      posarr[i] = temppos;
+      velarr[i] = tempvel;
+      accarr[i] = tempacc;
+      // checksafe[i] = check_safe(local_dist, tempvel, tempacc);
       //Xarr[i] X after i/lookahead second
     }
 
         // log
     auto end_time = omp_get_wtime();
-
     auto response_time = (end_time - start_time) * 1e3;
     sched_data sd {
       thr_id,
@@ -189,7 +220,9 @@ Command RubisDriveNode::compute_command(float32_t dist)
     __slog.add_entry(sd);
   }
 
+  
   cur_acc = accarr[0];
+  std::cout << "danger/acc = " << static_cast<float32_t>(dngarr[0]) << "/" << static_cast<float32_t>(accarr[0]) << std::endl;
 
   // construct steering command
   Command ret{rosidl_runtime_cpp::MessageInitialization::ALL};
@@ -229,3 +262,18 @@ Command RubisDriveNode::compute_command(float32_t dist)
 // This acts as an entry point, allowing the component to be
 // discoverable when its library is being loaded into a running process
 RCLCPP_COMPONENTS_REGISTER_NODE(autoware::rubis_drive::RubisDriveNode)
+
+
+      // posarr[i] = cur_vel * time;
+      // velarr[i] = cur_vel + cur_acc * time;
+
+      // float32_t local_dist = dist - posarr[i]; //dist to object
+      // float32_t local_vel = velarr[i];
+
+      // if(local_dist >= safe_dist) {
+      //   danger = 0;
+      // } else if((safe_dist-local_dist)*danger_scale < 100) {
+      //   danger = (safe_dist-local_dist) * danger_scale;
+      // } else {
+      //   danger = 100;
+      // }

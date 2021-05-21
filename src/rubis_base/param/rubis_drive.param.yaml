@@ -2,17 +2,19 @@
 
 /**:
   ros__parameters:
-    target_vel: 5.0
-    cur2tar: 1.0
-    safe_dist: 50.0
-    danger_scale: 20
+    target_vel: 10.0
+    cur2tar: 1.5
+    safe_dist0: 10.0
+    safe_dist1: 20.0
+    safe_dist2: 30.0
+    danger_scale: 8.0
     lookahead: 1000
     rubis:
       sched_info:
         task_id: 1
-        max_opt: 4
+        max_opt: 1
         name: "rubis_drive"
         log_dir: "/home/rubis/rubis_log/"
-        exec_time: 100000000  # 0.1s
-        deadline: 200000000  # 0.2s
-        period: 300000000  # 0.3s
+        exec_time: 6000000  # 10ms
+        deadline: 6000000  # 30ms
+        period: 15000000  # 30ms

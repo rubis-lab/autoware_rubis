@@ -68,7 +68,7 @@
     rubis:
       sched_info:
         task_id: 7
-        max_opt: 2
+        max_opt: 4
         name: "ndt_localizer"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 100000000  # 0.1s

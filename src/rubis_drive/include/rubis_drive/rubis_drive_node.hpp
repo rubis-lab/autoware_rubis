@@ -90,19 +90,22 @@ private:
 
   uint32_t lookahead;
   
-  float32_t velarr[1000000];
-  float32_t accarr[1000000];
-  float32_t posarr[1000000];
-  bool checksafe[1000000];
+  float32_t dngarr[10000];
+  float32_t velarr[10000];
+  float32_t accarr[10000];
+  float32_t posarr[10000];
+  bool checksafe[10000];
 
   bool check_safe(float32_t dist, float32_t vel, float32_t acc);
 
   // drive param
   float32_t target_vel;
   float32_t cur2tar;
-  float32_t safe_dist;
+  float32_t safe_dist0;
+  float32_t safe_dist1;
+  float32_t safe_dist2;
   
-  int32_t danger_scale;
+  float32_t danger_scale;
 
   rclcpp::TimerBase::SharedPtr command_timer_;
   rclcpp::Publisher<Command>::SharedPtr command_publisher_;

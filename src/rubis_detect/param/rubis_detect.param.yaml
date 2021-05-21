@@ -19,7 +19,8 @@
       kernel_size: 25
     staleness_threshold_ms: 500
     target_frame_id: "map"
-    lookahead_boxes: 30
+    lookahead_boxes: 5000
+    box_ratio: 0.02
     rubis:
       use_timer: true
       sched_info:

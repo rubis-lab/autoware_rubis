@@ -100,7 +100,7 @@ def generate_launch_description():
 
     # rubis_detect
     rubis_detect_param_file = os.path.join(
-        get_package_share_directory('rubis_detect'),
+        get_package_share_directory('rubis_base'),
         'param/rubis_detect.param.yaml')
     rubis_detect_param = DeclareLaunchArgument(
         'rubis_detect_param_file',
@@ -118,7 +118,7 @@ def generate_launch_description():
 
     # rubis_drive
     rubis_drive_param_file = os.path.join(
-        get_package_share_directory('rubis_drive'),
+        get_package_share_directory('rubis_base'),
         'param/rubis_drive.param.yaml')
     rubis_drive_param = DeclareLaunchArgument(
         'rubis_drive_param_file',
@@ -169,10 +169,10 @@ def generate_launch_description():
         euclidean_clustering,
 
         # rubis_detect
-        # rubis_detect_param,
-        # rubis_detect,
+        rubis_detect_param,
+        rubis_detect,
 
         # rubis_drive
-        # rubis_drive_param,
-        # rubis_drive,
+        rubis_drive_param,
+        rubis_drive,
     ])
