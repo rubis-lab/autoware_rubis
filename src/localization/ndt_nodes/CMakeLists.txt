@@ -52,7 +52,7 @@ ament_auto_add_library(${P2D_NDT_LOCALIZER_NODE_LIB} SHARED
   ${P2D_NDT_LOCALIZER_NODE_LIB_SRC}
   ${P2D_NDT_LOCALIZER_NODE_LIB_HEADERS}
 )
-autoware_set_compile_options(${P2D_NDT_LOCALIZER_NODE_LIB})
+autoware_set_compile_options(${P2D_NDT_LOCALIZER_NODE_LIB} -fopenmp)
 
 target_link_libraries(${P2D_NDT_LOCALIZER_NODE_LIB}
   ${PCL_LIBRARIES}
@@ -106,7 +106,7 @@ target_include_directories(${P2D_NDT_LOCALIZER_NODE_LIB} SYSTEM PUBLIC
     /home/rubis/AutowareAuto/src/rubis_rt/include/
 )
 target_compile_options(${P2D_NDT_LOCALIZER_NODE_LIB} PRIVATE -Wno-sign-conversion -Wno-conversion -Wno-old-style-cast
-        -Wno-useless-cast -Wno-double-promotion -Wno-nonnull-compare -Wuseless-cast)
+        -Wno-useless-cast -Wno-double-promotion -Wno-nonnull-compare -Wuseless-cast -fopenmp)
 
 ament_auto_package(INSTALL_TO_SHARE
   data

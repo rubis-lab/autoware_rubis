@@ -26,9 +26,16 @@ ament_auto_add_library(${PROJECT_NAME} SHARED
   include/euclidean_cluster/euclidean_cluster.hpp
   include/euclidean_cluster/visibility_control.hpp
   src/euclidean_cluster.cpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched.hpp
+  /home/rubis/AutowareAuto/src/rubis_rt/include/rubis_rt/sched_log.hpp
 )
-autoware_set_compile_options(${PROJECT_NAME})
-target_compile_options(${PROJECT_NAME} PRIVATE -Wno-sign-conversion -Wno-conversion)
+autoware_set_compile_options(${PROJECT_NAME} -fopenmp)
+
+target_compile_options(${PROJECT_NAME} PRIVATE -Wno-sign-conversion -Wno-conversion "-fopenmp")
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+  /home/rubis/AutowareAuto/src/rubis_rt/include/
+)
 
 if(BUILD_TESTING)
   # run linters

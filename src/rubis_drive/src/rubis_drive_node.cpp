@@ -217,7 +217,11 @@ Command RubisDriveNode::compute_command(float32_t dist)
       end_time,  // end_time
       response_time   //response_time
     };
-    __slog.add_entry(sd);
+    #pragma omp critical (log_lock)
+    {
+      __slog.add_entry(sd);
+    }
+    sched_yield();
   }
 
   

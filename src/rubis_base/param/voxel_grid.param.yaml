@@ -18,7 +18,7 @@
     rubis:
       sched_info:
         task_id: 7
-        max_opt: 4
+        max_opt: 1
         name: "voxel_grid"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 100000000  # 0.1s

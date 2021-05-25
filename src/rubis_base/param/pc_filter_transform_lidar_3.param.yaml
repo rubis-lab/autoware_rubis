@@ -26,9 +26,11 @@
     rubis:
       sched_info:
         task_id: 8022
-        max_opt: 2
+        max_opt: 1
         name: "point_cloud_filter_transform_3"
         log_dir: "/home/rubis/rubis_log/"
-        exec_time: 12000000  # 15ms
-        deadline: 12000000  # 20ms
-        period: 30000000  # 30ms
+        exec_time: 16000000  # 15ms
+        deadline: 40000000  # 20ms
+        period: 50000000  # 30ms
+
+        #exec_base  16000000  # 15ms

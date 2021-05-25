@@ -26,6 +26,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <iostream>
 
 using autoware::common::types::bool8_t;
 using autoware::common::types::float32_t;
@@ -117,7 +118,7 @@ m_use_z{declare_parameter("use_z").get<bool8_t>()}
       period, std::bind(&EuclideanClusterNode::handle_timer_callback, this));
   }
 
-  init(m_cluster_alg.get_config());
+  init_rubis(m_cluster_alg.get_config());
   // Initialize voxel grid
   if (declare_parameter("downsample").get<bool8_t>()) {
     filters::voxel_grid::PointXYZ min_point;
@@ -159,6 +160,19 @@ void EuclideanClusterNode::init(const euclidean_cluster::Config & cfg)
   m_clusters.clusters.reserve(cfg.max_num_clusters());
   m_boxes.header.frame_id.reserve(256U);
   m_boxes.header.frame_id = cfg.frame_id().c_str();
+}
+////////////////////////////////////////////////////////////////////////////////
+void EuclideanClusterNode::init_rubis(const euclidean_cluster::Config & cfg)
+{
+  // Sanity check
+  if ((!m_box_pub_ptr) && (!m_cluster_pub_ptr)) {
+    throw std::domain_error{"EuclideanClusterNode: No publisher topics provided"};
+  }
+  // Reserve
+  m_clusters.clusters.reserve(cfg.max_num_clusters());
+  m_boxes.header.frame_id.reserve(256U);
+  m_boxes.header.frame_id = cfg.frame_id().c_str();
+  m_cluster_alg.init_rubis(__si);
 }
 ////////////////////////////////////////////////////////////////////////////////
 void EuclideanClusterNode::insert_plain(const PointCloud2 & cloud)
@@ -206,14 +220,14 @@ void EuclideanClusterNode::compute_eigenboxes_with_z_rubis(const Clusters & clus
   boxes.boxes.clear();
 
   omp_set_dynamic(0);
-  #pragma omp parallel num_threads(__si.max_option)
+  #pragma omp parallel num_threads(1)
   {
     // configure rt
     auto thr_id = omp_get_thread_num();
 
     if(!__rt_configured[thr_id]) {
       auto tid = gettid();
-      std::cout << "[RubisDetectNode] (" << tid << "): __rt_configured (" << __si.exec_time << ", " << __si.deadline << ", " << __si.period << ")" << std::endl;
+      std::cout << "[EuclideanClusterNode] (" << tid << "): __rt_configured (" << __si.exec_time << ", " << __si.deadline << ", " << __si.period << ")" << std::endl;
       rubis::sched::set_sched_deadline(tid, __si.exec_time, __si.deadline, __si.period);
       __rt_configured[thr_id] = true;
     }
@@ -251,10 +265,10 @@ void EuclideanClusterNode::compute_eigenboxes_with_z_rubis(const Clusters & clus
       end_time,  // end_time
       response_time  // response_time
     };
-    #pragma omp critical
-    {
-      __slog.add_entry(sd);
-    }
+    // #pragma omp critical
+    // {
+    //   __slog.add_entry(sd);
+    // }
     sched_yield();
 
   }  // prama omp parallel
@@ -352,6 +366,7 @@ void EuclideanClusterNode::handle_timer_callback()
 
 void EuclideanClusterNode::handle_periodic(const PointCloud2::SharedPtr msg_ptr)
 {
+  auto start_time = omp_get_wtime();
   try {
     try {
       insert(*msg_ptr);
@@ -359,7 +374,10 @@ void EuclideanClusterNode::handle_periodic(const PointCloud2::SharedPtr msg_ptr)
       // Hit limits of inserting, can still cluster, but in bad state
       RCLCPP_WARN(get_logger(), e.what());
     }
-    m_cluster_alg.cluster(m_clusters);
+    std::cerr << "fuck that shit" << std::endl;
+    // m_cluster_alg.cluster(m_clusters);
+    m_cluster_alg.cluster_parallel(m_clusters);
+    std::cerr << "Jonna ssibal gaessibal" << std::endl;
     //lint -e{523} NOLINT empty functions to make this modular
     // handle_clusters(m_clusters, msg_ptr->header);
     handle_clusters(m_clusters, msg_ptr->header);
@@ -370,6 +388,11 @@ void EuclideanClusterNode::handle_periodic(const PointCloud2::SharedPtr msg_ptr)
     RCLCPP_FATAL(get_logger(), "EuclideanClusterNode: Unexpected error occurred!");
     throw;
   }
+  // rubis t1
+    auto end_time = omp_get_wtime();
+    auto response_time = (end_time - start_time) * 1e3;
+    std::cerr << "euc: " << response_time << std::endl;
+
 }
 }  // namespace euclidean_cluster_nodes
 }  // namespace segmentation

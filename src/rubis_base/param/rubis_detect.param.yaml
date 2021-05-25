@@ -25,12 +25,11 @@
       use_timer: true
       sched_info:
         task_id: 1
-        max_opt: 2
+        max_opt: 4
         name: "rubis_detect"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 7000000  # 30ms
-        deadline: 7000000  # 50ms
-        period: 15000000  # 30ms
-        # exec_time: 10000000  # 10ms
-        # deadline: 20000000  # 20ms
-        # period: 20000000  # 20ms
+        deadline: 16000000  # 50ms
+        period: 20000000  # 30ms
+        # exec_base: 6000000  # 10ms
+

@@ -36,12 +36,12 @@
       use_timer: true
       sched_info:
         task_id: 2
-        max_opt: 2
+        max_opt: 1
         name: "euclidean_cluster"
         log_dir: "/home/rubis/rubis_log/"
-        exec_time: 1000000 # 0.5ms
-        deadline: 1000000  # 1ms
-        period: 1500000  # 5ms 1000000 = 1ms
+        exec_time: 100000000 # 0.5ms
+        deadline: 180000000  # 1ms
+        period: 200000000  # 5ms 1000000 = 1ms
         # exec_time: 300000  # 0.3ms
         # deadline: 400000  # 0.4ms
         # period: 400000  # 0.4ms

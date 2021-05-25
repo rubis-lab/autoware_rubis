@@ -304,6 +304,7 @@ public:
     return this->near_impl(x, y, 0.0F);
   }
 
+
   /// \brief Finds all points within a fixed radius of a reference point
   /// \param[in] pt The reference point. Only the x and y members are respected.
   /// \return A const reference to a vector containing iterators pointing to

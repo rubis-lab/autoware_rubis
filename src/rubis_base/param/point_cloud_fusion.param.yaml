@@ -9,12 +9,14 @@
       use_timer: true
       sched_info:
         task_id: 1
-        max_opt: 2
+        max_opt: 4
         name: "point_cloud_fusion"
         log_dir: "/home/rubis/rubis_log/"
-        exec_time: 7000000  # 20ms
-        deadline: 7000000  # 10ms
-        period: 15000000  # 30ms 1000000 = 1ms
+        exec_time: 10000000  # 20ms
+        deadline: 20000000  # 10ms
+        period: 25000000  # 30ms 1000000 = 1ms
+
+        #exec_base  9000000  # 15ms
         # exec_time: 15000000  # 15ms
         # deadline: 25000000  # 20ms
         # period: 25000000  # 20ms

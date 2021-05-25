@@ -313,6 +313,7 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
     size_t debug_interval = static_cast<size_t>(traj_size / 256) + 1;
 
     #pragma omp for schedule(dynamic) nowait
+    // #pragma omp for schedule(static) nowait
     for(size_t i = 0; i < traj_size; i++) {
     // for(auto const& p : expected_trajectory) {
         auto heading_straight = from_angle(0.0F);
@@ -321,7 +322,7 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
         const auto p_box = point_to_box(expected_trajectory[i], heading_straight);
         
 
-        #pragma omp critical
+        #pragma omp critical (bbox_lock)
         {
           if( (i % debug_interval) == 0) {
             bboxes_debug.boxes.push_back(p_box);
@@ -359,12 +360,11 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
       end_time,  // end_time
       response_time  // response_time
     };
-    #pragma omp critical
+    #pragma omp critical (log_lock)
     {
       __slog.add_entry(sd);
     }
     sched_yield();
-
   }  // prama omp parallel
 
   ++__iter;

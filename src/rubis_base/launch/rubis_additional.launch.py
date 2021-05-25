@@ -28,7 +28,7 @@ def generate_launch_description():
         name='voxel_grid_cloud_node',
         parameters=[LaunchConfiguration('scan_downsampler_param_file')],
         remappings=[
-            ("points_in", "points_fused"),
+            ("points_in", "/lidars/points_fused"),
             ("points_downsampled", "points_fused_downsampled")
         ]
     )

@@ -299,7 +299,7 @@ const PointCloud2 & PointCloud2FilterTransformNode::filter_and_transform(const P
         end_time,  // end_time
         response_time  // response_time
     };
-    #pragma omp critical
+    #pragma omp critical (log_lock)
     {
       __slog.add_entry(sd);
     }

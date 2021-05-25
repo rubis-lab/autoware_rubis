@@ -87,6 +87,8 @@ private:
   void EUCLIDEAN_CLUSTER_NODES_LOCAL handle(const PointCloud2::SharedPtr msg_ptr);
   /// \brief Initialization function
   void EUCLIDEAN_CLUSTER_NODES_LOCAL init(const euclidean_cluster::Config & cfg);
+
+  void EUCLIDEAN_CLUSTER_NODES_LOCAL init_rubis(const euclidean_cluster::Config & cfg);
   /// \brief Insert directly into clustering algorithm
   void EUCLIDEAN_CLUSTER_NODES_LOCAL insert_plain(const PointCloud2 & cloud);
   /// \brief Pass points through a voxel grid before inserting into clustering algorithm

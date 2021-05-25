@@ -28,6 +28,12 @@
 #include <vector>
 #include <utility>
 
+#include <ctime>
+#include <omp.h>
+#include <chrono>
+#include "rubis_rt/sched.hpp"
+#include "rubis_rt/sched_log.hpp"
+
 namespace autoware
 {
 namespace perception
@@ -39,6 +45,11 @@ namespace euclidean_cluster
 {
 using autoware::common::types::float32_t;
 using autoware::common::types::bool8_t;
+using rubis::sched_log::SchedLog;
+using rubis::sched_log::sched_info;
+using rubis::sched_log::sched_data;
+// using autoware::common::geometry::spatial_hash::Output;
+
 /// \brief Simple point struct for memory mapping to and from PointCloud2 type
 struct PointXYZI
 {
@@ -150,6 +161,8 @@ public:
     m_seen.push_back(false);
   }
 
+  void init_rubis(sched_info _si);
+
   /// \brief Multi-insert
   /// \param[in] begin Iterator pointing to to the first point to insert
   /// \param[in] end Iterator pointing to one past the last point to insert
@@ -178,6 +191,7 @@ public:
   /// were constructed in place using placement new, so the dynamic type should be correct.
   /// \param[inout] clusters The clusters object
   void cluster(Clusters & clusters);
+  void cluster_parallel(Clusters & clusters);
 
   /// \brief Gets last error, intended to be used with clustering with internal cluster result
   /// This is a separate function rather than using an exception because the main error mode is
@@ -198,6 +212,11 @@ public:
   const Config & get_config() const;
 
 private:
+  SchedLog __slog;
+  sched_info __si;
+  std::vector<bool8_t> __rt_configured;
+  int32_t __iter;
+  bool8_t __use_timer = false;
   /// \brief Internal struct instead of pair since I can guarantee some memory stuff
   struct PointXY
   {
@@ -213,6 +232,10 @@ private:
   EUCLIDEAN_CLUSTER_LOCAL void add_neighbors(Cluster & cls, const PointXY pt);
   /// \brief Adds a point to the cluster, internal version since no error checking is needed
   EUCLIDEAN_CLUSTER_LOCAL static void add_point(Cluster & cls, const PointXYZII & pt);
+
+  // EUCLIDEAN_CLUSTER_LOCAL void add_neighbors_parallel(Cluster & cls, const PointXY pt);
+  // EUCLIDEAN_CLUSTER_LOCAL static void add_point_parallel(Cluster & cls, const PointXYZII & pt);
+
   /// \brief Get a specified point from the cluster
   EUCLIDEAN_CLUSTER_LOCAL static PointXY get_point(const Cluster & cls, const std::size_t idx);
   /// \brief Returns the preallocated clusters to the internal pool so the cluster object can safely

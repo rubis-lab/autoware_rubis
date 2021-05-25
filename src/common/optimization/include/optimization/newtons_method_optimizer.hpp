@@ -99,6 +99,8 @@ public:
       // As there's no newton solution yet, jacobian can be a good substitute.
       return OptimizationSummary{jacobian.norm(), TerminationType::CONVERGENCE, 0UL};
     }
+    // rubis t0
+    auto start_time = omp_get_wtime();
 
     // Iterate until convergence, error, or maximum number of iterations
     auto nr_iterations = 0UL;
@@ -110,15 +112,20 @@ public:
 
       // rubis
       if(!para_init) {
-        Eigen::initParallel();
-        Eigen::setNbThreads(2);
+        // Eigen::initParallel();
+        omp_set_num_threads(1);
+        Eigen::setNbThreads(1);
         para_init = true;
+        auto n = Eigen::nbThreads();
+        std::cerr << "Eigen nbThreads: " << n << std::endl;
+        // #pragma omp parallel
+        // {  std::cerr << "Hello World from thread" <<  omp_get_thread_num() << std::endl; }
+        std::cerr << "rubis" << std::endl;
       }
       if(!rt_init) {
 
       }
-      auto n = Eigen::nbThreads();
-      std::cerr << "Eigen nbThreads: " << n << std::endl;
+      
 
       // Find decent direction using Newton's method
       EigenSolverT solver(hessian);
@@ -173,6 +180,11 @@ public:
       }
       score_previous = score;
     }
+
+    // rubis t1
+    auto end_time = omp_get_wtime();
+    auto response_time = (end_time - start_time) * 1e3;
+    std::cerr << "ndt: " << response_time << std::endl;
 
     // Returning summary consisting of the following three values:
     // estimated_distance_to_optimum, convergence_tolerance_criteria_met, number_of_iterations_made

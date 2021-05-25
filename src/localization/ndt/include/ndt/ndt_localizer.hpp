@@ -28,6 +28,7 @@
 #include <experimental/optional>
 #include <utility>
 #include <string>
+#include <iostream>
 #include "omp.h"
 
 namespace autoware
@@ -113,7 +114,13 @@ public:
     // Define and solve the problem.
     NDTOptimizationProblemT problem(m_scan, map, m_optimization_problem_config);
 
+
+
     const auto opt_summary = m_optimizer.solve(problem, eig_pose_initial, eig_pose_result);
+
+    
+
+
     if (opt_summary.termination_type() == common::optimization::TerminationType::FAILURE) {
       throw std::runtime_error(
               "NDT localizer has likely encountered a numerical "

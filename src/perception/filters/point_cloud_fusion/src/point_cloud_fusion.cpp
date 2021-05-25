@@ -124,7 +124,7 @@ uint32_t PointCloudFusion::fuse_pc_msgs(
       end_time,  // end_time
       response_time  // response_time
     };
-    #pragma omp critical (add_entry)
+    #pragma omp critical (log_lock)
     {
       __slog.add_entry(sd);
     //   std::cerr << "point_cloud_fusion::fuse_pc_msgs log added" << std::endl;

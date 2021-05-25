@@ -31,6 +31,18 @@ namespace segmentation
 {
 namespace euclidean_cluster
 {
+
+void EuclideanCluster::init_rubis(sched_info _si)
+{
+  __si = _si;
+  __slog = SchedLog(__si);
+  __iter = 0;
+  for(int i = 0; i < __si.max_option; i++) {
+    __rt_configured.push_back(false);
+  }
+  __iter = 0;
+  return;
+}  
 ////////////////////////////////////////////////////////////////////////////////
 PointXYZII::PointXYZII(const PointXYZI & pt, const uint32_t id)
 : m_point{pt},
@@ -70,6 +82,7 @@ Config::Config(
 {
   // TODO(c.ho) sanity checking
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 std::size_t Config::min_cluster_size() const
 {
@@ -171,6 +184,7 @@ const Config & EuclideanCluster::get_config() const
 void EuclideanCluster::cluster_impl(Clusters & clusters)
 {
   m_last_error = Error::NONE;
+  // rubis: parallelize here
   for (const auto & kv : m_hash) {
     const auto & pt = kv.second;
     if (!m_seen[pt.get_id()]) {
@@ -187,10 +201,12 @@ void EuclideanCluster::cluster(Clusters & clusters, const PointXYZII & pt)
   if (num_clusters >= m_config.max_num_clusters()) {
     m_last_error = Error::TOO_MANY_CLUSTERS;
   } else {
+    //rubis critical
     clusters.clusters.emplace_back(std::move(m_cluster_pool[num_clusters]));
     // Seed cluster with new point
     auto & cluster = clusters.clusters.back();
     add_point(cluster, pt);
+    // rubis critical
     m_seen[pt.get_id()] = true;
     // Start clustering process
     std::size_t last_seed_idx = 0U;
@@ -212,6 +228,128 @@ void EuclideanCluster::cluster(Clusters & clusters, const PointXYZII & pt)
     }
   }
 }
+void EuclideanCluster::cluster_parallel(Clusters & clusters)
+{
+  if (clusters.clusters.capacity() < m_config.max_num_clusters()) {
+    throw std::domain_error{"EuclideanCluster: Provided clusters must have sufficient capacity"};
+  }
+  m_last_error = Error::NONE;
+  // rubis: parallelize here
+  omp_set_dynamic(0);
+  #pragma omp parallel shared(clusters, m_hash, m_seen) num_threads(__si.max_option)
+  {
+    auto thr_id = omp_get_thread_num();
+    if(!__rt_configured[thr_id]) {
+      auto tid = gettid();
+      std::cout << "[EuclideanCluster] (" << tid << "): __rt_configured (" << __si.exec_time << ", " << __si.deadline << ", " << __si.period << ")" << std::endl;
+      rubis::sched::set_sched_deadline(tid, __si.exec_time, __si.deadline, __si.period);
+      __rt_configured[thr_id] = true;
+    }
+
+    #pragma omp barrier
+
+    // workload start
+    auto start_time = omp_get_wtime();
+
+    // #pragma omp for schedule(dynamic) nowait
+    for (const auto & kv : m_hash) {
+      const auto & pt = kv.second;
+      if (!m_seen[pt.get_id()]) {
+        cluster(clusters, pt);
+      }
+      // const auto & pt = kv.second;
+      
+      // // #pragma omp critical(temp)
+      // if (!m_seen[pt.get_id()]) {
+      //   // init new cluster
+      //   const auto num_clusters = clusters.clusters.size();
+      //   if (num_clusters >= m_config.max_num_clusters()) {
+      //     m_last_error = Error::TOO_MANY_CLUSTERS;
+      //   } else {
+      //     //rubis critical
+      //     // #pragma omp critical(initialize)
+      //     clusters.clusters.emplace_back(std::move(m_cluster_pool[num_clusters]));
+      //     // Seed cluster with new point
+      //     auto & cluster = clusters.clusters.back();
+          
+      //     // #pragma omp critical(add)
+      //     add_point(cluster, pt);
+      //     // rubis critical
+      //     m_seen[pt.get_id()] = true;
+      //     // Start clustering process
+          
+      //     // while (last_seed_idx < cluster.width) {
+      //     //   const auto pt = get_point(cluster, last_seed_idx);
+      //     //   add_neighbors(cluster, pt);
+      //     //   // Increment seed point
+      //     //   ++last_seed_idx;
+      //     // }
+
+
+      //     std::size_t last_seed_idx = 0U;
+      //     while( last_seed_idx < cluster.width) {
+      //       const auto pt = get_point(cluster, last_seed_idx);
+      //       // add_neighbors(cluster, pt);
+      //       // std::vector<Output> & nbrs;
+      //       // nbrs.clear();
+
+      //       const auto & nbrs = m_hash.near(pt.x, pt.y);
+      //       // For each point within a fixed radius, check if already seen
+      //       for (const auto itd : nbrs) {
+      //         const auto & qt = itd.get_point();
+      //         const auto id = qt.get_id();
+      //         // rubis critical
+      //         if (!m_seen[id]) {
+      //           // Add to cluster
+      //           // #pragma omp critical(add)
+      //           add_point(cluster, qt);
+      //           // Mark point as seen
+      //           m_seen[id] = true;
+      //         }
+      //       }
+      //       last_seed_idx += 1;
+      //     }
+      //     // check if cluster is large enough: roll back pointer if so
+      //     if (last_seed_idx < m_config.min_cluster_size()) {
+      //       // return cluster to pool
+      //       m_cluster_pool[num_clusters] = std::move(clusters.clusters[num_clusters]);
+      //       m_cluster_pool[num_clusters].width = 0U;
+      //       clusters.clusters.resize(num_clusters);
+      //     } else {
+      //       // finalize cluster
+      //       cluster.row_step = cluster.point_step * cluster.width;
+      //     }
+      //   }
+      // // cluster(clusters, pt);
+      // iteration++;
+      // std::cerr << "iteration: " << iteration << std::endl;
+      // }
+    }
+    //workload end
+
+    auto end_time = omp_get_wtime();
+    auto response_time = (end_time - start_time) * 1e3;
+
+    sched_data sd {
+      thr_id, // thr_id
+      __iter,  // iter
+      start_time,  // start_time
+      end_time,  // end_time
+      response_time  // response_time
+    };
+
+    #pragma omp critical (add_entry)
+    {
+      __slog.add_entry(sd);
+    }
+    sched_yield();
+  }
+  ++__iter;
+  
+  m_hash.clear();
+  return;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 void EuclideanCluster::add_neighbors(Cluster & cls, const EuclideanCluster::PointXY pt)
 {
@@ -221,6 +359,7 @@ void EuclideanCluster::add_neighbors(Cluster & cls, const EuclideanCluster::Poin
   for (const auto itd : nbrs) {
     const auto & qt = itd.get_point();
     const auto id = qt.get_id();
+    // rubis critical
     if (!m_seen[id]) {
       // Add to cluster
       add_point(cls, qt);

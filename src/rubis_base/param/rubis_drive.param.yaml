@@ -12,9 +12,11 @@
     rubis:
       sched_info:
         task_id: 1
-        max_opt: 2
+        max_opt: 3
         name: "rubis_drive"
         log_dir: "/home/rubis/rubis_log/"
         exec_time: 9000000  # 10ms
-        deadline: 9000000  # 30ms
-        period: 15000000  # 30ms
+        deadline: 16000000  # 30ms
+        period: 20000000  # 30ms
+
+#exec_base = 7000000
