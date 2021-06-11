@@ -360,6 +360,8 @@ int32_t RubisDetectNode::detect_collision(const Point32 _p, const Complex32 _hea
       end_time,  // end_time
       response_time  // response_time
     };
+
+
     #pragma omp critical (log_lock)
     {
       __slog.add_entry(sd);
@@ -435,7 +437,7 @@ MarkerArray RubisDetectNode::to_visualization_marker_array(const BoundingBoxArra
     marker.pose.orientation.w = 1.0;
     if (i < collision_idx) {
       marker.scale.x = 0.2;
-      marker.color.a = 0.3F;
+      marker.color.a = 0.8F;
       marker.color.r = 0.0F;
       marker.color.g = 1.0F;
       marker.color.b = 0.0F;
@@ -447,7 +449,7 @@ MarkerArray RubisDetectNode::to_visualization_marker_array(const BoundingBoxArra
       marker.color.b = 0.0F;
     } else {
       marker.scale.x = 0.2;
-      marker.color.a = 0.3F;
+      marker.color.a = 0.8F;
       marker.color.r = 0.7F;
       marker.color.g = 0.7F;
       marker.color.b = 0.7F;

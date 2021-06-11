@@ -34,6 +34,7 @@ public:
   SchedLog();
   SchedLog(sched_info _si);
   void add_entry(sched_data _sd);
+  void add_entry(sched_data _sd, std::string _comment);
 
 private:
   sched_info __si;
@@ -90,6 +91,24 @@ void SchedLog::add_entry(sched_data _sd) {
   e_str += std::to_string(_sd.end_time) + "\t";  // end_time
   e_str += std::to_string(_sd.resp_time) + "\t";
   e_str += std::to_string(0.0) + "\t";  // slack
+  __log->info(e_str);
+  return;
+}
+
+void SchedLog::add_entry(sched_data _sd, std::string _comment) {
+  std::string e_str = "";
+  e_str += std::to_string(__si.task_id) + "\t";
+  e_str += std::to_string(_sd.thread_id) + "\t";
+  e_str += std::to_string(__si.max_option) + "\t";
+  e_str += std::to_string(_sd.iter) + "\t";
+  e_str += std::to_string(__si.exec_time) + "\t";  // exec_time
+  e_str += std::to_string(__si.deadline) + "\t";
+  e_str += std::to_string(__si.period) + "\t";
+  e_str += std::to_string(_sd.start_time) + "\t";  // start_time
+  e_str += std::to_string(_sd.end_time) + "\t";  // end_time
+  e_str += std::to_string(_sd.resp_time) + "\t";
+  e_str += std::to_string(0.0) + "\t";  // slack
+  e_str += _comment + "\t";  // slack
   __log->info(e_str);
   return;
 }

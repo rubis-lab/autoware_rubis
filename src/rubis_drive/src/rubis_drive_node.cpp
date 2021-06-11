@@ -217,9 +217,12 @@ Command RubisDriveNode::compute_command(float32_t dist)
       end_time,  // end_time
       response_time   //response_time
     };
+
+    std::string dist_report;
+    dist_report = "distance$$$$" + std::to_string(dist);
     #pragma omp critical (log_lock)
     {
-      __slog.add_entry(sd);
+      __slog.add_entry(sd, dist_report);
     }
     sched_yield();
   }

@@ -12,9 +12,9 @@
         max_opt: 4
         name: "point_cloud_fusion"
         log_dir: "/home/rubis/rubis_log/"
-        exec_time: 10000000  # 20ms
-        deadline: 20000000  # 10ms
-        period: 25000000  # 30ms 1000000 = 1ms
+        exec_time: 5000000  # 20ms
+        deadline: 32000000  # 10ms
+        period: 40000000  # 30ms 1000000 = 1ms
 
         #exec_base  9000000  # 15ms
         # exec_time: 15000000  # 15ms
